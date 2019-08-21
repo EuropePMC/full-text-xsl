@@ -1,36 +1,79 @@
 <xsl:stylesheet version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-  exclude-result-prefixes="xsi xs xlink mml">
+  xmlns:exsl="http://exslt.org/common"
+  exclude-result-prefixes="xsi xs xlink mml exsl">
 
   <xsl:output method="html" indent="no" encoding="utf-8" omit-xml-declaration="yes"/>
-
+  <xsl:param name="filelist"/>
   <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
   <xsl:variable name="smallcase" select="'abcdefghijklmnopqrstuvwxyz'"/>
   <xsl:variable name="allcase" select="concat($smallcase, $uppercase)"/>
   <xsl:template name="month">
     <xsl:param name="num"/>
     <xsl:choose>
-      <xsl:when test="$num=1">January</xsl:when>
-      <xsl:when test="$num=2">February</xsl:when>
-      <xsl:when test="$num=3">March</xsl:when>
-      <xsl:when test="$num=4">April</xsl:when>
-      <xsl:when test="$num=5">May</xsl:when>
-      <xsl:when test="$num=6">June</xsl:when>
-      <xsl:when test="$num=7">July</xsl:when>
-      <xsl:when test="$num=8">August</xsl:when>
-      <xsl:when test="$num=9">September</xsl:when>
-      <xsl:when test="$num=10">October</xsl:when>
-      <xsl:when test="$num=11">November</xsl:when>
-      <xsl:when test="$num=12">December</xsl:when>
+      <xsl:when test="$num = 1">January</xsl:when>
+      <xsl:when test="$num = 2">February</xsl:when>
+      <xsl:when test="$num = 3">March</xsl:when>
+      <xsl:when test="$num = 4">April</xsl:when>
+      <xsl:when test="$num = 5">May</xsl:when>
+      <xsl:when test="$num = 6">June</xsl:when>
+      <xsl:when test="$num = 7">July</xsl:when>
+      <xsl:when test="$num = 8">August</xsl:when>
+      <xsl:when test="$num = 9">September</xsl:when>
+      <xsl:when test="$num = 10">October</xsl:when>
+      <xsl:when test="$num = 11">November</xsl:when>
+      <xsl:when test="$num = 12">December</xsl:when>
     </xsl:choose>
   </xsl:template>
   
-  <xsl:variable name="pprid" select="//article-meta/article-id[@pub-id-type='archive']"/>
-  <xsl:variable name="filebase" select="concat('/docs/preprint/', $pprid, '/')"/>
+  <xsl:variable name="pprid">
+    <xsl:if test="//article-meta/article-id[@pub-id-type='archive']">
+      <xsl:value-of select="//article-meta/article-id[@pub-id-type='archive']"/>
+    </xsl:if>
+  </xsl:variable>
+  <xsl:variable name="filebase">
+    <xsl:if test="$pprid">
+      <xsl:value-of select="concat('/docs/preprint/', $pprid, '/')"/>
+    </xsl:if>
+  </xsl:variable>  
+  <xsl:variable name="emsid">
+    <xsl:if test="//article-meta/article-id[@pub-id-type = 'manuscript']">
+      <xsl:value-of select="translate(translate(//article-meta/article-id[@pub-id-type = 'manuscript'], 'ucpak', 'es'), 'ems', 'EMS')"/>
+    </xsl:if>
+  </xsl:variable>
+  
+  <xsl:variable name="fn-symbols" select="'*†‡§‖¶'"/>
+  
+  <xsl:template name="get-symbol">
+    <xsl:param name="count"/>
+    <xsl:param name="current"/>
+    <xsl:variable name="times" select="ceiling($count div 6)"/>
+    <xsl:variable name="symbol" select="substring($fn-symbols, $count mod 6, 1)"/>
+    <xsl:value-of select="$symbol"/>
+    <xsl:if test="$current &lt; $times">
+      <xsl:call-template name="get-symbol">
+        <xsl:with-param name="count" select="$count"/>
+        <xsl:with-param name="current" select="$current + 1" />
+      </xsl:call-template>
+    </xsl:if>
+  </xsl:template>
   
   <xsl:template match="/">
-    <xsl:apply-templates/>
+    <xsl:choose>
+      <xsl:when test="$emsid">
+        <div class="page_proper" id="xml-preview-body">
+          <div class="epmc_pageHolder articleContentPage fullPage">
+            <div class="epmc_wideLeft">
+              <xsl:apply-templates/>
+            </div>
+          </div>
+        </div>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:apply-templates/>
+      </xsl:otherwise>
+    </xsl:choose>    
   </xsl:template>
   
   <xsl:template match="article">
@@ -41,41 +84,101 @@
   </xsl:template>
   
   <xsl:template match="back">
-    <xsl:apply-templates/>
+    <xsl:choose>
+      <xsl:when test="$emsid">
+        <xsl:apply-templates select="ack"/>
+        <xsl:if test="not(ack)">
+          <xsl:apply-templates select="//author-notes"/>
+          <xsl:if test="not(fn-group/fn[@fn-type = 'con']) and not(//author-notes)">
+            <xsl:apply-templates select="//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
+          </xsl:if>
+          <xsl:if test="//contrib/email and not(//author-notes)">
+            <xsl:call-template name="list-emails"/>
+          </xsl:if>
+        </xsl:if>
+        <xsl:apply-templates select="*[not(self::ack)]"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:apply-templates/>
+      </xsl:otherwise>
+    </xsl:choose>    
   </xsl:template>
   
   <xsl:template match="front">
-    <xsl:call-template name="identifiers"/>
-    <xsl:call-template name="authors"/>
-    <xsl:call-template name="article-info-history"/>   
-    <xsl:apply-templates select="article-meta"/>
+    <xsl:choose>
+      <xsl:when test="$emsid">
+        <img src="https://europepmc.org/corehtml/pmc/pmcgifs/logo-wtpa2.gif"/>
+        <xsl:call-template name="identifiers"/>
+        <xsl:apply-templates select="article-meta/title-group"/>
+        <xsl:call-template name="authors"/>
+        <xsl:call-template name="article-info-history"/>
+        <xsl:apply-templates select="article-meta"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:call-template name="identifiers"/>
+        <xsl:call-template name="authors"/>
+        <xsl:call-template name="article-info-history"/>   
+        <xsl:apply-templates select="article-meta"/>
+      </xsl:otherwise>
+    </xsl:choose>    
   </xsl:template>
   
   <xsl:template name="identifiers">
-    <xsl:variable name="doi" select="//article-meta/article-id[@pub-id-type='doi']"/>
-    <div class="citeinfo">
-     <p class="identifiers">
-       <span class="ppr">
-         <xsl:text>PPRID: </xsl:text>
-         <xsl:value-of select="$pprid"/>
-       </span>
-       <span class="pubinfo">
-         <xsl:value-of select="//journal-meta/publisher/publisher-name"/>
-         <xsl:text> preprint, posted </xsl:text>
-         <xsl:apply-templates select="//article-meta/pub-date[@pub-type='preprint']"/>
-       </span>
-       <br/>
-       <span class="doi">
-         <xsl:text>doi: </xsl:text>
-         <a href="{concat('https://doi.org/', $doi)}">
-           <xsl:value-of select="$doi"/>
-         </a>
-       </span>
-     </p>
-    </div>
+    <xsl:variable name="doi">
+      <xsl:if test="//article-meta/article-id[@pub-id-type='doi']">
+        <span class="doi">
+          <xsl:text>doi: </xsl:text>
+          <a href="{concat('https://doi.org/', //article-meta/article-id[@pub-id-type='doi'])}">
+            <xsl:value-of select="//article-meta/article-id[@pub-id-type='doi']"/>
+          </a>
+        </span>
+      </xsl:if>
+    </xsl:variable> 
+    <xsl:choose>
+      <xsl:when test="$pprid">
+        <div class="citeinfo">
+          <p class="identifiers">
+            <span class="ppr">
+              <xsl:text>PPRID: </xsl:text>
+              <xsl:value-of select="$pprid"/>
+            </span>
+            <span class="pubinfo">
+              <xsl:value-of select="//journal-meta/publisher/publisher-name"/>
+              <xsl:text> preprint, posted </xsl:text>
+              <xsl:apply-templates select="//article-meta/pub-date[@pub-type='preprint']"/>
+            </span>
+            <br/>
+            <xsl:if test="$doi">
+              <xsl:copy-of select="$doi"/>
+            </xsl:if>
+          </p>
+        </div>
+      </xsl:when>
+      <xsl:otherwise>
+        <p class="citeinfo">
+          <span class="identifiers">
+            <span class="ppr">
+              <xsl:if test="$emsid">
+                <xsl:text>EMSID: </xsl:text>
+                <xsl:value-of select="$emsid"/>
+              </xsl:if>            
+            </span>
+          </span>
+          <span>
+            <span class="pubinfo">
+              <xsl:value-of select="//journal-meta/journal-id"/>
+            </span>
+            <br/>
+            <xsl:if test="$doi">
+              <xsl:copy-of select="$doi"/>
+            </xsl:if>
+          </span>
+        </p>        
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
   
-  <xsl:template match="pub-date[@pub-type='preprint']">
+  <xsl:template match="pub-date">
     <xsl:value-of select="concat(year, ' ')"/>
     <xsl:call-template name="month">
       <xsl:with-param name="num" select="month"/>
@@ -89,39 +192,95 @@
   </xsl:template>
   
   <xsl:template name="authors">
-    <div class="abs_link_metadata"><div><div class="abstract--authors clearfix"><div class="abstract--author-list">
-      <div class="abstract--main-authors-list">
-        <xsl:for-each select="//article-meta//contrib-group/contrib[@contrib-type='author']">
-          <div class="inline-block">
-            <xsl:if test="descendant::name">            
-              <div style="display: none;" id="authspan{count(preceding-sibling::contrib)+1}">
-                <div class="author-refine-panel">
-                  <xsl:apply-templates select="." mode="author-refine"/>
+    <div class="abs_link_metadata">
+      <xsl:choose>
+        <xsl:when test="$emsid">
+          <div>
+            <xsl:for-each select="//article-meta//contrib-group/contrib[@contrib-type = 'author']">
+              <div class="inline">
+                <!--<xsl:if test="descendant::name">
+                <div style="display: none;" id="authspan{count(preceding-sibling::contrib)+1}">
+                  <div class="author-refine-panel">
+                    <xsl:apply-templates select="." mode="author-refine"/>
+                  </div>
                 </div>
+              </xsl:if>-->
+                <span>
+                  <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
+                </span>
               </div>
-            </xsl:if>
-            <span>
-              <xsl:apply-templates select="*[position()=1]" mode="authorlist"/>            
-            </span>
+              <xsl:if test="position() != last()">
+                <xsl:text>, </xsl:text>
+              </xsl:if>
+              <xsl:if test="position() = last()-1">
+                <xsl:text>and </xsl:text>
+              </xsl:if>
+            </xsl:for-each>
           </div>
-          <xsl:if test="position()!=last()">
-            <xsl:text>, </xsl:text>
-          </xsl:if>
-        </xsl:for-each>    
-        </div>
-      <div class="abstract--author-affiliations">
-        <a href="javascript:void(0)" class="abstract--author-affiliations-title" title="Click to toggle affiliation details.">
-          <xsl:text>Affiliations </xsl:text><i id="affiliations_switch" class="fa fa-caret-right"></i>
-        </a>        
-        <ul class="abstract--author-affiliation-list">
-          <xsl:apply-templates select="//aff" mode="afflist"/>           
-        </ul>
-        <div class="abstract--close-affiliation-link">
-          <xsl:text>Close affiliations </xsl:text><i class="fa fa-close"></i>
-        </div>
-      </div>
-    </div></div></div></div>
-  </xsl:template>  
+          <div class="author-affiliations">
+            <h4 class="abstract--author-affiliations-title" title="Click to toggle affiliation details.">
+              <xsl:text>Affiliations</xsl:text>
+            </h4>
+            <ol class="affiliations">
+              <xsl:if test="count(//aff) = 1">
+                <xsl:attribute name="style">
+                  <xsl:text>list-style-type:none;</xsl:text>
+                </xsl:attribute>
+              </xsl:if>
+              <xsl:choose>
+                <xsl:when test="//aff[not(parent::contrib)]">
+                  <xsl:apply-templates select="//aff" mode="afflist"/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:apply-templates select="exsl:node-set($affiliations)/aff" mode="afflist"/>
+                </xsl:otherwise>
+              </xsl:choose>          
+            </ol>
+          </div>
+        </xsl:when>
+        <xsl:otherwise>
+          <div class="abstract--authors clearfix"><div class="abstract--author-list">
+            <div class="abstract--main-authors-list">
+              <xsl:for-each select="//article-meta//contrib-group/contrib[@contrib-type='author']">
+                <div class="inline-block">
+                  <xsl:if test="descendant::name">            
+                    <div style="display: none;" id="authspan{count(preceding-sibling::contrib)+1}">
+                      <div class="author-refine-panel">
+                        <xsl:apply-templates select="." mode="author-refine"/>
+                      </div>
+                    </div>
+                  </xsl:if>
+                  <span>
+                    <xsl:apply-templates select="*[position()=1]" mode="authorlist"/>            
+                  </span>
+                </div>
+                <xsl:if test="position() != last()">
+                  <xsl:text>, </xsl:text>
+                </xsl:if>
+                <xsl:if test="position() = last()-1">
+                  <xsl:text>and </xsl:text>
+                </xsl:if>
+              </xsl:for-each>    
+            </div>
+            <xsl:choose>
+              <xsl:when test="$emsid"></xsl:when>
+            </xsl:choose>
+            <div class="author-affiliations">
+              <a href="javascript:void(0)" class="abstract--author-affiliations-title" title="Click to toggle affiliation details.">
+                <xsl:text>Affiliations </xsl:text><i id="affiliations_switch" class="fa fa-caret-right"></i>
+              </a>        
+              <ul class="abstract--author-affiliation-list">
+                <xsl:apply-templates select="//aff" mode="afflist"/>           
+              </ul>
+              <div class="abstract--close-affiliation-link">
+                <xsl:text>Close affiliations </xsl:text><i class="fa fa-close"></i>
+              </div>
+            </div>
+          </div></div>
+        </xsl:otherwise>
+      </xsl:choose>
+    </div>
+  </xsl:template>
   
   <xsl:template match="contrib" mode="author-refine">
     <xsl:variable name="name" select="concat(name/given-names, ' ', name/surname)"/>
@@ -252,14 +411,36 @@
     </li>
   </xsl:template>
   
-  <xsl:template match="name" mode="authorlist">
-    <a href="{concat('/search?query=AUTH:%22', surname, '+', substring(given-names, 1, 1),'%22')}"
-      data-target="authspan{count(parent::contrib/preceding-sibling::contrib)+1}">
+  <xsl:variable name="affiliations">
+    <xsl:for-each select="//aff">
+      <xsl:choose>
+        <xsl:when test=". = preceding::aff"/>
+        <xsl:otherwise>
+          <aff>
+            <xsl:apply-templates/>
+          </aff>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:for-each>
+  </xsl:variable>
+  
+  <xsl:template match="name|collab" mode="authorlist">
+    <a data-target="authspan{count(parent::contrib/preceding-sibling::contrib)+1}">
+      <xsl:attribute name="href">
+      <xsl:choose>
+        <xsl:when test="self::name">
+          <xsl:value-of select="concat('https://europepmc.org/search?query=AUTH:%22', surname, '+', substring(given-names, 1, 1),'%22')"/>
+        </xsl:when>
+        <xsl:when test="self::collab">
+          <xsl:value-of select="concat('/search?query=AUTH:%22', translate(., ' ', '+'), '%22')"/>
+        </xsl:when>
+      </xsl:choose>
+      </xsl:attribute>
       <xsl:attribute name="class">
         <xsl:text>abstract--affiliation-group</xsl:text>
-        <xsl:for-each select="following-sibling::xref[@ref-type='aff']">
+        <xsl:for-each select="following-sibling::xref[@ref-type = 'aff']">
           <xsl:variable name="rid" select="@rid"/>
-          <xsl:for-each select="//aff[@id=$rid]">
+          <xsl:for-each select="//aff[@id = $rid]">
             <xsl:text> abstract--affiliation-group-</xsl:text>
             <xsl:value-of select="count(preceding::aff)"/>
           </xsl:for-each>
@@ -270,13 +451,54 @@
         </xsl:for-each>
         <xsl:for-each select="//aff[parent::contrib-group]">
           <xsl:variable name="id" select="@id"/>
-          <xsl:if test="not(//xref[@rid=$id])">
+          <xsl:if test="not(//xref[@rid = $id])">
             <xsl:text> abstract--affiliation-group-</xsl:text>
             <xsl:value-of select="count(preceding::aff)"/>
           </xsl:if>
         </xsl:for-each>
       </xsl:attribute>
-      <span class="abstract--author-name"><xsl:value-of select="concat(surname, ' ', substring(given-names, 1, 1))"/></span>
+      <span class="abstract--author-name">
+        <xsl:choose>
+          <xsl:when test="self::name">
+            <xsl:choose>
+              <xsl:when test="$emsid">
+                <xsl:value-of select="concat(given-names, ' ', surname)"/>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:value-of select="concat(surname, ' ', substring(given-names, 1, 1))"/>
+              </xsl:otherwise>
+            </xsl:choose>            
+          </xsl:when>
+          <xsl:when test="self::collab">
+            <xsl:value-of select="."/>
+          </xsl:when>
+        </xsl:choose>
+      </span>
+      <xsl:for-each select="following-sibling::aff">
+        <xsl:variable name="current" select="."/>
+        <xsl:variable name="position">
+          <xsl:if test="position() = last()">
+            <xsl:text>last</xsl:text>
+          </xsl:if>
+        </xsl:variable>
+        <xsl:for-each select="exsl:node-set($affiliations)/aff">
+          <xsl:if test=". = $current">
+            <sup class="abstract--author-affiliation-index inline-block">
+              <xsl:choose>
+                <xsl:when test="label">
+                  <xsl:value-of select="label"/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select="position()"/>
+                </xsl:otherwise>
+              </xsl:choose>            
+              <xsl:if test="$position != 'last'">
+                <xsl:text>, </xsl:text>
+              </xsl:if>
+            </sup>    
+          </xsl:if>
+        </xsl:for-each>
+      </xsl:for-each>
       <xsl:for-each select="following-sibling::xref[@ref-type='aff']">
         <xsl:variable name="position">
           <xsl:if test="position()=last()">
@@ -286,7 +508,14 @@
         <xsl:variable name="rid" select="@rid"/>
         <xsl:for-each select="//aff[@id=$rid]">
           <sup class="abstract--author-affiliation-index inline-block">
-            <xsl:value-of select="count(preceding::aff)+1"/>
+            <xsl:choose>
+              <xsl:when test="label">
+                <xsl:value-of select="label"/>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:value-of select="count(preceding::aff) + 1"/>
+              </xsl:otherwise>
+            </xsl:choose>
             <xsl:if test="$position!='last'">
               <xsl:text>, </xsl:text>
             </xsl:if>
@@ -294,51 +523,132 @@
         </xsl:for-each>
       </xsl:for-each>
     </a>
+    <xsl:if test="parent::contrib[@equal-contrib and @equal-contrib != 'no']">
+      <a href="#author-info-equal-contrib">
+        <sup class="inline-block">#</sup>
+      </a>
+    </xsl:if>
+    <xsl:for-each select="following-sibling::xref[@ref-type = 'fn']">
+      <xsl:variable name="rid" select="@rid"/>
+      <xsl:for-each select="//fn[@id = $rid]">
+        <xsl:if test="not(@fn-type) or (@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')">
+          <xsl:variable name="count" select="count(preceding-sibling::fn[not(@fn-type)] |
+            preceding-sibling::fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]) + 1"/>
+          <a href="{concat('#', $rid)}">
+            <sup class="inline-block">
+              <xsl:call-template name="get-symbol">
+                <xsl:with-param name="count" select="$count"/>
+                <xsl:with-param name="current" select="1"/>
+              </xsl:call-template>
+            </sup>
+          </a>
+        </xsl:if>
+      </xsl:for-each>
+    </xsl:for-each>
     <xsl:variable name="corresp" select="following-sibling::xref[@ref-type='corresp']/@rid"/>
     <xsl:choose>
-      <xsl:when test="following-sibling::corresp//email">
-        <i class="fa fa-envelope author-refine-icon"></i>
+      <xsl:when test="$emsid">
+        <xsl:choose>
+          <xsl:when test="following-sibling::corresp//email">
+            <a href="#{$corresp}">
+              <sup class="inline-block"><big>&#9993;</big></sup>
+            </a>
+          </xsl:when>
+          <xsl:when test="//corresp[@id = $corresp]">
+            <a href="#{$corresp}">
+              <sup class="inline-block"><big>&#9993;</big></sup>
+            </a>
+          </xsl:when>
+          <xsl:when test="following-sibling::corresp">
+            <a href="#{$corresp}">
+              <sup class="inline-block"><big>&#9993;</big></sup>
+            </a>
+          </xsl:when>
+        </xsl:choose>
       </xsl:when>
-       <xsl:when test="//corresp[@id=$corresp]">
-      	<xsl:choose>
-      		<xsl:when test="count(//corresp[@id=$corresp]//email)=1">
-      			<i class="fa fa-envelope author-refine-icon"></i>
-      		</xsl:when>
-      		<xsl:otherwise>
-      			<a href="#author-notes"><i class="fa fa-envelope author-refine-icon"></i></a>
-      		</xsl:otherwise>
-      	</xsl:choose>      	
-      </xsl:when>
-      <xsl:when test="following-sibling::corresp">
-        <a href="#author-notes"><i class="fa fa-envelope author-refine-icon"></i></a>
-      </xsl:when>
+      <xsl:otherwise>
+        <xsl:choose>
+          <xsl:when test="following-sibling::corresp//email">
+            <i class="fa fa-envelope author-refine-icon"></i>
+          </xsl:when>
+          <xsl:when test="//corresp[@id=$corresp]">
+            <xsl:choose>
+              <xsl:when test="count(//corresp[@id=$corresp]//email)=1">
+                <i class="fa fa-envelope author-refine-icon"></i>
+              </xsl:when>
+              <xsl:otherwise>
+                <a href="#author-notes"><i class="fa fa-envelope author-refine-icon"></i></a>
+              </xsl:otherwise>
+            </xsl:choose>      	
+          </xsl:when>
+          <xsl:when test="following-sibling::corresp">
+            <a href="#author-notes"><i class="fa fa-envelope author-refine-icon"></i></a>
+          </xsl:when>
+        </xsl:choose>
+      </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
   
-  <xsl:template match="collab" mode="authorlist">
-    <a href="{concat('/search?query=AUTH:%22', translate(., ' ', '+'), '%22')}">
-      <xsl:value-of select="."/>
-    </a>
-  </xsl:template>  
-  
   <xsl:template match="aff" mode="afflist">
-    <xsl:variable name="id" select="@id"/>
-    <xsl:variable name="count" select="'1'"/>
-    <li class="abstract--author-affiliation-item">
-      <div class="abstract--author-affiliation-text">
-        <span class="abstract--author-affiliation-index">
-          <xsl:value-of select="count(preceding::aff)+1"/>
-          <xsl:text>.</xsl:text>
-        </span>
-        <span>
-          <xsl:apply-templates select="*[not(self::label)]|text()"/>
-        </span>
-      </div>
-    </li>
+    <xsl:choose>
+      <xsl:when test="$emsid">
+        <xsl:variable name="alpha" select="'abcdefghijklmnopqrstuvwxyz'"/> 
+        <li>
+          <xsl:attribute name="id">
+            <xsl:value-of select="@id"/>
+          </xsl:attribute>
+          <xsl:if test="label and contains($alpha, label)">
+            <xsl:attribute name="type">a</xsl:attribute>
+            <xsl:attribute name="style">list-style-type:lower-alpha</xsl:attribute>
+          </xsl:if>
+          <xsl:if test="label">
+            <xsl:attribute name="value">
+              <xsl:choose>
+                <xsl:when test="label and contains($alpha, label)">
+                  <xsl:value-of select="string-length(substring-before($alpha, label))+1"/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select="label"/>
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:attribute>
+          </xsl:if>
+          <xsl:apply-templates select="*[not(self::label)] | text()"/>
+        </li>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:variable name="id" select="@id"/>
+        <xsl:variable name="count" select="'1'"/>
+        <li class="abstract--author-affiliation-item">
+          <div class="abstract--author-affiliation-text">
+            <span class="abstract--author-affiliation-index">
+              <xsl:value-of select="count(preceding::aff)+1"/>
+              <xsl:text>.</xsl:text>
+            </span>
+            <span>
+              <xsl:apply-templates select="*[not(self::label)]|text()"/>
+            </span>
+          </div>
+        </li>
+      </xsl:otherwise>
+    </xsl:choose>    
   </xsl:template>
 
-  <xsl:template match="article-meta/title-group/article-title">
+  <xsl:template match="article-meta/title-group">
     <div id="article-title">
+      <xsl:apply-templates select="article-title"/>
+      <xsl:apply-templates select="subtitle"/>      
+    </div>
+  </xsl:template>
+  
+  <xsl:template match="title-group/article-title">
+    <h1 class="article-title manuscript-title">
+      <xsl:apply-templates/>
+    </h1>
+  </xsl:template>
+  
+  <xsl:template match="title-group/subtitle">
+    <div class="article-submtitle manuscript-subtitle">
       <xsl:apply-templates/>
     </div>
   </xsl:template>
@@ -372,17 +682,16 @@
     <xsl:variable name="contrib-id">
       <xsl:apply-templates select="../contrib-id"/>
     </xsl:variable>
-    <xsl:if test="../../..//contrib[@contrib-type='author non-byline']/contrib-id[text()=$contrib-id]">
+    <xsl:if test="../../..//contrib[@contrib-type = 'author non-byline']/contrib-id[text() = $contrib-id]">
       <ul>
-        <xsl:for-each
-            select="../../..//contrib[@contrib-type='author non-byline']/contrib-id[text()=$contrib-id]">
+        <xsl:for-each select="../../..//contrib[@contrib-type = 'author non-byline']/contrib-id[text() = $contrib-id]">
           <li>
-            <xsl:if test="position()=1">
+            <xsl:if test="position() = 1">
               <xsl:attribute name="class">
                 <xsl:value-of select="'first'"/>
               </xsl:attribute>
             </xsl:if>
-            <xsl:if test="position()=last()">
+            <xsl:if test="position() = last()">
               <xsl:attribute name="class">
                 <xsl:value-of select="'last'"/>
               </xsl:attribute>
@@ -402,7 +711,7 @@
       </ul>
     </xsl:if>
   </xsl:template>
-
+  
   <xsl:template name="collabaff">
     <span class="aff">
       <xsl:for-each select="@* | node()">
@@ -412,17 +721,17 @@
               <xsl:value-of select="."/>
             </span>
           </xsl:when>
-          <xsl:when test="name()='country'">
+          <xsl:when test="name() = 'country'">
             <span class="country">
               <xsl:value-of select="."/>
             </span>
           </xsl:when>
-          <xsl:when test="name()='addr-line'">
+          <xsl:when test="name() = 'addr-line'">
             <span class="addr-line">
               <xsl:apply-templates mode="authorgroup"/>
             </span>
           </xsl:when>
-          <xsl:when test="name()=''">
+          <xsl:when test="name() = ''">
             <xsl:value-of select="."/>
           </xsl:when>
           <xsl:otherwise>
@@ -432,10 +741,10 @@
           </xsl:otherwise>
         </xsl:choose>
       </xsl:for-each>
-
+      
     </span>
   </xsl:template>
-
+  
   <xsl:template match="addr-line/named-content" mode="authorgroup">
     <span class="named-content">
       <xsl:apply-templates/>
@@ -457,12 +766,12 @@
   </xsl:template>
 
   <!-- ==== Data set start ==== -->
-  <xsl:template match="sec[@sec-type='datasets']">
+  <xsl:template match="sec[@sec-type = 'datasets']">
     <div id="datasets">
       <xsl:apply-templates/>
     </div>
   </xsl:template>
-  <xsl:template match="sec[@sec-type='datasets']/title"/>
+  <xsl:template match="sec[@sec-type = 'datasets']/title"/>
   <xsl:template match="related-object">
     <span class="{name()}">
       <xsl:if test="@id">
@@ -562,8 +871,7 @@
       <xsl:apply-templates/>
     </ul>
   </xsl:template>
-  <xsl:template
-      match="principal-award-recipient/surname | principal-award-recipient/given-names | principal-award-recipient/name">
+  <xsl:template match="principal-award-recipient/surname | principal-award-recipient/given-names | principal-award-recipient/name">
     <li class="name">
       <xsl:value-of select="given-names"/>
       <xsl:text> </xsl:text>
@@ -579,28 +887,32 @@
   </xsl:template>
 
   <!--  <xsl:template match="funding-statement"/>-->
-  
+
   <!-- fn-group -->
   <!--<xsl:template name="article-info-identification">
-    <xsl:variable name="doi" select="//article-meta/article-id[@pub-id-type='doi']"/>
-    <div>
-      <xsl:attribute name="id"><xsl:value-of select="'article-info-identification'"/></xsl:attribute>
-      <div>
-        <xsl:attribute name="class"><xsl:value-of select="'elife-article-info-doi'"/></xsl:attribute>
-        <h4 class="info-label">DOI</h4> <div class="info-content"><a href="/lookup/doi/{$doi}"><xsl:value-of select="$doi"/></a></div>
-      </div>
-      <div>
-        <xsl:attribute name="class"><xsl:value-of select="'elife-article-info-citeas'"/></xsl:attribute>
-        <h4 class="info-label">Cite this as</h4> <div class="info-content"><xsl:call-template name="citation"/></div>
-      </div>
-    </div>
-  </xsl:template>-->
-  
+        <xsl:variable name="doi" select="//article-meta/article-id[@pub-id-type='doi']"/>
+        <div>
+            <xsl:attribute name="id"><xsl:value-of select="'article-info-identification'"/></xsl:attribute>
+            <div>
+                <xsl:attribute name="class"><xsl:value-of select="'elife-article-info-doi'"/></xsl:attribute>
+                <h4 class="info-label">DOI</h4> <div class="info-content"><a href="/lookup/doi/{$doi}"><xsl:value-of select="$doi"/></a></div>
+            </div>
+            <div>
+                <xsl:attribute name="class"><xsl:value-of select="'elife-article-info-citeas'"/></xsl:attribute>
+                <h4 class="info-label">Cite this as</h4> <div class="info-content"><xsl:call-template name="citation"/></div>
+            </div>
+        </div>
+    </xsl:template>-->
+
   <xsl:template name="article-info-history">
     <div>
-      <xsl:attribute name="id"><xsl:value-of select="'article-info-history'"/></xsl:attribute>
+      <xsl:attribute name="id">
+        <xsl:value-of select="'article-info-history'"/>
+      </xsl:attribute>
       <ul>
-        <xsl:attribute name="class"><xsl:value-of select="'publication-history'"/></xsl:attribute>
+        <xsl:attribute name="class">
+          <xsl:value-of select="'publication-history'"/>
+        </xsl:attribute>
         <xsl:for-each select="//history/date[@date-type]">
           <xsl:apply-templates select="." mode="publication-history-item"/>
         </xsl:for-each>
@@ -614,44 +926,52 @@
   <xsl:template match="date | pub-date" mode="publication-history-item">
     <xsl:param name="date-type" select="string(@date-type)"/>
     <li>
-      <xsl:attribute name="class"><xsl:value-of select="$date-type"/></xsl:attribute>
+      <xsl:attribute name="class">
+        <xsl:value-of select="$date-type"/>
+      </xsl:attribute>
       <span>
-        <xsl:attribute name="class"><xsl:value-of select="concat($date-type, '-label')"/></xsl:attribute>
-        <xsl:call-template name="camel-case-word"><xsl:with-param name="text" select="$date-type"/></xsl:call-template>
+        <xsl:attribute name="class">
+          <xsl:value-of select="concat($date-type, '-label')"/>
+        </xsl:attribute>
+        <xsl:call-template name="camel-case-word">
+          <xsl:with-param name="text" select="$date-type"/>
+        </xsl:call-template>
       </span>
       <xsl:text> </xsl:text>
       <xsl:call-template name="month">
         <xsl:with-param name="num" select="month"/>
       </xsl:call-template>
-      <xsl:value-of select="concat( ' ', day, ', ', year, '.')"/>
+      <xsl:value-of select="concat(' ', day, ', ', year, '.')"/>
     </li>
   </xsl:template>
-  <xsl:template match="fn-group[@content-type='ethics-information']">
+  <xsl:template match="fn-group[@content-type = 'ethics-information']">
     <div id="article-info-ethics">
       <xsl:apply-templates/>
     </div>
   </xsl:template>
-  <xsl:template match="fn-group[@content-type='ethics-information']/fn">
+  <xsl:template match="fn-group[@content-type = 'ethics-information']/fn">
     <xsl:apply-templates/>
   </xsl:template>
-  <xsl:template match="fn-group[@content-type='ethics-information']/title"/>
-  <xsl:template match="contrib[@contrib-type='editor']" mode="article-info-reviewing-editor">
+  <xsl:template match="fn-group[@content-type = 'ethics-information']/title"/>
+  <xsl:template match="contrib[@contrib-type = 'editor']" mode="article-info-reviewing-editor">
     <div id="article-info-reviewing-editor">
       <div>
-        <xsl:attribute name="class"><xsl:value-of select="'elife-article-info-reviewingeditor-text'"/></xsl:attribute>
+        <xsl:attribute name="class">
+          <xsl:value-of select="'elife-article-info-reviewingeditor-text'"/>
+        </xsl:attribute>
         <xsl:apply-templates select="node()"/>
       </div>
     </div>
   </xsl:template>
 
-  <xsl:template match="fn-group[@content-type='competing-interest']">
+  <xsl:template match="fn-group[@content-type = 'competing-interest']">
     <div id="author-info-competing-interest">
       <ul class="fn-conflict">
         <xsl:apply-templates/>
       </ul>
     </div>
   </xsl:template>
-  <xsl:template match="fn-group[@content-type='competing-interest']/fn">
+  <xsl:template match="fn-group[@content-type = 'competing-interest']/fn">
     <li>
       <xsl:apply-templates/>
     </li>
@@ -681,10 +1001,10 @@
 
   <xsl:template match="permissions/copyright-statement">
     <!--<ul class="copyright-statement">
-      <li>
-        <xsl:apply-templates/>
-      </li>
-    </ul>-->
+            <li>
+                <xsl:apply-templates/>
+            </li>
+        </ul>-->
   </xsl:template>
 
   <xsl:template match="license">
@@ -782,32 +1102,40 @@
   <!-- ==== FRONT MATTER END ==== -->
 
   <xsl:template match="abstract">
-    <xsl:variable name="data-doi" select="child::object-id[@pub-id-type='doi']/text()"/>
+    <xsl:variable name="data-doi" select="child::object-id[@pub-id-type = 'doi']/text()"/>
     <div data-doi="{$data-doi}">
       <xsl:choose>
         <xsl:when test="./title">
-          <xsl:attribute name="id">
+          <xsl:variable name="id">
             <xsl:value-of select="translate(translate(./title, $uppercase, $smallcase), ' ', '-')"/>
+          </xsl:variable>
+          <xsl:attribute name="id">
+            <xsl:value-of select="$id"/>
           </xsl:attribute>
-          <h2><xsl:value-of select="title"/></h2>
+          <h2 id="{concat($id,'title')}">
+            <xsl:value-of select="title"/>
+          </h2>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:attribute name="id">
+          <xsl:variable name="id">
             <xsl:value-of select="name(.)"/>
+          </xsl:variable>
+          <xsl:attribute name="id">
+            <xsl:value-of select="$id"/>
           </xsl:attribute>
-          <h2>Abstract</h2>
+          <h2 id="{concat($id,'title')}">Abstract</h2>
         </xsl:otherwise>
       </xsl:choose>
       <xsl:apply-templates/>
     </div>
   </xsl:template>
-  
+
   <xsl:template match="kwd-group">
     <p>
-      <strong>Keywords: </strong> 
+      <strong>Keywords: </strong>
       <xsl:for-each select="kwd">
         <xsl:apply-templates/>
-        <xsl:if test="position()!=last()">
+        <xsl:if test="position() != last()">
           <xsl:text>, </xsl:text>
         </xsl:if>
       </xsl:for-each>
@@ -815,28 +1143,29 @@
   </xsl:template>
 
   <!-- Start transforming sections to heading levels -->
-<!--  <xsl:template match="supplementary-material">
-    <xsl:variable name="id">
-      <xsl:value-of select="@id"/>
-    </xsl:variable>
-    <xsl:variable name="data-doi" select="child::object-id[@pub-id-type='doi']/text()"/>
-    <div class="supplementary-material" data-doi="{$data-doi}">
-      <div class="supplementary-material-expansion" id="{$id}">
-        <xsl:apply-templates/>
-      </div>
-    </div>
-  </xsl:template>-->
+  <!--    <xsl:template match="supplementary-material">
+        <xsl:variable name="id">
+            <xsl:value-of select="@id"/>
+        </xsl:variable>
+        <xsl:variable name="data-doi" select="child::object-id[@pub-id-type='doi']/text()"/>
+        <div class="supplementary-material" data-doi="{$data-doi}">
+            <div class="supplementary-material-expansion" id="{$id}">
+                <xsl:apply-templates/>
+            </div>
+        </div>
+    </xsl:template>-->
 
   <!-- No need to proceed sec-type="additional-information", sec-type="supplementary-material" and sec-type="datasets"-->
-  <xsl:template match="sec[not(@sec-type='additional-information')][not(@sec-type='datasets')]
-    [not(@sec-type='supplementary-material')][not(@sec-type='floats-group')]">
+  <xsl:template match="
+      sec[not(@sec-type = 'additional-information')][not(@sec-type = 'datasets')]
+      [not(@sec-type = 'supplementary-material')][not(@sec-type = 'floats-group')]">
     <div>
       <xsl:if test="@sec-type">
         <xsl:attribute name="class">
           <xsl:value-of select="concat('section ', ./@sec-type)"/>
         </xsl:attribute>
       </xsl:if>
-      <xsl:apply-templates select="@*[name()!='sec-type'] | node()[not(self::label)]"/>
+      <xsl:apply-templates select="@*[name() != 'sec-type'] | node()[not(self::label)]"/>
     </div>
   </xsl:template>
 
@@ -850,30 +1179,38 @@
         </xsl:when>
         <xsl:otherwise>
           <xsl:element name="h{count(ancestor::sec)+count(ancestor::abstract)+count(ancestor::boxed-text) + 1}">
+            <xsl:attribute name="id">
+              <xsl:value-of select="concat(parent::sec/@id, 'title')"/>
+            </xsl:attribute>
             <xsl:apply-templates select="@* | preceding-sibling::*[1][self::label] | node()"/>
           </xsl:element>
         </xsl:otherwise>
-      </xsl:choose>       
+      </xsl:choose>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template match="sec/label | ack/label | ref-list/label">
     <xsl:value-of select="."/>
     <xsl:text>. </xsl:text>
   </xsl:template>
-  
+
   <xsl:template match="boxed-text/label">
     <xsl:if test="following-sibling::caption/title">
       <xsl:value-of select="."/>
       <xsl:text> </xsl:text>
-    </xsl:if>    
+    </xsl:if>
   </xsl:template>
-  
+
   <!-- END transforming sections to heading levels -->
 
   <xsl:template match="p">
     <xsl:if test="not(supplementary-material)">
       <p>
+        <xsl:if test="@id">
+          <xsl:attribute name="id">
+            <xsl:value-of select="@id"/>
+          </xsl:attribute>
+        </xsl:if>
         <xsl:if test="ancestor::caption and (count(preceding-sibling::p) = 0) and (ancestor::boxed-text or ancestor::media)">
           <xsl:attribute name="class">
             <xsl:value-of select="'first-child'"/>
@@ -882,13 +1219,13 @@
         <xsl:if test="parent::list-item and preceding-sibling::*[1][self::label]">
           <span class="list-label">
             <xsl:value-of select="preceding-sibling::label"/>
-          </span>         
+          </span>
         </xsl:if>
         <xsl:if test="not(parent::list-item) and preceding-sibling::*[1][self::label]">
           <span class="p-label">
             <xsl:value-of select="preceding-sibling::label"/>
             <xsl:text>: </xsl:text>
-          </span>                    
+          </span>
         </xsl:if>
         <xsl:apply-templates/>
       </p>
@@ -919,7 +1256,9 @@
             </xsl:otherwise>
           </xsl:choose>
         </xsl:attribute>
-        <xsl:attribute name="target"><xsl:value-of select="'_blank'"/></xsl:attribute>
+        <xsl:attribute name="target">
+          <xsl:value-of select="'_blank'"/>
+        </xsl:attribute>
         <xsl:apply-templates/>
       </a>
     </xsl:if>
@@ -942,13 +1281,13 @@
 
   <!-- START handling citation objects -->
   <xsl:template match="xref">
-     <xsl:apply-templates select="." mode="testing"/>
+    <xsl:apply-templates select="." mode="testing"/>
   </xsl:template>
   <!-- END handling citation objects -->
 
   <!-- START Table Handling -->
   <xsl:template match="table-wrap">
-    <xsl:variable name="data-doi" select="child::object-id[@pub-id-type='doi']/text()"/>
+    <xsl:variable name="data-doi" select="child::object-id[@pub-id-type = 'doi']/text()"/>
     <div class="table-wrap" data-doi="{$data-doi}">
       <xsl:apply-templates select="." mode="testing"/>
     </div>
@@ -957,6 +1296,7 @@
   <xsl:template match="table-wrap/label" mode="captionLabel">
     <span class="table-label">
       <xsl:apply-templates/>
+      <xsl:text>.</xsl:text>
     </span>
     <xsl:text> </xsl:text>
   </xsl:template>
@@ -964,17 +1304,23 @@
   <xsl:template match="caption">
     <xsl:choose>
       <!-- if article-title exists, make it as title.
-           Otherwise, make source -->
+                     Otherwise, make source -->
       <xsl:when test="parent::table-wrap">
         <xsl:if test="following-sibling::graphic">
           <xsl:variable name="caption" select="parent::table-wrap/label/text()"/>
           <xsl:variable name="filename" select="substring-before(concat(following-sibling::graphic/@xlink:href, '.'), '.')"/>
-          <xsl:variable name="graphics" select="concat($filebase,'image/',$filename)"/>
-          <!--<div class="fig-inline-img">
-            <img data-img="[graphic-{$filename}-small]" src="{concat($graphics, '-500.jpg')}" class="figure-expand" alt="{$caption}"/>            
-          </div>-->
-          <a href="{concat($graphics,'.jpg')}" target="_blank" class="figure-expand" title="{$caption} - Click to open full size">
-            <img data-img="[graphic-{$filename}-medium]" src="{concat($graphics, '-700.jpg')}" alt="{$caption}"/>
+          <xsl:variable name="graphics">
+            <xsl:choose>
+              <xsl:when test="$emsid">
+                <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:value-of select="concat($filebase,'image/',$filename, '.jpg')"/>                
+              </xsl:otherwise>
+            </xsl:choose>
+          </xsl:variable>
+          <a href="{$graphics}" target="_blank" class="figure-expand" title="{$caption} - Click to open full size">
+            <img data-img="[graphic-{$filename}-medium]" src="{$graphics}" alt="{$caption}"/>
           </a>
         </xsl:if>
         <xsl:apply-templates select="parent::table-wrap/label" mode="captionLabel"/>
@@ -983,7 +1329,7 @@
           <div class="table-caption">
             <xsl:apply-templates select="child::*[not(self::title)]"/>
           </div>
-        </xsl:if>        
+        </xsl:if>
       </xsl:when>
       <xsl:otherwise>
         <xsl:apply-templates/>
@@ -992,33 +1338,34 @@
   </xsl:template>
 
   <xsl:template match="table-wrap/table">
-  	<div class="table-overflow">
-	    <table>
-	      <xsl:apply-templates/>
-	    </table>
-	  </div>
+    <div class="table-overflow">
+      <table>
+        <xsl:apply-templates select="@rules | @frame"/>
+        <xsl:apply-templates/>
+      </table>
+    </div>
   </xsl:template>
 
   <!-- Handle other parts of table -->
   <xsl:template match="thead | tr">
-    <xsl:copy>
+    <xsl:element name="{local-name()}">
       <xsl:if test="@style">
         <xsl:attribute name="style">
           <xsl:value-of select="@style"/>
         </xsl:attribute>
       </xsl:if>
       <xsl:apply-templates/>
-    </xsl:copy>
+    </xsl:element>
   </xsl:template>
 
   <xsl:template match="tbody">
-    <xsl:copy>
+    <tbody>
       <xsl:apply-templates/>
-    </xsl:copy>
+    </tbody>
   </xsl:template>
 
   <xsl:template match="th | td">
-    <xsl:copy>
+    <xsl:element name="{local-name()}">
       <xsl:if test="@rowspan">
         <xsl:attribute name="rowspan">
           <xsl:value-of select="@rowspan"/>
@@ -1029,42 +1376,22 @@
           <xsl:value-of select="@colspan"/>
         </xsl:attribute>
       </xsl:if>
-
-      <!-- The author-callout-style-b family applies both background and foreground colour. -->
-      <xsl:variable name="class">
-        <xsl:if test="@align">
-          <xsl:value-of select="concat(' table-', @align)"/>
-        </xsl:if>
-        <xsl:if test="@style and starts-with(@style, 'author-callout-style-b')">
-          <xsl:value-of select="concat(' ', @style)"/>
-        </xsl:if>
-      </xsl:variable>
-
-      <xsl:if test="$class != ''">
-        <xsl:attribute name="class">
-          <xsl:value-of select="substring-after($class, ' ')"/>
-        </xsl:attribute>
-      </xsl:if>
-
-      <xsl:if test="@style and not(starts-with(@style, 'author-callout-style-b'))">
+      <xsl:if test="@style | @align">
         <xsl:attribute name="style">
+          <xsl:text>text-align:</xsl:text>
+          <xsl:value-of select="concat(@align, ';')"/>
           <xsl:value-of select="@style"/>
         </xsl:attribute>
       </xsl:if>
 
       <xsl:apply-templates/>
-    </xsl:copy>
+    </xsl:element>
   </xsl:template>
 
   <!-- Handle Table FootNote -->
   <xsl:template match="table-wrap-foot">
     <div class="table-foot">
-      <ul class="table-footnotes">
-        <xsl:if test="descendant::label">
-          <xsl:attribute name="style">
-            <xsl:text>list-style-type:none;</xsl:text>
-          </xsl:attribute>
-        </xsl:if>
+      <ul class="table-footnotes" style="list-style-type:none;">
         <xsl:apply-templates/>
       </ul>
     </div>
@@ -1100,9 +1427,11 @@
   </xsl:template>
 
   <xsl:template match="disp-formula">
-    <div class="disp-formula">
+    <span class="disp-formula">
       <xsl:if test="@id">
-        <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
+        <xsl:attribute name="id">
+          <xsl:value-of select="@id"/>
+        </xsl:attribute>
       </xsl:if>
       <xsl:apply-templates/>
       <xsl:if test="label">
@@ -1110,15 +1439,65 @@
           <xsl:value-of select="label/text()"/>
         </span>
       </xsl:if>
-    </div>
+    </span>
   </xsl:template>
 
-  <xsl:template match="*[local-name()='math']">
+  <xsl:template match="*[local-name() = 'math']">
     <span class="f mathjax mml-math">
-      <xsl:text disable-output-escaping="yes">&lt;math xmlns="http://www.w3.org/1998/Math/MathML"&gt;</xsl:text>
-      <xsl:apply-templates/>
-      <xsl:text disable-output-escaping="yes">&lt;/math&gt;</xsl:text>
+      <xsl:attribute name="id">
+        <xsl:value-of select="concat(parent::node()/@id, '-math')"/>
+      </xsl:attribute>
+      <xsl:choose>
+        <xsl:when test="$emsid">
+          <xsl:text>&lt;math xmlns="http://www.w3.org/1998/Math/MathML"&gt;</xsl:text>
+          <xsl:apply-templates mode="serialize"/>
+          <xsl:text>&lt;/math&gt;</xsl:text>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:text disable-output-escaping="yes">&lt;math xmlns="http://www.w3.org/1998/Math/MathML"&gt;</xsl:text>
+          <xsl:apply-templates/>
+          <xsl:text disable-output-escaping="yes">&lt;/math&gt;</xsl:text>
+        </xsl:otherwise>
+      </xsl:choose>      
     </span>
+  </xsl:template>
+  
+  <xsl:template match="mml:*">
+    <xsl:element name="{local-name(.)}">
+      <xsl:apply-templates select="@*"/>
+      <xsl:apply-templates/>
+    </xsl:element>
+  </xsl:template>
+  
+
+  <xsl:template match="*" mode="serialize">
+      <xsl:text>&lt;</xsl:text>
+      <xsl:value-of select="local-name(.)"/>
+      <xsl:apply-templates select="@*" mode="serialize" />
+      <xsl:choose>
+          <xsl:when test="node()">
+              <xsl:text>&gt;</xsl:text>
+              <xsl:apply-templates mode="serialize" />
+              <xsl:text>&lt;/</xsl:text>
+              <xsl:value-of select="local-name(.)"/>
+              <xsl:text>&gt;</xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+              <xsl:text> /&gt;</xsl:text>
+          </xsl:otherwise>
+      </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="@*" mode="serialize">
+      <xsl:text> </xsl:text>
+      <xsl:value-of select="name()"/>
+      <xsl:text>="</xsl:text>
+      <xsl:value-of select="."/>
+      <xsl:text>"</xsl:text>
+  </xsl:template>
+
+  <xsl:template match="text()" mode="serialize">
+      <xsl:value-of select="."/>
   </xsl:template>
 
   <!-- END Table Handling -->
@@ -1129,7 +1508,7 @@
   <!-- NOTE: PATH/LINK to be replaced -->
   <xsl:template match="fig-group">
     <!-- set main figure's DOI -->
-    <xsl:variable name="data-doi" select="child::fig[1]/object-id[@pub-id-type='doi']/text()"/>
+    <xsl:variable name="data-doi" select="child::fig[1]/object-id[@pub-id-type = 'doi']/text()"/>
     <div class="fig-group" id="{concat('fig-group-', count(preceding::fig-group)+1)}" data-doi="{$data-doi}">
       <xsl:apply-templates select="." mode="testing"/>
     </div>
@@ -1142,7 +1521,7 @@
         <xsl:value-of select="concat(' ', caption/title)"/>
       </xsl:if>
       <xsl:for-each select="caption/p">
-        <xsl:if test="not(ext-link[@ext-link-type='doi']) and not(.//object-id[@pub-id-type='doi'])">
+        <xsl:if test="not(ext-link[@ext-link-type = 'doi']) and not(.//object-id[@pub-id-type = 'doi'])">
           <xsl:value-of select="concat(' ', .)"/>
         </xsl:if>
       </xsl:for-each>
@@ -1155,7 +1534,7 @@
   <!-- individual fig in fig-group -->
 
   <xsl:template match="fig">
-    <xsl:variable name="data-doi" select="child::object-id[@pub-id-type='doi']/text()"/>
+    <xsl:variable name="data-doi" select="child::object-id[@pub-id-type = 'doi']/text()"/>
     <div class="fig" data-doi="{$data-doi}">
       <xsl:apply-templates select="." mode="testing"/>
     </div>
@@ -1177,19 +1556,38 @@
       <xsl:when test="not(parent::supplementary-material)">
         <div class="fig-caption">
           <xsl:variable name="filename" select="substring-before(concat(following-sibling::graphic/@xlink:href, '.'), '.')"/>
-    			<xsl:variable name="graphics" select="concat($filebase,'image/',$filename)"/>
-          <!-- three options -->
+          <xsl:variable name="graphics">
+            <xsl:choose>
+              <xsl:when test="$emsid">
+                <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:value-of select="concat($filebase,'image/',$filename)"/>                
+              </xsl:otherwise>
+            </xsl:choose>
+          </xsl:variable>
           <span class="elife-figure-links">
-            <!--<span class="elife-figure-link elife-figure-link-download">
-              <a href="[{$graphic-type}-{$filename}-download]"><xsl:attribute name="download"/>Download figure</a>
-            </span>-->
             <span class="elife-figure-link elife-figure-link-newtab">
-              <a href="{concat($graphics,'.jpg')}" target="_blank">Open in new tab</a>
+              <a target="_blank">
+                <xsl:attribute name="href">
+                  <xsl:choose>
+                    <xsl:when test="$emsid">
+                      <xsl:value-of select="$graphics"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                      <xsl:value-of select="concat($graphics,'.jpg')"/>                      
+                    </xsl:otherwise>
+                  </xsl:choose>
+                </xsl:attribute>
+                <xsl:text>Open in new tab</xsl:text>
+              </a>
             </span>
           </span>
           <span class="fig-label">
             <xsl:value-of select="../label/text()"/>
-            <xsl:if test="title"><xsl:text>:</xsl:text></xsl:if>
+            <xsl:if test="title">
+              <xsl:text>: </xsl:text>
+            </xsl:if>
           </span>
           <xsl:text> </xsl:text>
           <xsl:apply-templates/>
@@ -1212,7 +1610,7 @@
     </span>
   </xsl:template>
 
-  <xsl:template match="fig//caption/title | supplementary-material/caption/title |  table-wrap/caption/title">
+  <xsl:template match="fig//caption/title | supplementary-material/caption/title | table-wrap/caption/title">
     <span class="caption-title">
       <xsl:apply-templates/>
     </span>
@@ -1222,31 +1620,26 @@
 
   <!-- body content -->
   <xsl:template match="body">
-    <!--<div class="elife-article-decision-letter">
-      <xsl:apply-templates select="*[not(self::supplementary-material)]"/>
-    </div>-->
-    <div id='main-text'>
+    <xsl:if test="child::*[position()=1][self::p]">
+      <hr />
+    </xsl:if>
+    <div id="main-text">
       <div class="article fulltext-view">
-        <xsl:apply-templates mode="testing" select="*[not(@sec-type='supplementary-material')][not(@sec-type='floats-group')]"/>
-        <xsl:for-each select="//floats-group/* | //sec[@sec-type='floats-group']/*">
+        <xsl:apply-templates mode="testing" select="*[not(@sec-type = 'supplementary-material')][not(@sec-type = 'floats-group')]"/>
+        <xsl:for-each select="//floats-group/* | //sec[@sec-type = 'floats-group']/*">
           <xsl:variable name="rid" select="@id"/>
-          <xsl:if test="not(//body//xref[@rid=$rid])">        
+          <xsl:if test="not(//body//xref[@rid = $rid])">
             <xsl:apply-templates select="." mode="testing"/>
           </xsl:if>
         </xsl:for-each>
         <xsl:call-template name="appendices-main-text"/>
       </div>
     </div>
-    <!--<div id="main-figures">
-      <xsl:for-each select=".//fig[not(@specific-use)][not(parent::fig-group)] | .//fig-group">
-        <xsl:apply-templates select="."/>
-      </xsl:for-each>
-    </div>-->
   </xsl:template>
 
-  <xsl:template
-      match="sec[not(@sec-type='additional-information')][not(@sec-type='datasets')][not(@sec-type='supplementary-material')]
-      [not(@sec-type='floats-group')]" mode="testing">
+  <xsl:template match="
+      sec[not(@sec-type = 'additional-information')][not(@sec-type = 'datasets')][not(@sec-type = 'supplementary-material')]
+      [not(@sec-type = 'floats-group')]" mode="testing">
     <div>
       <xsl:if test="@sec-type">
         <xsl:attribute name="class">
@@ -1286,13 +1679,13 @@
       </xsl:if>
       <xsl:apply-templates/>
     </xsl:if>
-    <xsl:if test="//floats-group or //sec[@sec-type='floats-group']">
-	    <xsl:for-each select="descendant::xref[@ref-type='table' or @ref-type='fig' or @ref-type='boxed-text']">
-	      <xsl:variable name="rid" select="@rid"/>
-	      <xsl:if test="not(preceding::xref[@rid=$rid])">        
-	        <xsl:apply-templates select="//*[@id=$rid]" mode="testing"/>
-	      </xsl:if>
-	    </xsl:for-each>
+    <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group']">
+      <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
+        <xsl:variable name="rid" select="@rid"/>
+        <xsl:if test="not(preceding::xref[@rid = $rid])">
+          <xsl:apply-templates select="//*[@id = $rid][@position != 'anchor']" mode="testing"/>
+        </xsl:if>
+      </xsl:for-each>
     </xsl:if>
   </xsl:template>
 
@@ -1304,7 +1697,7 @@
         </span>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:variable name="string">
+        <!--<xsl:variable name="string">
           <xsl:choose>
             <xsl:when test="preceding-sibling::text()[string-length(normalize-space(.)) > 1]">
               <xsl:value-of select="preceding-sibling::text()[string-length(normalize-space(.)) > 1][1]"/>
@@ -1314,7 +1707,7 @@
             </xsl:otherwise>
           </xsl:choose>
         </xsl:variable>
-        <xsl:variable name="end" select="substring($string, string-length($string),1)"/>
+        <xsl:variable name="end" select="substring($string, string-length($string), 1)"/>
         <xsl:variable name="orstring">
           <xsl:choose>
             <xsl:when test="following-sibling::text()[string-length(normalize-space(.)) > 1]">
@@ -1325,25 +1718,25 @@
             </xsl:otherwise>
           </xsl:choose>
         </xsl:variable>
-        <xsl:variable name="start" select="substring($orstring, 1,1)"/>
+        <xsl:variable name="start" select="substring($orstring, 1, 1)"/>-->
         <a>
-          <xsl:attribute name="class"> 
-             <xsl:value-of select="concat('xref-', ./@ref-type)"/>     
-             <xsl:choose>
-               <xsl:when test="($end='[' and $start=']') or ($end='(' and $start=')')"/>
-               <xsl:when test="number(.)=number(.)">
-                 <xsl:text> super</xsl:text>
-               </xsl:when>
-             </xsl:choose>
-          </xsl:attribute>
+          <!--<xsl:attribute name="class">
+            <xsl:value-of select="concat('xref-', ./@ref-type)"/>
+            <xsl:choose>
+              <xsl:when test="($end = '[' and $start = ']') or ($end = '(' and $start = ')')"/>
+              <xsl:when test="number(.) = number(.)">
+                <xsl:text> super</xsl:text>
+              </xsl:when>
+            </xsl:choose>
+          </xsl:attribute>-->
           <xsl:attribute name="href">
             <!-- If xref has multiple elements in rid, then the link should points to 1st -->
             <xsl:choose>
               <xsl:when test="contains(@rid, ' ')">
-                <xsl:value-of select="concat('#',substring-before(@rid, ' '))"/>
+                <xsl:value-of select="concat('#', substring-before(@rid, ' '))"/>
               </xsl:when>
               <xsl:otherwise>
-                <xsl:value-of select="concat('#',@rid)"/>
+                <xsl:value-of select="concat('#', @rid)"/>
               </xsl:otherwise>
             </xsl:choose>
           </xsl:attribute>
@@ -1352,43 +1745,43 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
-  <xsl:template match="text()[string-length(.)=1]
-    [preceding-sibling::*[1][self::xref][number(.)=number(.)]]
-    [following-sibling::*[1][self::xref][number(.)=number(.)]]" 
-    mode="testing">
+
+  <xsl:template match="
+      text()[string-length(.) = 1]
+      [preceding-sibling::*[1][self::xref][number(.) = number(.)]]
+      [following-sibling::*[1][self::xref][number(.) = number(.)]]" mode="testing">
     <xsl:variable name="string">
       <xsl:choose>
         <xsl:when test="preceding-sibling::text()[string-length(normalize-space(.)) > 1]">
           <xsl:value-of select="preceding-sibling::text()[string-length(normalize-space(.)) > 1][1]"/>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:value-of select="preceding-sibling::text()[position()=1]"/>
+          <xsl:value-of select="preceding-sibling::text()[position() = 1]"/>
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
-    <xsl:variable name="end" select="substring($string, string-length($string),1)"/>
+    <xsl:variable name="end" select="substring($string, string-length($string), 1)"/>
     <xsl:variable name="orstring">
       <xsl:choose>
         <xsl:when test="following-sibling::text()[string-length(normalize-space(.)) > 1]">
           <xsl:value-of select="following-sibling::text()[string-length(normalize-space(.)) > 1][1]"/>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:value-of select="following-sibling::text()[position()=last()]"/>
+          <xsl:value-of select="following-sibling::text()[position() = last()]"/>
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
-    <xsl:variable name="start" select="substring($orstring, 1,1)"/>
+    <xsl:variable name="start" select="substring($orstring, 1, 1)"/>
     <xsl:choose>
-      <xsl:when test="($end='[' and $start=']') or ($end='(' and $start=')')">
-        <xsl:copy-of select="."/>        
+      <xsl:when test="($end = '[' and $start = ']') or ($end = '(' and $start = ')')">
+        <xsl:copy-of select="."/>
       </xsl:when>
       <xsl:otherwise>
         <sup>
           <xsl:copy-of select="."/>
         </sup>
       </xsl:otherwise>
-    </xsl:choose>     
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template match="table-wrap" mode="testing">
@@ -1405,7 +1798,7 @@
   <xsl:template match="boxed-text" mode="testing">
     <!-- For the citation links, take the id from the boxed-text -->
     <xsl:choose>
-      <xsl:when test="child::object-id[@pub-id-type='doi']/text()!=''">
+      <xsl:when test="child::object-id[@pub-id-type = 'doi']/text() != ''">
         <div class="boxed-text">
           <xsl:attribute name="id">
             <xsl:value-of select="@id"/>
@@ -1432,33 +1825,44 @@
     <xsl:variable name="id">
       <xsl:value-of select="@id"/>
     </xsl:variable>
-    <xsl:variable name="graphic-type">
-      <xsl:choose>
-        <xsl:when test="substring-after(child::graphic/@xlink:href, '.') = 'gif'">
-          <xsl:value-of select="'animation'"/>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:value-of select="'graphic'"/>
-        </xsl:otherwise>
-      </xsl:choose>
-    </xsl:variable>
-    <xsl:variable name="filename" select="substring-before(concat(child::graphic/@xlink:href, '.'), '.')"/>
-    <xsl:variable name="graphics" select="concat($filebase,'image/',$filename)"/>
     <div id="{$id}" class="fig-inline-img-set">
-      <div class="elife-fig-image-caption-wrapper">	      
+      <div class="elife-fig-image-caption-wrapper">
         <div>
-	        <xsl:attribute name="class">
-		        <xsl:text>fig-expansion</xsl:text>
-		        <xsl:if test="number(substring-after($id, 'F')) mod 2 = 0">
-		          <xsl:text> even</xsl:text>
-		        </xsl:if>
-		      </xsl:attribute>
-          <!--<div class="fig-inline-img">
-            <img data-img="[graphic-{$filename}-small]" src="{concat($graphics, '-500.jpg')}" class="figure-expand" alt="{$caption}"/>
-          </div>-->
-          <a href="{concat($graphics,'.jpg')}" target="_blank" class="figure-expand" title="{$caption} - Click to open full size">
-            <img data-img="[graphic-{$filename}-medium]" src="{concat($graphics, '-700.jpg')}" alt="{$caption}"/>
-          </a>
+          <xsl:attribute name="class">
+            <xsl:text>fig-expansion</xsl:text>
+            <xsl:if test="number(substring-after($id, 'F')) mod 2 = 0">
+              <xsl:text> even</xsl:text>
+            </xsl:if>
+          </xsl:attribute>
+          <xsl:for-each select="child::graphic">
+            <xsl:variable name="filename" select="substring-before(concat(@xlink:href, '.'), '.')"/>
+            <xsl:variable name="graphics">
+              <xsl:choose>
+                <xsl:when test="$emsid">
+                  <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select="concat($filebase,'image/',$filename)"/>                  
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:variable>
+            <a target="_blank" class="figure-expand" title="{$caption} - Click to open full size">
+              <xsl:choose>
+                <xsl:when test="$emsid">
+                  <xsl:attribute name="href">
+                    <xsl:value-of select="$graphics"/>
+                  </xsl:attribute>
+                  <img data-img="[graphic-{$filename}-medium]" src="{$graphics}" alt="{$caption}"/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:attribute name="href">
+                    <xsl:value-of select="concat($graphics,'.jpg')"/>
+                  </xsl:attribute>
+                  <img data-img="[graphic-{$filename}-medium]" src="{concat($graphics, '-700.jpg')}" alt="{$caption}"/>             
+                </xsl:otherwise>
+              </xsl:choose>              
+            </a>
+          </xsl:for-each>
         </div>
         <xsl:apply-templates/>
       </div>
@@ -1502,46 +1906,22 @@
   </xsl:template>
 
   <xsl:template match="media" mode="testing">
-    <xsl:choose>
-      <xsl:when test="@mimetype != 'video'">
-        <xsl:variable name="media-download-href"><xsl:value-of select="concat($filebase, 'media/', @xlink:href)"/></xsl:variable>
-        <!-- if mimetype is application -->
-        <span class="inline-linked-media-wrapper">
-          <a href="{$media-download-href}">
-            <xsl:attribute name="download"/>
-            Download source data<span class="inline-linked-media-filename">
-              <!--[<xsl:value-of
-                select="translate(translate(preceding-sibling::label, $uppercase, $smallcase), ' ', '-')"/>media-<xsl:value-of
-                select="count(preceding::media[@mimetype = 'application']) + 1"/>.<xsl:value-of
-                select="substring-after(@xlink:href, '.')"/>]-->
-            </span>
-          </a>
+    <xsl:variable name="filename" select="substring-before(concat(@xlink:href, '.'), '.')"/>
+    <xsl:variable name="media-download-href" select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
+    <!-- if mimetype is application -->
+    <span class="inline-linked-media-wrapper">
+      <a href="{$media-download-href}">
+        <xsl:attribute name="download">
+          <xsl:value-of select="concat($filename, '.')"/>
+          <xsl:value-of select="substring-after($media-download-href, '.')"/>
+        </xsl:attribute> Download source data<span class="inline-linked-media-filename">
+          <!--[<xsl:value-of
+                            select="translate(translate(preceding-sibling::label, $uppercase, $smallcase), ' ', '-')"/>media-<xsl:value-of
+                            select="count(preceding::media[@mimetype = 'application']) + 1"/>.<xsl:value-of
+                            select="substring-after(@xlink:href, '.')"/>]-->
         </span>
-      </xsl:when>
-      <xsl:otherwise>
-        <!-- otherwise -->
-        <div class="media video-content">
-          <!-- set attribute -->
-          <xsl:attribute name="id">
-            <!-- <xsl:value-of select="concat('media-', @id)"/>-->
-            <xsl:value-of select="@id"/>
-          </xsl:attribute>
-          <div class="media-inline video-inline">
-            <div class="elife-inline-video">
-              <xsl:text> [video-</xsl:text><xsl:value-of select="@id"/><xsl:text>-inline] </xsl:text>
-
-              <div class="elife-video-links">
-                <span class="elife-video-link elife-video-link-download">
-                  <a href="[video-{@id}-download]"><xsl:attribute name="download"/>Download Video</a>
-
-                </span>
-              </div>
-            </div>
-          </div>
-          <xsl:apply-templates/>
-        </div>
-      </xsl:otherwise>
-    </xsl:choose>
+      </a>
+    </span>
   </xsl:template>
   <!-- Acknowledgement -->
 
@@ -1557,43 +1937,49 @@
         </xsl:choose>
       </h2>
       <xsl:apply-templates select="*[not(self::label or self::title)]"/>
-      <xsl:for-each select="following-sibling::fn-group/fn[@fn-type='con']">
+      <xsl:for-each select="following-sibling::fn-group/fn[@fn-type = 'con']">
         <xsl:apply-templates/>
       </xsl:for-each>
-      <xsl:if test="following-sibling::fn-group/fn[@fn-type='con'] and (//author-notes/fn[@fn-type='con'] | //author-notes/fn[@fn-type='equal'] | 
-        //contrib[@equal-contrib='yes'])">    
+      <xsl:if test="
+          following-sibling::fn-group/fn[@fn-type = 'con'] and (//author-notes/fn[@fn-type = 'con'] | //author-notes/fn[@fn-type = 'equal'] |
+          //contrib[@equal-contrib = 'yes'])">
         <div id="author-info-equal-contrib">
-          <xsl:apply-templates select="//author-notes/fn[@fn-type='con']"/>
-          <xsl:apply-templates select="//author-notes/fn[@fn-type='equal']"/>
-          <xsl:apply-templates select="//contrib[@equal-contrib='yes'][1]" mode="equal"/>
+          <xsl:apply-templates select="//author-notes/fn[@fn-type = 'con']"/>
+          <xsl:apply-templates select="//author-notes/fn[@fn-type = 'equal']"/>
+          <xsl:apply-templates select="//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
         </div>
-      </xsl:if>            
+      </xsl:if>
     </div>
     <xsl:apply-templates select="//author-notes"/>
-    <xsl:if test="not(following-sibling::fn-group/fn[@fn-type='con']) and not(//author-notes)">
-      <xsl:apply-templates select="//contrib[@equal-contrib='yes'][1]" mode="equal"/>
+    <xsl:if test="not(following-sibling::fn-group/fn[@fn-type = 'con']) and not(//author-notes)">
+      <xsl:apply-templates select="//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
+    </xsl:if>
+    <xsl:if test="//contrib/email and not(//author-notes)">
+      <xsl:call-template name="list-emails"/>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template match="back/fn-group">
-    <xsl:if test="fn[not(@fn-type='con')]">
+    <xsl:if test="fn[not(@fn-type = 'con')]">
       <h2>Notes</h2>
-      <xsl:apply-templates select="fn[not(@fn-type='con')]"/>
+      <xsl:apply-templates select="fn[not(@fn-type = 'con')]"/>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template match="back/fn-group/fn">
     <xsl:apply-templates/>
   </xsl:template>
-  
+
   <xsl:template match="back/fn-group/fn/p">
     <xsl:choose>
-      <xsl:when test="bold and not(child::text())">
-        <h3><xsl:value-of select="."/></h3>
+      <xsl:when test="bold and (not(child::text()) or not(child::text()[normalize-space(.) != '']))">
+        <h3>
+          <xsl:value-of select="bold"/>
+        </h3>
       </xsl:when>
       <xsl:otherwise>
         <p>
-          <xsl:if test="count(preceding-sibling::*)=0 or preceding-sibling::*[1][self::label]">
+          <xsl:if test="count(preceding-sibling::*) = 0 or preceding-sibling::*[1][self::label]">
             <xsl:attribute name="id">
               <xsl:value-of select="parent::fn/@id"/>
             </xsl:attribute>
@@ -1602,51 +1988,73 @@
             <span class="fn-label">
               <xsl:value-of select="preceding-sibling::label"/>
             </span>
-            <xsl:text> </xsl:text>                    
+            <xsl:text> </xsl:text>
           </xsl:if>
           <xsl:apply-templates/>
         </p>
       </xsl:otherwise>
-    </xsl:choose>    
+    </xsl:choose>
   </xsl:template>
   
+  <xsl:template name="list-emails">
+    <xsl:if test="//contrib/email">
+      <p>
+        <xsl:text>Author emails: </xsl:text>
+        <xsl:for-each select="//contrib[email]">
+          <xsl:value-of select="name/given-names"/>
+          <xsl:text> </xsl:text>
+          <xsl:value-of select="name/surname"/>
+          <xsl:text>, </xsl:text>
+          <xsl:apply-templates select="email"/>
+          <xsl:if test="position() != last()">
+            <xsl:text>; </xsl:text>
+          </xsl:if>
+        </xsl:for-each>
+      </p>
+    </xsl:if>
+  </xsl:template>
+
   <!-- author-notes -->
   <xsl:template match="author-notes">
-    <xsl:if test="fn[(@fn-type!='con' and @fn-type!='equal') or not(@fn-type)]|p|corresp">
+    <xsl:if test="fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')] | p | corresp">
       <h2 id="author-notes">Author Information</h2>
-      <xsl:apply-templates select="p|corresp"/>
-    </xsl:if>     
-    <xsl:if test="not(//back/fn-group/fn[@fn-type='con']) and (fn[@fn-type='con'] | fn[@fn-type='equal'] | //contrib[@equal-contrib='yes'])">
-      <h3>Author Contributions</h3>      
+      <xsl:apply-templates select="p | corresp | bio"/>
+      <xsl:call-template name="list-emails"/>
+    </xsl:if>
+    <xsl:if test="not(//back/fn-group/fn[@fn-type = 'con']) and (fn[@fn-type = 'con'] | fn[@fn-type = 'equal'] | //contrib[@equal-contrib = 'yes'])">
+      <h3>Author Contributions</h3>
       <div id="author-info-equal-contrib">
-        <xsl:apply-templates select="fn[@fn-type='con']"/>
-        <xsl:apply-templates select="fn[@fn-type='equal']"/>
-        <xsl:apply-templates select="//contrib[@equal-contrib='yes'][1]" mode="equal"/>
-      </div>      
-    </xsl:if> 
-    <xsl:if test="fn[@fn-type='present-address']">
+        <xsl:apply-templates select="fn[@fn-type = 'con']"/>
+        <xsl:apply-templates select="fn[@fn-type = 'equal']"/>
+        <xsl:apply-templates select="//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
+      </div>
+    </xsl:if>
+    <xsl:if test="fn[@fn-type = 'present-address']">
       <div id="author-info-additional-address">
-        <xsl:apply-templates select="fn[@fn-type='present-address'][1]"/>
+        <xsl:apply-templates select="fn[@fn-type = 'present-address'][1]"/>
       </div>
     </xsl:if>
-    <xsl:if test="fn[@fn-type='other'] | fn[@fn-type='deceased'] | fn[not(@fn-type)]">      
+    <xsl:if test="fn[not(@fn-type)] | fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]">
       <div id="author-info-other-footnotes">
-        <xsl:apply-templates select="fn[@fn-type='other']"/>
-        <xsl:apply-templates select="fn[@fn-type='deceased']"/>
-        <xsl:apply-templates select="fn[not(@fn-type)]"/>
+        <xsl:apply-templates select="fn[not(@fn-type)] | fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]"/>
       </div>
     </xsl:if>
-    <!--    <div id="author-info-contributions">
-      <xsl:apply-templates select="ancestor::article/back//fn-group[@content-type='author-contribution']"/>
-    </div>-->
+    <!--        <div id="author-info-contributions">
+            <xsl:apply-templates select="ancestor::article/back//fn-group[@content-type='author-contribution']"/>
+        </div>-->
   </xsl:template>
-  
-  <xsl:template match="fn[@fn-type='equal']">
+
+  <xsl:template match="fn[@fn-type = 'equal']">
     <xsl:variable name="contributeid" select="@id"/>
     <section class="equal-contrib">
-      <p><xsl:text>The following authors contributed equally: </xsl:text></p>    
+      <p>
+        <xsl:if test="//contrib[@equal-contrib and @equal-contrib != 'no']">
+          <sup>#</sup>
+        </xsl:if>
+        <xsl:text> The following authors contributed equally: </xsl:text>
+      </p>
       <ul class="equal-contrib-list">
-        <xsl:for-each select="../../contrib-group/contrib/xref[@rid=$contributeid]">
+        <xsl:for-each select="../../contrib-group/contrib/xref[@rid = $contributeid]">
           <li class="equal-contributor">
             <xsl:value-of select="../name/given-names"/>
             <xsl:text> </xsl:text>
@@ -1656,13 +2064,18 @@
       </ul>
     </section>
   </xsl:template>
-  
+
   <xsl:template match="contrib" mode="equal">
     <xsl:variable name="contributeid" select="@id"/>
     <section class="equal-contrib">
-      <p><xsl:text>The following authors contributed equally: </xsl:text></p>    
+      <p>
+        <xsl:if test="//contrib[@equal-contrib and @equal-contrib != 'no']">
+          <sup>#</sup>
+        </xsl:if>
+        <xsl:text> The following authors contributed equally: </xsl:text>
+      </p>
       <ul class="equal-contrib-list">
-        <xsl:for-each select="ancestor::contrib-group/contrib[@equal-contrib='yes']">
+        <xsl:for-each select="ancestor::contrib-group/contrib[@equal-contrib and @equal-contrib != 'no']">
           <li class="equal-contributor">
             <xsl:value-of select="name/given-names"/>
             <xsl:text> </xsl:text>
@@ -1672,45 +2085,52 @@
       </ul>
     </section>
   </xsl:template>
-  
-  <xsl:template match="fn-group[@content-type='author-contribution']">
+
+  <xsl:template match="fn-group[@content-type = 'author-contribution']">
     <ul class="fn-con">
       <xsl:apply-templates/>
     </ul>
   </xsl:template>
-  
-  <xsl:template match="fn-group[@content-type='author-contribution']/fn">
+
+  <xsl:template match="fn-group[@content-type = 'author-contribution']/fn">
     <li>
       <xsl:apply-templates/>
     </li>
   </xsl:template>
-  
-  <xsl:template match="fn-group[@content-type='author-contribution']/fn/p">
+
+  <xsl:template match="fn-group[@content-type = 'author-contribution']/fn/p">
     <xsl:apply-templates/>
   </xsl:template>
-  
-  <xsl:template match="author-notes/fn[@fn-type='con']/p">
+
+  <xsl:template match="author-notes/fn[@fn-type = 'con']/p">
     <xsl:apply-templates/>
   </xsl:template>
-  
-  <xsl:template match="author-notes/fn[@fn-type='other'] | author-notes/fn[@fn-type='deceased'] | author-notes/fn[not(@fn-type)]">
+
+  <xsl:template match="author-notes/fn[not(@fn-type)] | author-notes/fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]">
     <div class="foot-note" id="{@id}">
       <xsl:apply-templates/>
     </div>
   </xsl:template>
-  
-  <xsl:template match="author-notes/fn[@fn-type='other']/p | author-notes/fn[@fn-type='deceased']/p">
+
+  <xsl:template match="author-notes/fn[not(@fn-type)]/p | author-notes/fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]/p">
+    <xsl:variable name="count" select="count(parent::fn/preceding-sibling::fn[not(@fn-type)] | 
+      preceding-sibling::fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]) + 1"/>
     <p>
+      <xsl:call-template name="get-symbol">
+        <xsl:with-param name="count" select="$count"/>
+        <xsl:with-param name="current" select="1"/>
+      </xsl:call-template>
+      <xsl:text> </xsl:text>
       <xsl:apply-templates/>
     </p>
   </xsl:template>
-  
-  <xsl:template match="author-notes/fn[not(@fn-type)]/p">
+
+  <!--<xsl:template match="author-notes/fn[not(@fn-type)]/p">
     <xsl:variable name="id" select="parent::fn/@id"/>
     <p>
-      <xsl:for-each select="//contrib[xref[@rid=$id]]">
-        <xsl:variable name="count" select="count(//contrib[xref[@rid=$id]])"/>
-        <xsl:if test="$count &gt; 1 and position()=last()">
+      <xsl:for-each select="//contrib[xref[@rid = $id]]">
+        <xsl:variable name="count" select="count(//contrib[xref[@rid = $id]])"/>
+        <xsl:if test="$count &gt; 1 and position() = last()">
           <xsl:text> and </xsl:text>
         </xsl:if>
         <xsl:choose>
@@ -1722,7 +2142,7 @@
           </xsl:otherwise>
         </xsl:choose>
         <xsl:choose>
-          <xsl:when test="position()=last()">
+          <xsl:when test="position() = last()">
             <xsl:text>: </xsl:text>
           </xsl:when>
           <xsl:when test="$count &gt; 2">
@@ -1732,15 +2152,22 @@
       </xsl:for-each>
       <xsl:apply-templates/>
     </p>
-  </xsl:template>
-  
+  </xsl:template>-->
+
   <xsl:template match="author-notes/corresp">
-    <p class="corresp">
+    <p class="corresp" id="{@id}">
+      <xsl:if test="$emsid">
+        <sup>&#9993;</sup>
+        <xsl:text> </xsl:text>
+      </xsl:if>      
+      <xsl:if test="count(*) &lt; 2">
+        <xsl:text>Correspondence: </xsl:text>
+      </xsl:if>
       <xsl:apply-templates/>
     </p>
   </xsl:template>
-  
-  <xsl:template match="email[ancestor::corresp or ancestor::author-notes]">
+
+  <xsl:template match="email[ancestor::corresp or ancestor::author-notes or ancestor::contrib]">
     <xsl:variable name="email">
       <xsl:call-template name="reverse">
         <xsl:with-param name="rest" select="."/>
@@ -1748,17 +2175,17 @@
     </xsl:variable>
     <a href="mailto:dev@null" data-email="{$email}" class="oemail">
       <xsl:value-of select="$email"/>
-    </a>    
-  </xsl:template>  
-  
+    </a>
+  </xsl:template>
+
   <xsl:template name="reverse">
     <xsl:param name="str"/>
     <xsl:param name="rest"/>
     <xsl:choose>
       <xsl:when test="$rest != ''">
         <xsl:call-template name="reverse">
-          <xsl:with-param name="str" select="concat($str,substring($rest,string-length($rest),1))"/>
-          <xsl:with-param name="rest" select="substring($rest,1,string-length($rest)-1)"/>
+          <xsl:with-param name="str" select="concat($str, substring($rest, string-length($rest), 1))"/>
+          <xsl:with-param name="rest" select="substring($rest, 1, string-length($rest) - 1)"/>
         </xsl:call-template>
       </xsl:when>
       <xsl:otherwise>
@@ -1767,33 +2194,39 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:template match="author-notes/fn[@fn-type='present-address']">
+  <xsl:template match="author-notes/fn[@fn-type = 'present-address']">
     <h3>Present Address</h3>
     <xsl:choose>
-      <xsl:when test="following-sibling::fn[@fn-type='present-address']">
+      <xsl:when test="following-sibling::fn[@fn-type = 'present-address']">
         <ul class="additional-address-items">
-          <xsl:for-each select="parent::author-notes/fn[@fn-type='present-address']">
-            <li><xsl:apply-templates/></li>
+          <xsl:for-each select="parent::author-notes/fn[@fn-type = 'present-address']">
+            <li>
+              <xsl:apply-templates/>
+            </li>
           </xsl:for-each>
         </ul>
       </xsl:when>
       <xsl:otherwise>
-        <p><xsl:apply-templates/></p>
+        <p>
+          <xsl:apply-templates/>
+        </p>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
-  <xsl:template match="author-notes/fn[@fn-type='present-address']/p">
+
+  <xsl:template match="author-notes/fn[@fn-type = 'present-address']/p">
     <xsl:variable name="id" select="parent::fn/@id"/>
-    <xsl:for-each select="//xref[@rid=$id]">
+    <xsl:for-each select="//xref[@rid = $id]">
       <xsl:if test="parent::contrib/name">
-        <strong><xsl:value-of select="concat(parent::contrib/name/given-names, ' ', parent::contrib/name/surname, ': ')"/></strong>
-      </xsl:if>      
+        <strong>
+          <xsl:value-of select="concat(parent::contrib/name/given-names, ' ', parent::contrib/name/surname, ': ')"/>
+        </strong>
+      </xsl:if>
     </xsl:for-each>
-    <xsl:apply-templates></xsl:apply-templates>
+    <xsl:apply-templates/>
   </xsl:template>
-  
-  <xsl:template match="author-notes/fn[@fn-type='present-address']/p/text()">
+
+  <xsl:template match="author-notes/fn[@fn-type = 'present-address']/p/text()">
     <xsl:choose>
       <xsl:when test="starts-with(., 'Present address:')">
         <xsl:value-of select="substring-after(., 'Present address:')"/>
@@ -1807,8 +2240,8 @@
   <!-- START Reference Handling -->
 
   <xsl:template match="ref-list">
-    <div id="references">
-      <h2>
+    <div id="ref-list">
+      <h2 id="ref-listtitle">
         <xsl:apply-templates select="label"/>
         <xsl:choose>
           <xsl:when test="title">
@@ -1817,7 +2250,7 @@
           <xsl:otherwise>References</xsl:otherwise>
         </xsl:choose>
       </h2>
-      <ol class="elife-reflinks-links">
+      <ol class="elife-reflinks-links" id="reference-list">
         <xsl:apply-templates select="*[not(self::label or self::title)]"/>
       </ol>
     </div>
@@ -1828,6 +2261,55 @@
       <xsl:apply-templates/>
     </li>
   </xsl:template>
+  
+  <xsl:template match="ref//person-group" mode="list-ref-people">  
+    <xsl:for-each select="name | collab">
+      <xsl:if test="position() != 1">
+        <xsl:text>, </xsl:text>
+      </xsl:if>
+      <xsl:choose>
+        <xsl:when test="name() = 'name'">
+          <xsl:variable name="givenname" select="given-names"/>
+          <xsl:variable name="surname" select="surname"/>
+          <xsl:variable name="suffix" select="suffix"/>
+          <xsl:variable name="fullname">
+            <xsl:value-of select="concat($surname, ' ', $givenname)"/>
+          </xsl:variable>
+          <span class="reflink-author">
+            <xsl:value-of select="$fullname"/>
+          </span>
+        </xsl:when>
+        <xsl:when test="name() = 'collab'">
+          <span class="reflink-author">
+            <span class="nlm-collab">
+              <xsl:apply-templates/>
+            </span>
+          </span>
+        </xsl:when>
+      </xsl:choose>
+    </xsl:for-each>
+    <xsl:for-each select="collab">
+      <xsl:value-of select="."/>
+    </xsl:for-each>
+    <xsl:choose>
+      <xsl:when test="@person-group-type = 'editor'">
+        <xsl:if test="etal">
+          <xsl:text>, et al</xsl:text>
+        </xsl:if>
+        <xsl:text>, editor</xsl:text>
+        <xsl:if test="count(child::*[self::name | self::collab | self::etal]) > 1">
+          <xsl:text>s</xsl:text>
+        </xsl:if>
+        <xsl:text>. </xsl:text>
+      </xsl:when>
+      <xsl:when test="etal">
+        <xsl:text>, et al. </xsl:text>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:text>. </xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
 
   <xsl:template match="ref/element-citation">
     <xsl:variable name="title">
@@ -1837,9 +2319,6 @@
         </xsl:when>
         <xsl:when test="child::source">
           <xsl:apply-templates select="child::source/node()"/>
-        </xsl:when>
-        <xsl:when test="child::comment">
-          <xsl:apply-templates select="child::comment/node()"/>
         </xsl:when>
       </xsl:choose>
     </xsl:variable>
@@ -1856,84 +2335,34 @@
         </xsl:when>
       </xsl:choose>
     </xsl:variable>
-
+    
     <div class="reflink-main">
-
+      <xsl:if test="label">
+        <xsl:value-of select="concat(label, ' ')"/>
+      </xsl:if>
       <!-- call authors template -->
 
-      <xsl:if test="person-group[@person-group-type='author']|collab">
+      <xsl:if test="person-group[@person-group-type = 'author'] | collab">
         <span class="authors">
-          <xsl:for-each select="person-group[@person-group-type='author']">
-            <xsl:for-each select="name | collab">
-              <xsl:if test="position() != 1">
-                <xsl:text>, </xsl:text>
-              </xsl:if>
-              <xsl:choose>
-                <xsl:when test="name() = 'name'">
-                  <xsl:variable name="givenname" select="given-names"/>
-                  <xsl:variable name="surname" select="surname"/>
-                  <xsl:variable name="suffix" select="suffix"/>
-                  <xsl:variable name="fullname">
-                    <!--<xsl:choose>
-                      <xsl:when test="string($suffix) != ''">
-                        <xsl:value-of select="concat($surname, ' ', $givenname, ' ', $suffix)"/>
-                      </xsl:when>
-                      <xsl:otherwise>
-                        <xsl:value-of select="concat($surname, ' ', $givenname)"/>
-                      </xsl:otherwise>
-                    </xsl:choose>-->
-                    <xsl:value-of select="concat($surname, ' ', $givenname)"/>
-                  </xsl:variable>
-                  <!--<xsl:variable name="hrefvalue" 
-                    select="concat('http://scholar.google.com/scholar?q=&quot;author:', $fullname, '&quot;')"/>
-                  <span class="elife-reflink-author">
-                    <a href="{$hrefvalue}" target="_blank">
-                      <xsl:value-of select="$fullname"/>
-                    </a>
-                  </span>-->
-                  <span class="reflink-author">
-                    <xsl:value-of select="$fullname"/>
-                  </span>
-                </xsl:when>
-                <xsl:when test="name() = 'collab'">
-                  <span class="reflink-author">
-                    <span class="nlm-collab">
-                      <xsl:apply-templates/>
-                    </span>
-                  </span>
-                </xsl:when>
-              </xsl:choose>
-            </xsl:for-each>
-            <xsl:for-each select="collab">
-              <xsl:value-of select="."/>
-            </xsl:for-each>
-            <xsl:choose>
-              <xsl:when test="etal">
-                <xsl:text>, et al. </xsl:text>
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:text>. </xsl:text>
-              </xsl:otherwise>
-            </xsl:choose>
-          </xsl:for-each>
+          <xsl:apply-templates select="person-group[@person-group-type = 'author']" mode="list-ref-people"/>
         </span>
       </xsl:if>
-      
+
       <span class="elife-reflink-title">
-      	<span class="nlm-{$title-type}">
-      		<xsl:copy-of select="$title"/>
-      	</span>
-        <xsl:if test="not('.'=substring($title, string-length($title) - string-length('.') +1))">
+        <span class="nlm-{$title-type}">
+          <xsl:copy-of select="$title"/>
+        </span>
+        <xsl:if test="not('.' = substring($title, string-length($title) - string-length('.') + 1))">
           <xsl:text>.</xsl:text>
         </xsl:if>
         <xsl:text> </xsl:text>
       </span>
 
       <!-- move all other elements into details div
-        and comma separate
-      -->
+                and comma separate
+            -->
       <xsl:variable name="class">
-        <xsl:if test="@publication-type">
+        <xsl:if test="@publication-type = 'journal'">
           <xsl:value-of select="'elife-reflink-details-journal'"/>
         </xsl:if>
       </xsl:variable>
@@ -1950,12 +2379,12 @@
         <xsl:if test="child::year">
           <xsl:value-of select="'year|'"/>
         </xsl:if>
-      	<xsl:if test="child::month">
-      		<xsl:value-of select="'month|'"/>
-      	</xsl:if>
-      	<xsl:if test="child::day">
-      		<xsl:value-of select="'day|'"/>
-      	</xsl:if>
+        <xsl:if test="child::month">
+          <xsl:value-of select="'month|'"/>
+        </xsl:if>
+        <xsl:if test="child::day">
+          <xsl:value-of select="'day|'"/>
+        </xsl:if>
         <xsl:if test="child::volume">
           <xsl:value-of select="'volume|'"/>
         </xsl:if>
@@ -1968,11 +2397,22 @@
         <xsl:if test="child::lpage">
           <xsl:value-of select="'lpage|'"/>
         </xsl:if>
+        <xsl:if test="child::person-group[@person-group-type = 'editor'] and @publication-type='book'">
+          <xsl:value-of select="'book-editor|'"/>
+        </xsl:if>
       </xsl:variable>
+      <xsl:if test="contains($includes, 'book-editor|')">
+        <span>
+          <xsl:text>In: </xsl:text>
+          <xsl:apply-templates select="person-group[@person-group-type = 'editor']" mode="list-ref-people"/>
+        </span>
+      </xsl:if>
       <xsl:if test="contains($includes, 'source|')">
         <span>
           <xsl:if test="$class != ''">
-            <xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
+            <xsl:attribute name="class">
+              <xsl:value-of select="$class"/>
+            </xsl:attribute>
           </xsl:if>
           <span class="nlm-source">
             <xsl:apply-templates select="child::source/node()"/>
@@ -2007,22 +2447,22 @@
           <xsl:apply-templates select="child::year/node()"/>
         </span>
       </xsl:if>
-    	<xsl:if test="contains($includes, 'month|')">
-    		<xsl:if test="not(starts-with($includes, 'month|'))">
-    			<xsl:text> </xsl:text>
-    		</xsl:if>
-    		<span class="reflink-details-month">
-    			<xsl:apply-templates select="child::month/node()"/>
-    		</span>
-    	</xsl:if>
-    	<xsl:if test="contains($includes, 'day|')">
-    		<xsl:if test="not(starts-with($includes, 'day|'))">
-    			<xsl:text> </xsl:text>
-    		</xsl:if>
-    		<span class="elife-reflink-details-year">
-    			<xsl:apply-templates select="child::day/node()"/>
-    		</span>
-    	</xsl:if>
+      <xsl:if test="contains($includes, 'month|')">
+        <xsl:if test="not(starts-with($includes, 'month|'))">
+          <xsl:text> </xsl:text>
+        </xsl:if>
+        <span class="reflink-details-month">
+          <xsl:apply-templates select="child::month/node()"/>
+        </span>
+      </xsl:if>
+      <xsl:if test="contains($includes, 'day|')">
+        <xsl:if test="not(starts-with($includes, 'day|'))">
+          <xsl:text> </xsl:text>
+        </xsl:if>
+        <span class="elife-reflink-details-year">
+          <xsl:apply-templates select="child::day/node()"/>
+        </span>
+      </xsl:if>
       <xsl:if test="contains($includes, 'volume|')">
         <xsl:if test="not(starts-with($includes, 'volume|'))">
           <xsl:text>; </xsl:text>
@@ -2052,56 +2492,56 @@
           </xsl:if>
         </span>
       </xsl:if>
-    	<xsl:apply-templates select="pub-id[@pub-id-type='doi']" mode="idlinks"/>
-    	<xsl:apply-templates select="pub-id[not(@pub-id-type='doi')]" mode="idlinks"/>
+      <xsl:apply-templates select="pub-id[@pub-id-type = 'doi']" mode="idlinks"/>
+      <xsl:apply-templates select="pub-id[not(@pub-id-type = 'doi')]" mode="idlinks"/>
       <xsl:apply-templates/>
     </div>
   </xsl:template>
-	
-	<xsl:template match="pub-id" mode="idlinks">
-		<xsl:choose>
-			<xsl:when test="@pub-id-type='pmid'">
-				<xsl:text> </xsl:text>
-				<a href="http://europepmc.org/abstract/MED/{.}" target="_blank">
-					<xsl:text>[Europe PMC Abstract]</xsl:text>
-				</a>
-			</xsl:when>
-			<xsl:when test="@pub-id-type='doi'">
-				<span class="elife-reflink-doi-cited-wrapper">
-					<xsl:text> </xsl:text>
-					<span class="elife-reflink-details-doi">
-						<a href="https://doi.org/{.}" target="_blank">
-							<xsl:text>https://doi.org/</xsl:text>
-							<xsl:value-of select="."/>
-						</a>
-					</span>
-				</span>
-			</xsl:when>
-			<xsl:when test="@pub-id-type='pmcid'">
-				<xsl:text> </xsl:text>
-				<a href="http://europepmc.org/articles/{.}" target="_blank">
-					<xsl:text>[Europe PMC Full Text]</xsl:text>
-				</a>
-			</xsl:when>
-			<xsl:when test="@pub-id-type='PPR'">
-				<xsl:text> </xsl:text>
-				<a href="http://europepmc.org/preprints/{.}" target="_blank">
-					<xsl:text>[Europe PMC Preprint]</xsl:text>
-				</a>
-			</xsl:when>
-			<xsl:when test="@pub-id-type='AGR'">
-				<xsl:text> </xsl:text>
-				<a href="http://europepmc.org/abstract/AGR/{.}" target="_blank">
-					<xsl:text>[Europe PMC Abstract]</xsl:text>
-				</a>
-			</xsl:when>
-		</xsl:choose>		
-	</xsl:template>
+
+  <xsl:template match="pub-id" mode="idlinks">
+    <xsl:choose>
+      <xsl:when test="@pub-id-type = 'pmid'">
+        <xsl:text> </xsl:text>
+        <a href="http://europepmc.org/abstract/MED/{.}" target="_blank">
+          <xsl:text>[Europe PMC Abstract]</xsl:text>
+        </a>
+      </xsl:when>
+      <xsl:when test="@pub-id-type = 'doi'">
+        <span class="elife-reflink-doi-cited-wrapper">
+          <xsl:text> </xsl:text>
+          <span class="elife-reflink-details-doi">
+            <a href="https://doi.org/{.}" target="_blank">
+              <xsl:text>https://doi.org/</xsl:text>
+              <xsl:value-of select="."/>
+            </a>
+          </span>
+        </span>
+      </xsl:when>
+      <xsl:when test="@pub-id-type = 'pmcid'">
+        <xsl:text> </xsl:text>
+        <a href="http://europepmc.org/articles/{.}" target="_blank">
+          <xsl:text>[Europe PMC Full Text]</xsl:text>
+        </a>
+      </xsl:when>
+      <xsl:when test="@pub-id-type = 'PPR'">
+        <xsl:text> </xsl:text>
+        <a href="http://europepmc.org/preprints/{.}" target="_blank">
+          <xsl:text>[Europe PMC Preprint]</xsl:text>
+        </a>
+      </xsl:when>
+      <xsl:when test="@pub-id-type = 'AGR'">
+        <xsl:text> </xsl:text>
+        <a href="http://europepmc.org/abstract/AGR/{.}" target="_blank">
+          <xsl:text>[Europe PMC Abstract]</xsl:text>
+        </a>
+      </xsl:when>
+    </xsl:choose>
+  </xsl:template>
 
   <!-- START video handling -->
 
   <xsl:template match="media">
-    <xsl:variable name="data-doi" select="child::object-id[@pub-id-type='doi']/text()"/>
+    <xsl:variable name="data-doi" select="child::object-id[@pub-id-type = 'doi']/text()"/>
     <xsl:choose>
       <xsl:when test="@mimetype = 'video'">
         <div class="media" data-doi="{$data-doi}">
@@ -2137,31 +2577,31 @@
   <!-- START sub-article -->
 
   <xsl:template match="sub-article">
-    <xsl:variable name="data-doi" select="child::front-stub/article-id[@pub-id-type='doi']/text()"/>
+    <xsl:variable name="data-doi" select="child::front-stub/article-id[@pub-id-type = 'doi']/text()"/>
     <div data-doi="{$data-doi}">
       <!-- determine the attribute -->
       <xsl:attribute name="id">
-        <xsl:if test="@article-type='article-commentary'">
+        <xsl:if test="@article-type = 'article-commentary'">
           <xsl:text>decision-letter</xsl:text>
         </xsl:if>
-        <xsl:if test="@article-type='reply'">
+        <xsl:if test="@article-type = 'reply'">
           <xsl:text>author-response</xsl:text>
         </xsl:if>
       </xsl:attribute>
       <xsl:apply-templates/>
 
     </div>
-    <div class="panel-separator"></div>
+    <div class="panel-separator"/>
   </xsl:template>
 
   <!-- sub-article body -->
   <xsl:template match="sub-article/body">
     <div>
       <xsl:attribute name="class">
-        <xsl:if test="../@article-type='article-commentary'">
+        <xsl:if test="../@article-type = 'article-commentary'">
           <xsl:text>elife-article-decision-letter</xsl:text>
         </xsl:if>
-        <xsl:if test="../@article-type='reply'">
+        <xsl:if test="../@article-type = 'reply'">
           <xsl:text>elife-article-author-response</xsl:text>
         </xsl:if>
       </xsl:attribute>
@@ -2171,10 +2611,10 @@
     </div>
     <div>
       <xsl:attribute name="class">
-        <xsl:if test="../@article-type='article-commentary'">
+        <xsl:if test="../@article-type = 'article-commentary'">
           <xsl:text>elife-article-decision-letter-doi</xsl:text>
         </xsl:if>
-        <xsl:if test="../@article-type='reply'">
+        <xsl:if test="../@article-type = 'reply'">
           <xsl:text>elife-article-author-response-doi</xsl:text>
         </xsl:if>
       </xsl:attribute>
@@ -2208,7 +2648,7 @@
     </div>
   </xsl:template>
 
-  <xsl:template match="contrib[@contrib-type='editor']/name/given-names | contrib[@contrib-type='editor']/name/surname">
+  <xsl:template match="contrib[@contrib-type = 'editor']/name/given-names | contrib[@contrib-type = 'editor']/name/surname">
     <span class="nlm-given-names">
       <xsl:value-of select="given-names"/>
     </span>
@@ -2225,12 +2665,13 @@
     <xsl:text>, </xsl:text>
   </xsl:template>
 
-  <xsl:template match="contrib[@contrib-type='editor']//aff">
+  <xsl:template match="contrib[@contrib-type = 'editor']//aff">
     <xsl:apply-templates select="child::*"/>
   </xsl:template>
 
-  <xsl:template match="contrib[@contrib-type='editor']//role | contrib[@contrib-type='editor']//institution | 
-    contrib[@contrib-type='editor']//country">
+  <xsl:template match="
+      contrib[@contrib-type = 'editor']//role | contrib[@contrib-type = 'editor']//institution |
+      contrib[@contrib-type = 'editor']//country">
     <span class="nlm-{name()}">
       <xsl:apply-templates/>
     </span>
@@ -2243,7 +2684,7 @@
 
   <!-- box text -->
   <xsl:template match="boxed-text">
-    <xsl:variable name="data-doi" select="child::object-id[@pub-id-type='doi']/text()"/>
+    <xsl:variable name="data-doi" select="child::object-id[@pub-id-type = 'doi']/text()"/>
     <xsl:choose>
       <xsl:when test="$data-doi != ''">
         <div class="boxed-text">
@@ -2260,44 +2701,56 @@
   </xsl:template>
 
   <xsl:template match="inline-graphic">
-    <xsl:variable name="ig-variant">
+    <xsl:variable name="filename" select="substring-before(concat(@xlink:href, '.'), '.')"/>
+    <xsl:variable name="graphics">
       <xsl:choose>
-        <xsl:when test="//article/@article-type = 'research-article'">
-          <xsl:value-of select="'research-'"/>
+        <xsl:when test="$emsid">
+          <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:value-of select="'nonresearch-'"/>
-        </xsl:otherwise>
-      </xsl:choose>
-      <xsl:choose>
-        <xsl:when test="ancestor::boxed-text">
-          <xsl:value-of select="'box'"/>
-        </xsl:when>
-        <xsl:when test="ancestor::fig">
-          <xsl:value-of select="'fig'"/>
-        </xsl:when>
-        <xsl:when test="ancestor::table-wrap">
-          <xsl:value-of select="'table'"/>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:value-of select="'other'"/>
+          <xsl:value-of select="concat($filebase,'image/',$filename,'.jpg')"/>                
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
-    [inline-graphic-<xsl:value-of select="@xlink:href"/>-<xsl:value-of select="$ig-variant"/>]
+    <a href="{$graphics}" target="_blank" class="figure-expand" title="Click to open full size">
+      <img data-img="[graphic-{$filename}-medium]" src="{$graphics}" alt="inline image"/>
+    </a>
   </xsl:template>
 
+  <xsl:template match="inline-graphic" mode="testing">
+    <xsl:variable name="filename" select="substring-before(concat(@xlink:href, '.'), '.')"/>
+    <xsl:variable name="graphics">
+      <xsl:choose>
+        <xsl:when test="$emsid">
+          <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="concat($filebase,'image/',$filename,'.jpg')"/>                
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    <a href="{$graphics}" target="_blank" class="figure-expand" title="Click to open full size">
+      <img data-img="[graphic-{$filename}-medium]" src="{$graphics}" alt="inline image"/>
+    </a>
+  </xsl:template>
+  
   <xsl:template name="appendices-main-text">
     <xsl:apply-templates select="//back/app-group/app" mode="testing"/>
   </xsl:template>
+  
+  <xsl:template match="app"/>
 
   <xsl:template match="app" mode="testing">
     <div class="section app">
       <xsl:if test="@id">
-        <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
+        <xsl:attribute name="id">
+          <xsl:value-of select="@id"/>
+        </xsl:attribute>
       </xsl:if>
       <xsl:if test="title">
-        <h3><xsl:value-of select="title"/></h3>
+        <h3>
+          <xsl:value-of select="title"/>
+        </h3>
       </xsl:if>
       <xsl:apply-templates mode="testing"/>
     </div>
@@ -2355,7 +2808,17 @@
 
   <xsl:template match="list-item">
     <li>
-      <xsl:apply-templates/>
+      <xsl:choose>
+        <xsl:when test="count(child::node()[not(normalize-space(.) = '')]) = 1 and child::node()[self::p]">
+          <xsl:attribute name="id">
+            <xsl:value-of select="child::p/@id"/>
+          </xsl:attribute>
+          <xsl:apply-templates select="child::p/child::node()"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:apply-templates/>
+        </xsl:otherwise>
+      </xsl:choose>
     </li>
   </xsl:template>
 
@@ -2378,11 +2841,11 @@
   </xsl:template>
 
   <xsl:template match="monospace">
-    <code>
+    <span class="monospace">
       <xsl:apply-templates/>
-    </code>
+    </span>
   </xsl:template>
-  
+
   <xsl:template match="preformat">
     <pre>
       <xsl:apply-templates/>
@@ -2416,20 +2879,20 @@
     <br/>
   </xsl:template>
 
-  <xsl:template match="disp-quote">
-    <xsl:text disable-output-escaping="yes">&lt;blockquote class="disp-quote"&gt;</xsl:text>
-      <xsl:apply-templates/>
-    <xsl:text disable-output-escaping="yes">&lt;/blockquote&gt;</xsl:text>
+  <xsl:template match="disp-quote | verse-group">
+    <blockquote class="{local-name(.)}">
+    <xsl:apply-templates/>
+    </blockquote>
   </xsl:template>
 
   <xsl:template match="code">
     <xsl:choose>
       <xsl:when test="@xml:space = 'preserve'">
         <pre>
-          <code>
-            <xsl:apply-templates/>
-          </code>
-        </pre>
+                    <code>
+                        <xsl:apply-templates/>
+                    </code>
+                </pre>
       </xsl:when>
       <xsl:otherwise>
         <code>
@@ -2441,29 +2904,30 @@
 
   <!-- END - general format -->
 
-  <xsl:template match="sub-article//title-group | sub-article/front-stub | fn-group[@content-type='competing-interest']/fn/p | 
-    //history//*[@publication-type='journal']/article-title">
+  <xsl:template match="
+      sub-article//title-group | sub-article/front-stub | fn-group[@content-type = 'competing-interest']/fn/p |
+      //history//*[@publication-type = 'journal']/article-title">
     <xsl:apply-templates/>
   </xsl:template>
 
-  <xsl:template match="caption | table-wrap/table | table-wrap-foot | fn | bold | italic | underline | preformat | monospace | 
-    styled-content | sub | sup | sec/title | ext-link | app/title | disp-formula | inline-formula | list | list-item | disp-quote | code" 
-    mode="testing">
+  <xsl:template match="
+      caption | table-wrap/table | table-wrap-foot | fn | bold | italic | underline | preformat | monospace |
+      styled-content | sub | sup | sec/title | ext-link | app/title | disp-formula | inline-formula | list | list-item | disp-quote | code | verse-group" mode="testing">
     <xsl:apply-templates select="."/>
   </xsl:template>
 
   <!-- nodes to remove -->
-  <xsl:template match="sec[@sec-type='supplementary-material'] | sec[@sec-type='floats-group']"/>
+  <xsl:template match="sec[@sec-type = 'supplementary-material'] | sec[@sec-type = 'floats-group']"/>
   <xsl:template match="back/fn-group/fn/label"/>
   <xsl:template match="aff/label"/>
   <xsl:template match="list-item/label"/>
   <xsl:template match="disp-formula/label"/>
   <xsl:template match="app/title"/>
-  <xsl:template match="fn-group[@content-type='competing-interest']/title"/>
+  <xsl:template match="fn-group[@content-type = 'competing-interest']/title"/>
   <xsl:template match="permissions/copyright-year | permissions/copyright-holder"/>
-  <xsl:template match="fn-group[@content-type='author-contribution']/title"/>
-  <xsl:template match="author-notes/fn[@fn-type='con']/label"/>
-  <xsl:template match="author-notes/fn[@fn-type='other']/label"/>
+  <xsl:template match="fn-group[@content-type = 'author-contribution']/title"/>
+  <xsl:template match="author-notes/fn[@fn-type = 'con']/label"/>
+  <xsl:template match="author-notes/fn[@fn-type = 'other']/label"/>
   <xsl:template match="author-notes/fn[not(@fn-type)]/label"/>
   <xsl:template match="author-notes/corresp/label"/>
   <xsl:template match="abstract/title"/>
@@ -2471,36 +2935,42 @@
   <xsl:template match="fig-group//object-id | fig-group//graphic | fig//label"/>
   <xsl:template match="ack/title"/>
   <xsl:template match="ref-list/title"/>
-  <xsl:template match="ref//label | ref//year | ref//article-title | ref//fpage | ref//volume | ref//issue | ref//source | ref//pub-id | 
-    ref//lpage | ref//comment | ref//supplement | ref//person-group[@person-group-type='editor'] | ref//edition | ref//publisher-loc | 
-    ref//publisher-name | ref//ext-link"/>
-  <xsl:template match="person-group[@person-group-type='author'] | collab"/>
+  <xsl:template match="
+      ref//label | ref//year | ref//article-title | ref//fpage | ref//volume | ref//issue | ref//source | ref//pub-id |
+      ref//lpage | ref//supplement | ref//person-group[@person-group-type = 'editor'] | ref//edition | ref//publisher-loc |
+      ref//lpage | ref//supplement | ref//edition | ref//publisher-loc |
+      ref//publisher-name"/>
+  <xsl:template match="person-group[@person-group-type = 'author'] | collab"/>
   <xsl:template match="media/label"/>
   <xsl:template match="sub-article//article-title"/>
   <xsl:template match="sub-article//article-id"/>
   <xsl:template match="object-id | table-wrap/label"/>
   <xsl:template match="funding-group//institution-wrap/institution-id"/>
   <xsl:template match="table-wrap/graphic"/>
-  <xsl:template match="author-notes/fn[@fn-type='present-address']/label"/>
-  <xsl:template match="author-notes/fn[@fn-type='deceased']/label"/>
+  <xsl:template match="author-notes/fn[@fn-type = 'present-address']/label"/>
+  <xsl:template match="author-notes/fn[@fn-type = 'deceased']/label"/>
   <xsl:template match="table-wrap-foot//fn/label"/>
 
   <xsl:template name="camel-case-word">
     <xsl:param name="text"/>
-    <xsl:value-of select="translate(substring($text, 1, 1), $smallcase, $uppercase)" />
-    <xsl:value-of select="translate(substring($text, 2, string-length($text)-1), $uppercase, $smallcase)" />
+    <xsl:value-of select="translate(substring($text, 1, 1), $smallcase, $uppercase)"/>
+    <xsl:value-of select="translate(substring($text, 2, string-length($text) - 1), $uppercase, $smallcase)"/>
   </xsl:template>
 
   <xsl:template name="citation">
-    <xsl:variable name="year"><xsl:call-template name="year"/></xsl:variable>
-    <xsl:variable name="citationid"><xsl:call-template name="citationid"/></xsl:variable>
+    <xsl:variable name="year">
+      <xsl:call-template name="year"/>
+    </xsl:variable>
+    <xsl:variable name="citationid">
+      <xsl:call-template name="citationid"/>
+    </xsl:variable>
     <xsl:value-of select="concat(//journal-meta/journal-title-group/journal-title, ' ', $year, ';', $citationid)"/>
   </xsl:template>
 
   <xsl:template name="year">
     <xsl:choose>
-      <xsl:when test="//article-meta/pub-date[@date-type='pub']/year">
-        <xsl:value-of select="//article-meta/pub-date[@date-type='pub']/year"/>
+      <xsl:when test="//article-meta/pub-date[@date-type = 'pub']/year">
+        <xsl:value-of select="//article-meta/pub-date[@date-type = 'pub']/year"/>
       </xsl:when>
       <xsl:otherwise>
         <xsl:value-of select="//article-meta/permissions/copyright-year"/>
@@ -2515,7 +2985,9 @@
           <xsl:value-of select="//article-meta/volume"/>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:variable name="year"><call-template name="year"/></xsl:variable>
+          <xsl:variable name="year">
+            <call-template name="year"/>
+          </xsl:variable>
           <xsl:value-of select="$year - 2011"/>
         </xsl:otherwise>
       </xsl:choose>
@@ -2524,17 +2996,19 @@
   </xsl:template>
 
   <xsl:template name="citationid">
-    <xsl:variable name="volume"><xsl:call-template name="volume"/></xsl:variable>
+    <xsl:variable name="volume">
+      <xsl:call-template name="volume"/>
+    </xsl:variable>
     <xsl:choose>
-      <xsl:when test="//article-meta/pub-date[@pub-type='collection']/year">
+      <xsl:when test="//article-meta/pub-date[@pub-type = 'collection']/year">
         <xsl:value-of select="concat($volume, ':', //article-meta/elocation-id)"/>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:value-of select="//article-meta/article-id[@pub-id-type='doi']"/>
+        <xsl:value-of select="//article-meta/article-id[@pub-id-type = 'doi']"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xsl:template name="supplementary-material">
     <xsl:if test="//supplementary-material[not(object-id)]">
       <div id="supplementary-material">
@@ -2542,36 +3016,36 @@
         <ul class="supplementary-material">
           <xsl:for-each select="//supplementary-material[not(object-id)]">
             <li id="{@id}">
-            <xsl:choose>
-              <xsl:when test="ext-link">
-                <a>
-                  <xsl:attribute name="href">
-                    <xsl:value-of select="concat('[', ext-link/@xlink:href, ']')"/>
-                  </xsl:attribute>
-                  <xsl:attribute name="download"/>
-                  <xsl:apply-templates/>
-                </a>
-                <xsl:for-each select="../p">
-                  <xsl:apply-templates select="."/>
-                </xsl:for-each>
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:apply-templates select="label"/>
-                <xsl:if test="caption/title">
-                  <xsl:text>: </xsl:text>
-                </xsl:if>
-                <xsl:apply-templates select="caption/title"/>
-                <xsl:apply-templates select="media"/>
-                <xsl:apply-templates select="caption/*[not(self::title)]"/>                  
-              </xsl:otherwise>
-            </xsl:choose>  
+              <xsl:choose>
+                <xsl:when test="ext-link">
+                  <a>
+                    <xsl:attribute name="href">
+                      <xsl:value-of select="concat('[', ext-link/@xlink:href, ']')"/>
+                    </xsl:attribute>
+                    <xsl:attribute name="download"/>
+                    <xsl:apply-templates/>
+                  </a>
+                  <xsl:for-each select="../p">
+                    <xsl:apply-templates select="."/>
+                  </xsl:for-each>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:apply-templates select="label"/>
+                  <xsl:if test="caption/title">
+                    <xsl:text>: </xsl:text>
+                  </xsl:if>
+                  <xsl:apply-templates select="caption/title"/>
+                  <xsl:apply-templates select="media"/>
+                  <xsl:apply-templates select="caption/*[not(self::title)]"/>
+                </xsl:otherwise>
+              </xsl:choose>
             </li>
           </xsl:for-each>
         </ul>
       </div>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template match="glossary">
     <sec id="glossary">
       <xsl:if test="not(title)">
@@ -2580,40 +3054,51 @@
       <xsl:apply-templates/>
     </sec>
   </xsl:template>
-  
+
   <xsl:template match="glossary/title">
-    <h2><xsl:value-of select="."/></h2>
+    <h2>
+      <xsl:value-of select="."/>
+    </h2>
   </xsl:template>
-  
+
   <xsl:template match="def-list">
-    <dl><xsl:apply-templates/></dl>
+    <dl>
+      <xsl:apply-templates/>
+    </dl>
   </xsl:template>
-  
+
   <xsl:template match="def-item">
     <xsl:apply-templates/>
   </xsl:template>
-  
+
   <xsl:template match="def-item/term">
-    <dt><xsl:value-of select="."/></dt>
+    <dt>
+      <xsl:value-of select="."/>
+    </dt>
   </xsl:template>
-  
+
   <xsl:template match="def">
-    <dd><xsl:apply-templates select="p/*|p/text()"/></dd>
+    <dd>
+      <xsl:apply-templates select="p/* | p/text()"/>
+    </dd>
   </xsl:template>
   
-  <xsl:template match="mml:*">
-    <xsl:element name="{local-name(.)}">
-      <xsl:apply-templates select="@*"/>
+  <xsl:template match="bio">
+    <xsl:apply-templates/>
+  </xsl:template>
+  
+  <xsl:template match="verse-line">
+    <span style="display: block; text-indent: -1em; margin-left: 1em; ">
       <xsl:apply-templates/>
-    </xsl:element>
+    </span>
   </xsl:template>
   
   <xsl:template match="*">
     <xsl:apply-templates select="@* | node()"/>
   </xsl:template>
-  
-   <xsl:template match="@* | text()">
-    <xsl:copy></xsl:copy>
-  </xsl:template>
 
+  <xsl:template match="@* | text()">
+    <xsl:copy/>
+  </xsl:template>
+  
 </xsl:stylesheet>

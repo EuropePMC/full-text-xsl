@@ -27,8 +27,18 @@
     </xsl:choose>
   </xsl:template>
   
+  <xsl:variable name="emsid">
+    <xsl:if test="//article-meta/article-id[@pub-id-type = 'manuscript']">
+      <xsl:value-of select="translate(translate(//article-meta/article-id[@pub-id-type = 'manuscript'], 'ucpak', 'es'), 'ems', 'EMS')"/>
+    </xsl:if>
+  </xsl:variable>
   <xsl:variable name="pprid">
-    <xsl:if test="//article-meta/article-id[@pub-id-type='archive']">
+    <xsl:if test="starts-with(//article-meta/article-id[@pub-id-type='archive'], 'PPR')">
+      <xsl:value-of select="//article-meta/article-id[@pub-id-type='archive']"/>
+    </xsl:if>
+  </xsl:variable>
+  <xsl:variable name="ctxid">
+    <xsl:if test="not($pprid) and //article-meta/article-id[@pub-id-type='archive']">
       <xsl:value-of select="//article-meta/article-id[@pub-id-type='archive']"/>
     </xsl:if>
   </xsl:variable>
@@ -36,10 +46,8 @@
     <xsl:if test="$pprid">
       <xsl:value-of select="concat('/docs/preprint/', $pprid, '/')"/>
     </xsl:if>
-  </xsl:variable>  
-  <xsl:variable name="emsid">
-    <xsl:if test="//article-meta/article-id[@pub-id-type = 'manuscript']">
-      <xsl:value-of select="translate(translate(//article-meta/article-id[@pub-id-type = 'manuscript'], 'ucpak', 'es'), 'ems', 'EMS')"/>
+    <xsl:if test="$ctxid">
+      <xsl:value-of select="concat('/docs/micropublications/', $ctxid, '/')"/>
     </xsl:if>
   </xsl:variable>
   
@@ -161,7 +169,11 @@
               <xsl:if test="$emsid">
                 <xsl:text>EMSID: </xsl:text>
                 <xsl:value-of select="$emsid"/>
-              </xsl:if>            
+              </xsl:if>
+              <xsl:if test="$ctxid">
+                <xsl:text>CTXID: </xsl:text>
+                <xsl:value-of select="$ctxid"/>
+              </xsl:if>
             </span>
           </span>
           <span>
@@ -1241,42 +1253,37 @@
   </xsl:template>
 
   <xsl:template match="ext-link">
-    <xsl:if test="@ext-link-type = 'uri'">
-      <a>
-        <xsl:attribute name="href">
-          <xsl:choose>
-            <xsl:when test="starts-with(@xlink:href, 'www.')">
-              <xsl:value-of select="concat('http://', @xlink:href)"/>
-            </xsl:when>
-            <xsl:when test="starts-with(@xlink:href, 'doi:')">
-              <xsl:value-of select="concat('https://doi.org/', substring-after(@xlink:href, 'doi:'))"/>
-            </xsl:when>
-            <xsl:otherwise>
-              <xsl:value-of select="@xlink:href"/>
-            </xsl:otherwise>
-          </xsl:choose>
-        </xsl:attribute>
-        <xsl:attribute name="target">
-          <xsl:value-of select="'_blank'"/>
-        </xsl:attribute>
-        <xsl:apply-templates/>
-      </a>
-    </xsl:if>
-    <xsl:if test="@ext-link-type = 'doi'">
-      <a>
-        <xsl:attribute name="href">
-          <xsl:choose>
-            <xsl:when test="starts-with(@xlink:href, '10.7554/')">
-              <xsl:value-of select="concat('/lookup/doi/', @xlink:href)"/>
-            </xsl:when>
-            <xsl:otherwise>
-              <xsl:value-of select="concat('https://doi.org/', @xlink:href)"/>
-            </xsl:otherwise>
-          </xsl:choose>
-        </xsl:attribute>
-        <xsl:apply-templates/>
-      </a>
-    </xsl:if>
+    <xsl:choose>
+      <xsl:when test="@ext-link-type = 'doi'">
+        <a>
+          <xsl:attribute name="href">
+            <xsl:value-of select="concat('https://doi.org/', @xlink:href)"/>
+          </xsl:attribute>
+          <xsl:apply-templates/>
+        </a>
+      </xsl:when>
+      <xsl:otherwise>
+        <a>
+          <xsl:attribute name="href">
+            <xsl:choose>
+              <xsl:when test="starts-with(@xlink:href, 'www.')">
+                <xsl:value-of select="concat('http://', @xlink:href)"/>
+              </xsl:when>
+              <xsl:when test="starts-with(@xlink:href, 'doi:')">
+                <xsl:value-of select="concat('https://doi.org/', substring-after(@xlink:href, 'doi:'))"/>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:value-of select="@xlink:href"/>
+              </xsl:otherwise>
+            </xsl:choose>
+          </xsl:attribute>
+          <xsl:attribute name="target">
+            <xsl:value-of select="'_blank'"/>
+          </xsl:attribute>
+          <xsl:apply-templates/>
+        </a>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <!-- START handling citation objects -->

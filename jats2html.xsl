@@ -38,15 +38,18 @@
     </xsl:if>
   </xsl:variable>
   <xsl:variable name="ctxid">
-    <xsl:if test="not($pprid) and //article-meta/article-id[@pub-id-type='archive']">
-      <xsl:value-of select="//article-meta/article-id[@pub-id-type='archive']"/>
-    </xsl:if>
+    <xsl:choose>
+      <xsl:when test="normalize-space($pprid) != ''"/>
+      <xsl:when test="//article-meta/article-id[@pub-id-type='archive']">
+        <xsl:value-of select="//article-meta/article-id[@pub-id-type='archive']"/>
+      </xsl:when>
+    </xsl:choose>
   </xsl:variable>
   <xsl:variable name="filebase">
-    <xsl:if test="$pprid">
+    <xsl:if test="normalize-space($pprid) != ''">
       <xsl:value-of select="concat('/docs/preprint/', $pprid, '/')"/>
     </xsl:if>
-    <xsl:if test="$ctxid">
+    <xsl:if test="normalize-space($ctxid) != ''">
       <xsl:value-of select="concat('/docs/micropublications/', $ctxid, '/')"/>
     </xsl:if>
   </xsl:variable>
@@ -67,9 +70,27 @@
     </xsl:if>
   </xsl:template>
   
+  <xsl:template name="get-filename">
+    <xsl:param name="string"/>
+    <xsl:choose>
+      <xsl:when test="contains($string, '.')">
+        <xsl:value-of select="substring-before($string, '.')"/>
+        <xsl:if test="contains(substring-after($string, '.'), '.')">
+          <xsl:text>.</xsl:text>
+          <xsl:call-template name="get-filename">
+            <xsl:with-param name="string" select="substring-after($string, '.')"/>
+          </xsl:call-template>
+        </xsl:if>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="$string"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
   <xsl:template match="/">
     <xsl:choose>
-      <xsl:when test="$emsid">
+      <xsl:when test="normalize-space($emsid) != ''">
         <div class="page_proper" id="xml-preview-body">
           <div class="epmc_pageHolder articleContentPage fullPage">
             <div class="epmc_wideLeft">
@@ -93,7 +114,7 @@
   
   <xsl:template match="back">
     <xsl:choose>
-      <xsl:when test="$emsid">
+      <xsl:when test="normalize-space($emsid) != ''">
         <xsl:apply-templates select="ack"/>
         <xsl:if test="not(ack)">
           <xsl:apply-templates select="//author-notes"/>
@@ -114,7 +135,7 @@
   
   <xsl:template match="front">
     <xsl:choose>
-      <xsl:when test="$emsid">
+      <xsl:when test="normalize-space($emsid) != ''">
         <img src="https://europepmc.org/corehtml/pmc/pmcgifs/logo-wtpa2.gif"/>
         <xsl:call-template name="identifiers"/>
         <xsl:apply-templates select="article-meta/title-group"/>
@@ -143,7 +164,7 @@
       </xsl:if>
     </xsl:variable> 
     <xsl:choose>
-      <xsl:when test="$pprid">
+      <xsl:when test="normalize-space($pprid) != ''">
         <div class="citeinfo">
           <p class="identifiers">
             <span class="ppr">
@@ -166,11 +187,11 @@
         <p class="citeinfo">
           <span class="identifiers">
             <span class="ppr">
-              <xsl:if test="$emsid">
+              <xsl:if test="normalize-space($emsid) != ''">
                 <xsl:text>EMSID: </xsl:text>
                 <xsl:value-of select="$emsid"/>
               </xsl:if>
-              <xsl:if test="$ctxid">
+              <xsl:if test="normalize-space($ctxid) != ''">
                 <xsl:text>CTXID: </xsl:text>
                 <xsl:value-of select="$ctxid"/>
               </xsl:if>
@@ -206,7 +227,7 @@
   <xsl:template name="authors">
     <div class="abs_link_metadata">
       <xsl:choose>
-        <xsl:when test="$emsid">
+        <xsl:when test="normalize-space($emsid) != ''">
           <div>
             <xsl:for-each select="//article-meta//contrib-group/contrib[@contrib-type = 'author']">
               <div class="inline">
@@ -275,7 +296,7 @@
               </xsl:for-each>    
             </div>
             <xsl:choose>
-              <xsl:when test="$emsid"></xsl:when>
+              <xsl:when test="normalize-space($emsid) != ''"></xsl:when>
             </xsl:choose>
             <div class="author-affiliations">
               <a href="javascript:void(0)" class="abstract--author-affiliations-title" title="Click to toggle affiliation details.">
@@ -473,7 +494,7 @@
         <xsl:choose>
           <xsl:when test="self::name">
             <xsl:choose>
-              <xsl:when test="$emsid">
+              <xsl:when test="normalize-space($emsid) != ''">
                 <xsl:value-of select="concat(given-names, ' ', surname)"/>
               </xsl:when>
               <xsl:otherwise>
@@ -559,7 +580,7 @@
     </xsl:for-each>
     <xsl:variable name="corresp" select="following-sibling::xref[@ref-type='corresp']/@rid"/>
     <xsl:choose>
-      <xsl:when test="$emsid">
+      <xsl:when test="normalize-space($emsid) != ''">
         <xsl:choose>
           <xsl:when test="following-sibling::corresp//email">
             <a href="#{$corresp}">
@@ -603,7 +624,7 @@
   
   <xsl:template match="aff" mode="afflist">
     <xsl:choose>
-      <xsl:when test="$emsid">
+      <xsl:when test="normalize-space($emsid) != ''">
         <xsl:variable name="alpha" select="'abcdefghijklmnopqrstuvwxyz'"/> 
         <li>
           <xsl:attribute name="id">
@@ -1315,10 +1336,14 @@
       <xsl:when test="parent::table-wrap">
         <xsl:if test="following-sibling::graphic">
           <xsl:variable name="caption" select="parent::table-wrap/label/text()"/>
-          <xsl:variable name="filename" select="substring-before(concat(following-sibling::graphic/@xlink:href, '.'), '.')"/>
+          <xsl:variable name="filename">
+            <xsl:call-template name="get-filename">
+              <xsl:with-param name="string" select="following-sibling::graphic/@xlink:href"/>
+            </xsl:call-template>
+          </xsl:variable>
           <xsl:variable name="graphics">
             <xsl:choose>
-              <xsl:when test="$emsid">
+              <xsl:when test="normalize-space($emsid) != ''">
                 <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
               </xsl:when>
               <xsl:otherwise>
@@ -1455,7 +1480,7 @@
         <xsl:value-of select="concat(parent::node()/@id, '-math')"/>
       </xsl:attribute>
       <xsl:choose>
-        <xsl:when test="$emsid">
+        <xsl:when test="normalize-space($emsid) != ''">
           <xsl:text>&lt;math xmlns="http://www.w3.org/1998/Math/MathML"&gt;</xsl:text>
           <xsl:apply-templates mode="serialize"/>
           <xsl:text>&lt;/math&gt;</xsl:text>
@@ -1562,10 +1587,14 @@
     <xsl:choose>
       <xsl:when test="not(parent::supplementary-material)">
         <div class="fig-caption">
-          <xsl:variable name="filename" select="substring-before(concat(following-sibling::graphic/@xlink:href, '.'), '.')"/>
+          <xsl:variable name="filename">
+            <xsl:call-template name="get-filename">
+              <xsl:with-param name="string" select="following-sibling::graphic/@xlink:href"/>
+            </xsl:call-template>
+          </xsl:variable>
           <xsl:variable name="graphics">
             <xsl:choose>
-              <xsl:when test="$emsid">
+              <xsl:when test="normalize-space($emsid) != ''">
                 <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
               </xsl:when>
               <xsl:otherwise>
@@ -1578,7 +1607,7 @@
               <a target="_blank">
                 <xsl:attribute name="href">
                   <xsl:choose>
-                    <xsl:when test="$emsid">
+                    <xsl:when test="normalize-space($emsid) != ''">
                       <xsl:value-of select="$graphics"/>
                     </xsl:when>
                     <xsl:otherwise>
@@ -1842,10 +1871,14 @@
             </xsl:if>
           </xsl:attribute>
           <xsl:for-each select="child::graphic">
-            <xsl:variable name="filename" select="substring-before(concat(@xlink:href, '.'), '.')"/>
+            <xsl:variable name="filename">
+              <xsl:call-template name="get-filename">
+                <xsl:with-param name="string" select="@xlink:href"/>
+              </xsl:call-template>
+            </xsl:variable>
             <xsl:variable name="graphics">
               <xsl:choose>
-                <xsl:when test="$emsid">
+                <xsl:when test="normalize-space($emsid) != ''">
                   <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
                 </xsl:when>
                 <xsl:otherwise>
@@ -1855,7 +1888,7 @@
             </xsl:variable>
             <a target="_blank" class="figure-expand" title="{$caption} - Click to open full size">
               <xsl:choose>
-                <xsl:when test="$emsid">
+                <xsl:when test="normalize-space($emsid) != ''">
                   <xsl:attribute name="href">
                     <xsl:value-of select="$graphics"/>
                   </xsl:attribute>
@@ -1913,7 +1946,11 @@
   </xsl:template>
 
   <xsl:template match="media" mode="testing">
-    <xsl:variable name="filename" select="substring-before(concat(@xlink:href, '.'), '.')"/>
+    <xsl:variable name="filename">
+      <xsl:call-template name="get-filename">
+        <xsl:with-param name="string" select="@xlink:href"/>
+      </xsl:call-template>
+    </xsl:variable>
     <xsl:variable name="media-download-href" select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
     <!-- if mimetype is application -->
     <span class="inline-linked-media-wrapper">
@@ -2163,7 +2200,7 @@
 
   <xsl:template match="author-notes/corresp">
     <p class="corresp" id="{@id}">
-      <xsl:if test="$emsid">
+      <xsl:if test="normalize-space($emsid) != ''">
         <sup>&#9993;</sup>
         <xsl:text> </xsl:text>
       </xsl:if>      
@@ -2370,7 +2407,7 @@
             -->
       <xsl:variable name="class">
         <xsl:if test="@publication-type = 'journal'">
-          <xsl:value-of select="'elife-reflink-details-journal'"/>
+          <xsl:value-of select="'reflink-details-journal'"/>
         </xsl:if>
       </xsl:variable>
       <xsl:variable name="includes">
@@ -2430,7 +2467,7 @@
         <xsl:if test="not(starts-with($includes, 'publisher-name|'))">
           <xsl:text>, </xsl:text>
         </xsl:if>
-        <span class="elife-reflink-details-pub-name">
+        <span class="reflink-details-pub-name">
           <span class="nlm-publisher-name">
             <xsl:apply-templates select="child::publisher-name/node()"/>
           </span>
@@ -2440,7 +2477,7 @@
         <xsl:if test="not(starts-with($includes, 'publisher-loc|'))">
           <xsl:text>, </xsl:text>
         </xsl:if>
-        <span class="elife-reflink-details-pub-loc">
+        <span class="reflink-details-pub-loc">
           <span class="nlm-publisher-loc">
             <xsl:apply-templates select="child::publisher-loc/node()"/>
           </span>
@@ -2450,7 +2487,7 @@
         <xsl:if test="not(starts-with($includes, 'year|'))">
           <xsl:text>, </xsl:text>
         </xsl:if>
-        <span class="elife-reflink-details-year">
+        <span class="reflink-details-year">
           <xsl:apply-templates select="child::year/node()"/>
         </span>
       </xsl:if>
@@ -2466,7 +2503,7 @@
         <xsl:if test="not(starts-with($includes, 'day|'))">
           <xsl:text> </xsl:text>
         </xsl:if>
-        <span class="elife-reflink-details-year">
+        <span class="reflink-details-day">
           <xsl:apply-templates select="child::day/node()"/>
         </span>
       </xsl:if>
@@ -2474,7 +2511,7 @@
         <xsl:if test="not(starts-with($includes, 'volume|'))">
           <xsl:text>; </xsl:text>
         </xsl:if>
-        <span class="elife-reflink-details-volume">
+        <span class="reflink-details-volume">
           <xsl:apply-templates select="child::volume/node()"/>
         </span>
       </xsl:if>
@@ -2482,7 +2519,7 @@
         <xsl:if test="not(starts-with($includes, 'issue|'))">
           <xsl:text>(</xsl:text>
         </xsl:if>
-        <span class="elife-reflink-details-volume">
+        <span class="reflink-details-volume">
           <xsl:apply-templates select="child::issue/node()"/>
         </span>
         <xsl:text>)</xsl:text>
@@ -2491,7 +2528,7 @@
         <xsl:if test="not(starts-with($includes, 'fpage|'))">
           <xsl:text>: </xsl:text>
         </xsl:if>
-        <span class="elife-reflink-details-pages">
+        <span class="reflink-details-pages">
           <xsl:apply-templates select="child::fpage/node()"/>
           <xsl:if test="contains($includes, 'lpage|')">
             <xsl:text>-</xsl:text>
@@ -2501,7 +2538,6 @@
       </xsl:if>
       <xsl:apply-templates select="pub-id[@pub-id-type = 'doi']" mode="idlinks"/>
       <xsl:apply-templates select="pub-id[not(@pub-id-type = 'doi')]" mode="idlinks"/>
-      <xsl:apply-templates/>
     </div>
   </xsl:template>
 
@@ -2516,7 +2552,7 @@
       <xsl:when test="@pub-id-type = 'doi'">
         <span class="elife-reflink-doi-cited-wrapper">
           <xsl:text> </xsl:text>
-          <span class="elife-reflink-details-doi">
+          <span class="reflink-details-doi">
             <a href="https://doi.org/{.}" target="_blank">
               <xsl:text>https://doi.org/</xsl:text>
               <xsl:value-of select="."/>
@@ -2708,10 +2744,14 @@
   </xsl:template>
 
   <xsl:template match="inline-graphic">
-    <xsl:variable name="filename" select="substring-before(concat(@xlink:href, '.'), '.')"/>
+    <xsl:variable name="filename">
+      <xsl:call-template name="get-filename">
+        <xsl:with-param name="string" select="@xlink:href"/>
+      </xsl:call-template>
+    </xsl:variable>
     <xsl:variable name="graphics">
       <xsl:choose>
-        <xsl:when test="$emsid">
+        <xsl:when test="normalize-space($emsid) != ''">
           <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
         </xsl:when>
         <xsl:otherwise>
@@ -2725,10 +2765,14 @@
   </xsl:template>
 
   <xsl:template match="inline-graphic" mode="testing">
-    <xsl:variable name="filename" select="substring-before(concat(@xlink:href, '.'), '.')"/>
+    <xsl:variable name="filename">
+      <xsl:call-template name="get-filename">
+        <xsl:with-param name="string" select="@xlink:href"/>
+      </xsl:call-template>
+    </xsl:variable>
     <xsl:variable name="graphics">
       <xsl:choose>
-        <xsl:when test="$emsid">
+        <xsl:when test="normalize-space($emsid) != ''">
           <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
         </xsl:when>
         <xsl:otherwise>
@@ -2946,7 +2990,7 @@
       ref//label | ref//year | ref//article-title | ref//fpage | ref//volume | ref//issue | ref//source | ref//pub-id |
       ref//lpage | ref//supplement | ref//person-group[@person-group-type = 'editor'] | ref//edition | ref//publisher-loc |
       ref//lpage | ref//supplement | ref//edition | ref//publisher-loc |
-      ref//publisher-name"/>
+      ref//publisher-name | ref//issn | red//month | ref//day | ref//season"/>
   <xsl:template match="person-group[@person-group-type = 'author'] | collab"/>
   <xsl:template match="media/label"/>
   <xsl:template match="sub-article//article-title"/>

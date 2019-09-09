@@ -73,6 +73,9 @@
   <xsl:template name="get-filename">
     <xsl:param name="string"/>
     <xsl:choose>
+      <xsl:when test="normalize-space($ctxid) != ''">
+        <xsl:value-of select="$string"/>
+      </xsl:when>
       <xsl:when test="contains($string, '.')">
         <xsl:value-of select="substring-before($string, '.')"/>
         <xsl:if test="contains(substring-after($string, '.'), '.')">
@@ -129,6 +132,10 @@
       </xsl:when>
       <xsl:otherwise>
         <xsl:apply-templates/>
+        <xsl:if test="not(//article-meta/abstract)">
+          <xsl:apply-templates select="//article-meta"/>
+          <xsl:call-template name="article-info-history"/>
+        </xsl:if>
       </xsl:otherwise>
     </xsl:choose>    
   </xsl:template>
@@ -146,8 +153,10 @@
       <xsl:otherwise>
         <xsl:call-template name="identifiers"/>
         <xsl:call-template name="authors"/>
-        <xsl:call-template name="article-info-history"/>   
-        <xsl:apply-templates select="article-meta"/>
+        <xsl:if test="article-meta/abstract">
+          <xsl:apply-templates select="article-meta"/>
+          <xsl:call-template name="article-info-history"/>
+        </xsl:if>
       </xsl:otherwise>
     </xsl:choose>    
   </xsl:template>
@@ -220,7 +229,8 @@
   </xsl:template>
   
   <xsl:template match="article-meta">
-    <xsl:apply-templates select="contrib-group/contrib[@contrib-type='editor']" mode="article-info-reviewing-editor"/>
+    <xsl:apply-templates select="contrib-group/contrib[@contrib-type='reviewer'][1]" mode="article-info-reviewing-editor"/>
+    <xsl:apply-templates select="contrib-group/contrib[@contrib-type='editor'][1]" mode="article-info-reviewing-editor"/>
     <xsl:apply-templates select="permissions|abstract|kwd-group"/>
   </xsl:template>
   
@@ -786,7 +796,7 @@
 
   <!-- ==== FRONT MATTER START ==== -->
 
-  <xsl:template match="surname | given-names | name">
+  <xsl:template match="name">
     <span class="nlm-given-names">
       <xsl:value-of select="given-names"/>
     </span>
@@ -794,8 +804,6 @@
     <span class="nlm-surname">
       <xsl:value-of select="surname"/>
     </span>
-    <xsl:text>, </xsl:text>
-    <xsl:value-of select="name"/>
   </xsl:template>
 
   <!-- ==== Data set start ==== -->
@@ -942,6 +950,7 @@
       <xsl:attribute name="id">
         <xsl:value-of select="'article-info-history'"/>
       </xsl:attribute>
+      <h2>History</h2>
       <ul>
         <xsl:attribute name="class">
           <xsl:value-of select="'publication-history'"/>
@@ -986,14 +995,14 @@
     <xsl:apply-templates/>
   </xsl:template>
   <xsl:template match="fn-group[@content-type = 'ethics-information']/title"/>
-  <xsl:template match="contrib[@contrib-type = 'editor']" mode="article-info-reviewing-editor">
+  <xsl:template match="contrib" mode="article-info-reviewing-editor">
     <div id="article-info-reviewing-editor">
-      <div>
-        <xsl:attribute name="class">
-          <xsl:value-of select="'elife-article-info-reviewingeditor-text'"/>
-        </xsl:attribute>
+      <h2>Reviewed by</h2>
+      <xsl:apply-templates select="node()"/>
+      <xsl:for-each select="following::contrib[@contrib-type='reviewer' or @contrib-type='editor']">
+        <xsl:text>, </xsl:text>
         <xsl:apply-templates select="node()"/>
-      </div>
+      </xsl:for-each>
     </div>
   </xsl:template>
 
@@ -1025,6 +1034,9 @@
           </xsl:attribute>
         </xsl:otherwise>
       </xsl:choose>
+      <xsl:if test="not(parent::article-meta/abstract">
+        <h2>Copyright</h2>
+      </xsl:if>
       <xsl:apply-templates/>
       <xsl:if test="parent::article-meta">
         <xsl:apply-templates select="//body//permissions"/>
@@ -1211,7 +1223,7 @@
           </xsl:element>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:element name="h{count(ancestor::sec)+count(ancestor::abstract)+count(ancestor::boxed-text) + 1}">
+          <xsl:element name="h{count(ancestor::sec)+count(ancestor::abstract)+count(ancestor::boxed-text)+count(ancestor::ack) + 1}">
             <xsl:attribute name="id">
               <xsl:value-of select="concat(parent::sec/@id, 'title')"/>
             </xsl:attribute>
@@ -1947,23 +1959,37 @@
 
   <xsl:template match="media" mode="testing">
     <xsl:variable name="filename">
-      <xsl:call-template name="get-filename">
-        <xsl:with-param name="string" select="@xlink:href"/>
-      </xsl:call-template>
+      <xsl:choose>
+        <xsl:when test="normalize-space($emsid) != ''">
+          <xsl:call-template name="get-filename">
+            <xsl:with-param name="string" select="@xlink:href"/>
+          </xsl:call-template>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="@xlink:href"/>
+        </xsl:otherwise>
+      </xsl:choose>
     </xsl:variable>
-    <xsl:variable name="media-download-href" select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
+    <xsl:variable name="media-download-href">
+      <xsl:choose>
+        <xsl:when test="normalize-space($emsid) != ''">
+          <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="concat($filebase,'image/',$filename)"/>  
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable> 
     <!-- if mimetype is application -->
     <span class="inline-linked-media-wrapper">
       <a href="{$media-download-href}">
-        <xsl:attribute name="download">
-          <xsl:value-of select="concat($filename, '.')"/>
-          <xsl:value-of select="substring-after($media-download-href, '.')"/>
-        </xsl:attribute> Download source data<span class="inline-linked-media-filename">
-          <!--[<xsl:value-of
-                            select="translate(translate(preceding-sibling::label, $uppercase, $smallcase), ' ', '-')"/>media-<xsl:value-of
-                            select="count(preceding::media[@mimetype = 'application']) + 1"/>.<xsl:value-of
-                            select="substring-after(@xlink:href, '.')"/>]-->
-        </span>
+        <xsl:if test="normalize-space($emsid) != ''">
+          <xsl:attribute name="download">
+            <xsl:value-of select="concat($filename, '.')"/>
+            <xsl:value-of select="substring-after($media-download-href, '.')"/>
+          </xsl:attribute>
+        </xsl:if>
+        <xsl:text> Download source data</xsl:text>
       </a>
     </span>
   </xsl:template>

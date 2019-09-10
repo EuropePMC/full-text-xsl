@@ -1034,7 +1034,7 @@
           </xsl:attribute>
         </xsl:otherwise>
       </xsl:choose>
-      <xsl:if test="not(parent::article-meta/abstract">
+      <xsl:if test="not(parent::article-meta/abstract)">
         <h2>Copyright</h2>
       </xsl:if>
       <xsl:apply-templates/>

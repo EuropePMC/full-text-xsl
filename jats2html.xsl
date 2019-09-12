@@ -2243,7 +2243,7 @@
         <sup>&#9993;</sup>
         <xsl:text> </xsl:text>
       </xsl:if>      
-      <xsl:if test="count(*) &lt; 2">
+      <xsl:if test="count(node()) = 1">
         <xsl:text>Correspondence: </xsl:text>
       </xsl:if>
       <xsl:apply-templates/>

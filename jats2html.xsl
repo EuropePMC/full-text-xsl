@@ -996,14 +996,27 @@
   </xsl:template>
   <xsl:template match="fn-group[@content-type = 'ethics-information']/title"/>
   <xsl:template match="contrib" mode="article-info-reviewing-editor">
-    <div id="article-info-reviewing-editor">
-      <h2>Reviewed by</h2>
-      <xsl:apply-templates select="node()"/>
-      <xsl:for-each select="following::contrib[@contrib-type='reviewer' or @contrib-type='editor']">
-        <xsl:text>, </xsl:text>
+    <xsl:variable name="level">
+      <xsl:choose>
+        <xsl:when test="ancestor::article-meta/abstract">
+          <xsl:text>p|b|span</xsl:text>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:text>div|h2|p</xsl:text>          
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    <xsl:element name="{substring-before($level,'|')}">
+      <xsl:attribute name="id"><xsl:text>article-info-reviewing-editor</xsl:text></xsl:attribute>
+      <xsl:element name="{substring-before(substring-after($level, '|'), '|')}">Reviewed by</xsl:element>
+      <xsl:element name="{substring-after(substring-after($level, '|'),'|')}">
         <xsl:apply-templates select="node()"/>
-      </xsl:for-each>
-    </div>
+        <xsl:for-each select="following::contrib[@contrib-type='reviewer' or @contrib-type='editor']">
+          <xsl:text>, </xsl:text>
+          <xsl:apply-templates select="node()"/>
+        </xsl:for-each>
+      </xsl:element>
+    </xsl:element>
   </xsl:template>
 
   <xsl:template match="fn-group[@content-type = 'competing-interest']">

@@ -209,8 +209,50 @@
           <span>
             <span class="pubinfo">
               <xsl:value-of select="//journal-meta/journal-id"/>
+              <xsl:if test="not(//journal-meta/journal-id)">
+                <xsl:value-of select="//journal-meta//journal-title"/>
+              </xsl:if>
+              <xsl:text>. </xsl:text>
+              <xsl:value-of select="//article-meta/pub-date[1]/year"/>
+              <xsl:for-each select="//article-meta[1]">
+                <xsl:if test="volume or issue or fpage or elocation-id">
+                  <xsl:if test="volume or issue">
+                    <xsl:text>; </xsl:text>
+                    <xsl:value-of select="volume"/>
+                    <xsl:if test="issue">
+                      <xsl:value-of select="concat('(', issue, ')')"/>
+                    </xsl:if>
+                  </xsl:if>
+                  <xsl:if test="fpage or elocation-id">
+                    <xsl:text>: </xsl:text>
+                    <xsl:value-of select="elocation-id"/>
+                    <xsl:value-of select="fpage"/>
+                    <xsl:if test="lpage">
+                      <xsl:text>-</xsl:text>
+                      <xsl:value-of select="lpage"/>
+                    </xsl:if>
+                  </xsl:if>
+                </xsl:if>
+              </xsl:for-each>
+              <xsl:text>.</xsl:text>
             </span>
             <br/>
+            <xsl:for-each select="//article-meta/pub-date[@pub-type='epub' or @publication-format='electronic'][1]">
+              <xsl:text>Published online </xsl:text>
+              <xsl:value-of select="year"/>
+              <xsl:if test="month or season">
+                <xsl:text> </xsl:text>
+                <xsl:call-template name="month">
+                  <xsl:with-param name="num" select="month"/>
+                </xsl:call-template>
+                <xsl:value-of select="season"/>
+                <xsl:if test="day">
+                  <xsl:text> </xsl:text>
+                  <xsl:value-of select="day"/>
+                </xsl:if>
+              </xsl:if>
+              <xsl:text>. </xsl:text>
+            </xsl:for-each>
             <xsl:if test="$doi">
               <xsl:copy-of select="$doi"/>
             </xsl:if>

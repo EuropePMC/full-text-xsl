@@ -2413,9 +2413,6 @@
         </xsl:when>
       </xsl:choose>
     </xsl:for-each>
-    <xsl:for-each select="collab">
-      <xsl:value-of select="."/>
-    </xsl:for-each>
     <xsl:choose>
       <xsl:when test="@person-group-type = 'editor'">
         <xsl:if test="etal">

@@ -559,6 +559,7 @@
           </xsl:when>
         </xsl:choose>
       </span>
+      <xsl:apply-templates select="following-sibling::degrees"/>
       <xsl:for-each select="following-sibling::aff">
         <xsl:variable name="current" select="."/>
         <xsl:variable name="position">
@@ -672,6 +673,17 @@
         </xsl:choose>
       </xsl:otherwise>
     </xsl:choose>
+    <xsl:apply-templates select="following-sibling::on-behalf-of"/>
+  </xsl:template>
+  
+  <xsl:template match="contrib/degrees">
+    <xsl:text>, </xsl:text>
+    <xsl:value-of select="."/>
+  </xsl:template>
+  
+  <xsl:template match="on-behalf-of">
+    <xsl:text> </xsl:text>
+    <xsl:value-of select="."/>
   </xsl:template>
   
   <xsl:template match="aff" mode="afflist">
@@ -1782,13 +1794,15 @@
       </xsl:if>
       <xsl:apply-templates/>
     </xsl:if>
-    <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group']">
-      <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
-        <xsl:variable name="rid" select="@rid"/>
-        <xsl:if test="not(preceding::xref[@rid = $rid])">
-          <xsl:apply-templates select="//*[@id = $rid][@position != 'anchor']" mode="testing"/>
-        </xsl:if>
-      </xsl:for-each>
+    <xsl:if test="not(ancestor::list-item)">
+      <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group']">
+        <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
+          <xsl:variable name="rid" select="@rid"/>
+          <xsl:if test="not(preceding::xref[@rid = $rid])">
+            <xsl:apply-templates select="//*[@id = $rid][@position != 'anchor']" mode="testing"/>
+          </xsl:if>
+        </xsl:for-each>
+      </xsl:if>
     </xsl:if>
   </xsl:template>
 
@@ -2933,6 +2947,16 @@
         </ol>
       </xsl:otherwise>
     </xsl:choose>
+    <xsl:if test="not(ancestor::list-item)">
+      <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group']">
+        <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
+          <xsl:variable name="rid" select="@rid"/>
+          <xsl:if test="not(preceding::xref[@rid = $rid])">
+            <xsl:apply-templates select="//*[@id = $rid][@position != 'anchor']" mode="testing"/>
+          </xsl:if>
+        </xsl:for-each>
+      </xsl:if>
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="list-item">
@@ -3202,7 +3226,7 @@
 
   <xsl:template match="def-item/term">
     <dt>
-      <xsl:value-of select="."/>
+      <xsl:apply-templates/>
     </dt>
   </xsl:template>
 

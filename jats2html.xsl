@@ -208,11 +208,16 @@
           </span>
           <span>
             <span class="pubinfo">
-              <xsl:value-of select="//journal-meta/journal-id"/>
-              <xsl:if test="not(//journal-meta/journal-id)">
-                <xsl:value-of select="//journal-meta//journal-title"/>
-              </xsl:if>
-              <xsl:text>. </xsl:text>
+              <xsl:choose>
+                <xsl:when test="//journal-meta/journal-id">
+                  <xsl:value-of select="//journal-meta/journal-id"/>
+                  <xsl:text>.</xsl:text>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select="//journal-meta//journal-title"/>
+                </xsl:otherwise>
+              </xsl:choose>
+              <xsl:text> </xsl:text>
               <xsl:value-of select="//article-meta/pub-date[1]/year"/>
               <xsl:for-each select="//article-meta[1]">
                 <xsl:if test="volume or issue or fpage or elocation-id">

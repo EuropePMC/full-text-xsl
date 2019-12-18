@@ -311,7 +311,12 @@
             <h2 id="fulltext--author-affiliations-title" role="button" tabindex="0" onclick="this.classList.toggle('open'); this.blur()">
               <xsl:text>Affiliations</xsl:text>
             </h2>
-            <ol class="affiliations" style="list-style-type:none;">
+            <ol class="affiliations">
+              <xsl:if test="normalize-space($pprid) != ''">
+                <xsl:attribute name="style">
+                  <xsl:text>list-style-type:none</xsl:text>
+                </xsl:attribute>
+              </xsl:if>
               <xsl:choose>
                 <xsl:when test="//aff[not(parent::contrib)]">
                   <xsl:apply-templates select="//aff" mode="afflist"/>

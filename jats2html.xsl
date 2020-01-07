@@ -1315,12 +1315,12 @@
         </xsl:if>
         <xsl:if test="parent::list-item and preceding-sibling::*[1][self::label]">
           <span class="list-label">
-            <xsl:value-of select="preceding-sibling::label"/>
+            <xsl:apply-templates select="preceding-sibling::*[1][self::label]/node()"/>
           </span>
         </xsl:if>
         <xsl:if test="not(parent::list-item) and preceding-sibling::*[1][self::label]">
           <span class="p-label">
-            <xsl:value-of select="preceding-sibling::label"/>
+            <xsl:apply-templates select="preceding-sibling::*[1][self::label]/node()"/>
             <xsl:text>: </xsl:text>
           </span>
         </xsl:if>
@@ -2955,7 +2955,7 @@
   <xsl:template match="list-item">
     <li>
       <xsl:choose>
-        <xsl:when test="count(child::node()[not(normalize-space(.) = '')]) = 1 and child::node()[self::p]">
+        <xsl:when test="count(child::node()) = 1 and child::node()[self::p]">
           <xsl:attribute name="id">
             <xsl:value-of select="child::p/@id"/>
           </xsl:attribute>

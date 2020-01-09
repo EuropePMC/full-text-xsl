@@ -1208,7 +1208,16 @@
 
   <xsl:template match="kwd-group">
     <p>
-      <strong>Keywords: </strong>
+      <strong>
+        <xsl:choose>
+          <xsl:when test="title">
+            <xsl:value-of select="title"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:text>Keywords: </xsl:text>
+          </xsl:otherwise>
+        </xsl:choose>
+      </strong>
       <xsl:for-each select="kwd">
         <xsl:apply-templates/>
         <xsl:if test="position() != last()">

@@ -90,6 +90,19 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  
+  <xsl:variable name="affiliations">
+    <xsl:for-each select="//article-meta//aff">
+      <xsl:choose>
+        <xsl:when test=". = preceding::aff"/>
+        <xsl:otherwise>
+          <aff>
+            <xsl:apply-templates/>
+          </aff>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:for-each>
+  </xsl:variable>
 
   <xsl:template match="/">
     <xsl:choose>
@@ -115,28 +128,7 @@
     <xsl:apply-templates select="body"/>
     <xsl:call-template name="supplementary-material"/>
     <xsl:apply-templates select="back"/>
-  </xsl:template>
-
-  <xsl:template match="back">
-    <xsl:choose>
-      <xsl:when test="normalize-space($emsid) != ''">
-        <xsl:apply-templates select="ack"/>
-        <xsl:if test="not(ack)">
-          <xsl:apply-templates select="//author-notes"/>
-          <xsl:if test="not(fn-group/fn[@fn-type = 'con']) and not(//author-notes)">
-            <xsl:apply-templates select="//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
-          </xsl:if>
-          <xsl:if test="//contrib/email and not(//author-notes)">
-            <xsl:call-template name="list-emails"/>
-          </xsl:if>
-        </xsl:if>
-        <xsl:apply-templates select="*[not(self::ack)]"/>
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:apply-templates/>
-        <xsl:call-template name="article-info-history"/>
-      </xsl:otherwise>
-    </xsl:choose>
+    <xsl:apply-templates select="sub-article"/>
   </xsl:template>
 
   <xsl:template match="front">
@@ -152,6 +144,9 @@
             <xsl:apply-templates select="article-meta/kwd-group"/>
           </xsl:if>
         </div>
+        <xsl:if test="following-sibling::sub-article[@article-type='peer-review']">
+          <xsl:call-template name="peer-review-summary"/>
+        </xsl:if>
         <xsl:apply-templates select="article-meta/abstract"/>
       </xsl:when>
       <xsl:otherwise>
@@ -159,16 +154,53 @@
           <xsl:call-template name="identifiers"/>
           <xsl:call-template name="authors"/>
           <xsl:apply-templates select="article-meta"/>
+          <xsl:if test="not(following-sibling::back)">
+            <xsl:apply-templates select="article-meta/author-notes"/>
+          </xsl:if>
           <xsl:if test="not(article-meta/abstract) or normalize-space($ctxid) != ''">
             <xsl:apply-templates select="article-meta/kwd-group"/>
             <hr class="no_abstract"/>
           </xsl:if>
         </div>
+        <xsl:if test="following-sibling::sub-article[@article-type='peer-review']">
+          <xsl:call-template name="peer-review-summary"/>
+        </xsl:if>
         <xsl:if test="normalize-space($ctxid) = ''">
           <xsl:apply-templates select="article-meta/abstract"/>
         </xsl:if>               
       </xsl:otherwise>
     </xsl:choose>
+  </xsl:template>
+  
+  <xsl:template match="back">
+    <xsl:choose>
+      <xsl:when test="normalize-space($emsid) != ''">
+        <xsl:apply-templates select="ack"/>
+        <xsl:if test="not(ack)">
+          <xsl:apply-templates select="preceding-sibling::*//author-notes"/>
+          <xsl:if test="not(fn-group/fn[@fn-type = 'con']) and not(preceding-sibling::*//author-notes)">
+            <xsl:apply-templates select="preceding-sibling::*//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
+          </xsl:if>
+          <xsl:if test="preceding-sibling::*//contrib/email and not(preceding-sibling::*//author-notes)">
+            <xsl:apply-templates select="preceding-sibling::*" mode="list-emails"/>
+          </xsl:if>
+        </xsl:if>
+        <xsl:apply-templates select="*[not(self::ack)]"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:apply-templates/>
+        <xsl:call-template name="article-info-history"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
+  <xsl:template match="sub-article">
+    <hr class="sub-article-divider"/>
+    <div class="sub-article" id="{@id}">
+      <xsl:apply-templates select="front-stub"/>
+      <xsl:apply-templates select="body"/>
+      <xsl:apply-templates select="back"/>
+    </div>
   </xsl:template>
 
   <xsl:template name="identifiers">
@@ -318,8 +350,8 @@
                 </xsl:attribute>
               </xsl:if>
               <xsl:choose>
-                <xsl:when test="//aff[not(parent::contrib)]">
-                  <xsl:apply-templates select="//aff" mode="afflist"/>
+                <xsl:when test="//article-meta//aff[not(parent::contrib)]">
+                  <xsl:apply-templates select="//article-meta//aff" mode="afflist"/>
                 </xsl:when>
                 <xsl:otherwise>
                   <xsl:apply-templates select="exsl:node-set($affiliations)/aff" mode="afflist"/>
@@ -331,148 +363,6 @@
       </xsl:choose>
     </div>
   </xsl:template>
-
-  <xsl:template match="contrib" mode="author-refine">
-    <xsl:variable name="name" select="concat(name/given-names, ' ', name/surname)"/>
-    <h3 class="author-refine-title" title="{$name}">
-      <xsl:value-of select="$name"/>
-    </h3>
-    <div class="author-refine-content">
-      <xsl:for-each select="//aff[parent::contrib-group]">
-        <xsl:variable name="id" select="@id"/>
-        <xsl:if test="not(//xref[@rid=$id])">
-          <xsl:apply-templates select="." mode="author-refine"/>
-        </xsl:if>
-      </xsl:for-each>
-      <span class="author-refine-subtitle">
-        <xsl:apply-templates select="(aff|xref[@ref-type='aff'])[1]" mode="author-refine"/>
-      </span>
-      <a class="author-refine-show-more">
-        <xsl:text>More </xsl:text><i class="fa fa-caret-right"></i>
-      </a>
-      <ul class="author-refine-links">
-        <xsl:apply-templates select="corresp[descendant::email]|xref[@ref-type='corresp']" mode="author-refine"/>
-        <li class="author-refine-link-item">
-          <a href="/search?query=AUTH:%22{translate($name, ' ', '+')}%22&amp;page=1" class="author-refine-href">
-            <i class="fa fa-search author-refine-icon"></i>
-            <xsl:text>Find articles by '</xsl:text>
-            <xsl:value-of select="$name"/>
-            <xsl:text>'</xsl:text>
-          </a>
-        </li>
-        <!--<li class="author-refine-link-item">
-          <a href="/search?query=" class="author-refine-href">
-            <i class="fa fa-filter author-refine-icon"></i>
-            <xsl:text>Filter current search by '</xsl:text>
-            <xsl:value-of select="$name"/>
-            <xsl:text>'</xsl:text>
-          </a>
-        </li>-->
-      </ul>
-    </div>
-  </xsl:template>
-
-  <xsl:template match="xref[@ref-type='aff']" mode="author-refine">
-    <xsl:variable name="rid" select="@rid"/>
-    <xsl:attribute name="title">
-      <xsl:apply-templates select="//aff[@id=$rid]" mode="list-affs-title"/>
-      <xsl:for-each select="following-sibling::xref[@ref-type='aff']">
-        <xsl:variable name="id" select="@rid"/>
-        <xsl:text>; </xsl:text>
-        <xsl:apply-templates select="//aff[@id=$id]" mode="list-affs-title"/>
-      </xsl:for-each>
-      <xsl:for-each select="following-sibling::aff">
-        <xsl:text>; </xsl:text>
-        <xsl:apply-templates select="." mode="list-affs-title"/>
-      </xsl:for-each>
-    </xsl:attribute>
-    <xsl:apply-templates select="//aff[@id=$rid]" mode="list-affs"/>
-    <xsl:for-each select="following-sibling::xref[@ref-type='aff']">
-      <xsl:variable name="id" select="@rid"/>
-      <xsl:text>; </xsl:text>
-      <xsl:apply-templates select="//aff[@id=$id]" mode="list-affs"/>
-    </xsl:for-each>
-    <xsl:for-each select="following-sibling::aff">
-      <xsl:text>; </xsl:text>
-      <xsl:apply-templates select="." mode="list-affs"/>
-    </xsl:for-each>
-  </xsl:template>
-
-  <xsl:template match="aff" mode="author-refine">
-    <xsl:attribute name="title">
-      <xsl:apply-templates select="." mode="list-affs-title"/>
-      <xsl:for-each select="following-sibling::aff">
-        <xsl:text>; </xsl:text>
-        <xsl:apply-templates select="." mode="list-affs-title"/>
-      </xsl:for-each>
-      <xsl:for-each select="following-sibling::xref[@ref-type='aff']">
-        <xsl:variable name="id" select="@rid"/>
-        <xsl:text>; </xsl:text>
-        <xsl:apply-templates select="//aff[@id=$id]" mode="list-affs-title"/>
-      </xsl:for-each>
-    </xsl:attribute>
-    <xsl:apply-templates select="." mode="list-affs"/>
-    <xsl:for-each select="following-sibling::aff">
-      <xsl:text>; </xsl:text>
-      <xsl:apply-templates select="." mode="list-affs"/>
-    </xsl:for-each>
-    <xsl:for-each select="following-sibling::xref[@ref-type='aff']">
-      <xsl:variable name="id" select="@rid"/>
-      <xsl:text>; </xsl:text>
-      <xsl:apply-templates select="//aff[@id=$id]" mode="list-affs"/>
-    </xsl:for-each>
-  </xsl:template>
-
-  <xsl:template match="aff" mode="list-affs">
-    <xsl:apply-templates select="text()|*[not(self::label)]"/>
-  </xsl:template>
-
-  <xsl:template match="aff|*[not(self::label)]" mode="list-affs-title">
-    <xsl:apply-templates mode="list-affs-title"/>
-  </xsl:template>
-
-  <xsl:template match="label" mode="list-affs-title"/>
-
-  <xsl:template match="text()" mode="list-affs-title">
-    <xsl:value-of select="normalize-space(.)"/>
-  </xsl:template>
-
-  <xsl:template match="xref[@ref-type='corresp']" mode="author-refine">
-    <xsl:variable name="rid" select="@rid"/>
-    <xsl:if test="count(//corresp[@id=$rid]//email) = 1">
-      <xsl:apply-templates select="//corresp[@id=$rid]" mode="author-refine"/>
-    </xsl:if>
-  </xsl:template>
-
-  <xsl:template match="corresp" mode="author-refine">
-    <li class="author-refine-link-item">
-      <a href="mailto:dev@null" class="author-refine-href oemail">
-        <xsl:variable name="email">
-          <xsl:call-template name="reverse">
-            <xsl:with-param name="rest" select="descendant::email"/>
-          </xsl:call-template>
-        </xsl:variable>
-        <xsl:attribute name="data-email">
-          <xsl:value-of select="$email"/>
-        </xsl:attribute>
-        <i class="fa fa-envelope author-refine-icon"></i>
-        <span><xsl:value-of select="$email"/></span>
-      </a>
-    </li>
-  </xsl:template>
-
-  <xsl:variable name="affiliations">
-    <xsl:for-each select="//aff">
-      <xsl:choose>
-        <xsl:when test=". = preceding::aff"/>
-        <xsl:otherwise>
-          <aff>
-            <xsl:apply-templates/>
-          </aff>
-        </xsl:otherwise>
-      </xsl:choose>
-    </xsl:for-each>
-  </xsl:variable>
 
   <xsl:template match="name|collab" mode="authorlist">
     <a data-target="authspan{count(parent::contrib/preceding-sibling::contrib)+1}">
@@ -693,6 +583,112 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  
+  <xsl:template match="meta-value" mode="review-map">
+    <xsl:variable name="str" select="translate(., '-', ' ')"/>
+    <xsl:value-of select="concat(translate(substring($str, 1, 1), $smallcase, $uppercase), substring($str, 2))"/>
+  </xsl:template>
+  
+  <xsl:template name="peer-review-summary">
+    <h2>Peer Review Summary</h2>
+    <table class="peer-review-summary">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Reviewer</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <xsl:for-each select="//sub-article[@article-type='peer-review']">
+          <tr>
+            <td>
+              <xsl:apply-templates select="front-stub/pub-date"/>
+            </td>
+            <td>
+              <xsl:apply-templates select="front-stub/contrib-group[1]/contrib[1]/name"/>
+            </td>
+            <td>
+              <a href="{concat('#', @id)}">
+                <xsl:apply-templates
+                  select="front-stub/custom-meta-group/custom-meta[meta-name='recommendation']/meta-value"
+                  mode="review-map"
+                />
+              </a>
+            </td>
+          </tr>
+        </xsl:for-each>
+      </tbody>
+    </table>
+  </xsl:template>
+  
+  <xsl:template match="front-stub">
+    <div class="front-matter">
+      <xsl:if test="article-id[@pub-id-type='doi']">
+        <div class="citeinfo">
+          <p class="identifiers">              
+            <span class="doi">
+              <xsl:text>doi: </xsl:text>
+              <a href="{concat('https://doi.org/', article-id[@pub-id-type='doi'])}">
+                <xsl:value-of select="article-id[@pub-id-type='doi']"/>
+              </a>
+            </span>
+          </p>
+        </div>
+      </xsl:if>
+      <xsl:choose>
+        <xsl:when test="parent::sub-article/@article-type='peer-review' and custom-meta-group/custom-meta[meta-name='recommendation']">
+          <h1 class="sub-article-title">
+            <xsl:apply-templates
+              select="custom-meta-group/custom-meta[meta-name='recommendation']/meta-value"
+              mode="review-map"
+            />
+          </h1>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:apply-templates select="title-group"/>
+        </xsl:otherwise>
+      </xsl:choose>      
+      <div class="fulltext--author-information">
+        <div>
+          <xsl:for-each select="contrib-group/contrib[@contrib-type = 'author']">
+            <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
+            <xsl:if test="position() != last()">
+              <xsl:text>, </xsl:text>
+            </xsl:if>
+            <xsl:if test="position() = last()-1">
+              <xsl:text>and </xsl:text>
+            </xsl:if>
+          </xsl:for-each>
+        </div>
+        <ol class="affiliations">
+          <xsl:if test="normalize-space($pprid) != ''">
+            <xsl:attribute name="style">
+              <xsl:text>list-style-type:none</xsl:text>
+            </xsl:attribute>
+          </xsl:if>
+          <xsl:apply-templates select="descendant::aff" mode="afflist"/>
+        </ol>
+      </div>
+      <xsl:apply-templates select="contrib-group/contrib[@contrib-type='reviewer'][1]" mode="article-info-reviewing-editor"/>
+      <xsl:apply-templates select="contrib-group/contrib[@contrib-type='editor'][1]" mode="article-info-reviewing-editor"/>
+      <xsl:apply-templates select="permissions"/>
+      <xsl:if test="not(following-sibling::back)">
+        <xsl:apply-templates select="author-notes"/>
+      </xsl:if>
+      <xsl:if test="not(abstract)">
+        <xsl:apply-templates select="kwd-group"/>
+      </xsl:if>
+    </div>
+    <xsl:apply-templates select="abstract"/>
+  </xsl:template>
+  
+  <xsl:template match="front-stub/title-group">
+    <div class="sub-article-title-container">
+      <xsl:apply-templates select="article-title"/>
+      <xsl:apply-templates select="subtitle"/>
+    </div>
+  </xsl:template>
 
   <xsl:template match="article-meta/title-group">
     <div id="article-title">
@@ -700,8 +696,14 @@
       <xsl:apply-templates select="subtitle"/>
     </div>
   </xsl:template>
+  
+  <xsl:template match="front-stub/title-group/article-title">
+    <h1 class="sub-article-title">
+      <xsl:apply-templates/>
+    </h1>
+  </xsl:template>
 
-  <xsl:template match="title-group/article-title">
+  <xsl:template match="article-meta/title-group/article-title">
     <h1 class="article-title manuscript-title">
       <xsl:apply-templates/>
     </h1>
@@ -944,24 +946,6 @@
     </p>
   </xsl:template>
 
-  <!--  <xsl:template match="funding-statement"/>-->
-
-  <!-- fn-group -->
-  <!--<xsl:template name="article-info-identification">
-        <xsl:variable name="doi" select="//article-meta/article-id[@pub-id-type='doi']"/>
-        <div>
-            <xsl:attribute name="id"><xsl:value-of select="'article-info-identification'"/></xsl:attribute>
-            <div>
-                <xsl:attribute name="class"><xsl:value-of select="'elife-article-info-doi'"/></xsl:attribute>
-                <h4 class="info-label">DOI</h4> <div class="info-content"><a href="/lookup/doi/{$doi}"><xsl:value-of select="$doi"/></a></div>
-            </div>
-            <div>
-                <xsl:attribute name="class"><xsl:value-of select="'elife-article-info-citeas'"/></xsl:attribute>
-                <h4 class="info-label">Cite this as</h4> <div class="info-content"><xsl:call-template name="citation"/></div>
-            </div>
-        </div>
-    </xsl:template>-->
-
   <xsl:template name="article-info-history">
     <div>
       <xsl:attribute name="id">
@@ -972,7 +956,7 @@
         <xsl:attribute name="class">
           <xsl:value-of select="'publication-history'"/>
         </xsl:attribute>
-        <xsl:for-each select="//history/date[@date-type]">
+        <xsl:for-each select="//article-meta/history/date[@date-type]">
           <xsl:apply-templates select="." mode="publication-history-item"/>
         </xsl:for-each>
         <xsl:apply-templates select="//article-meta/pub-date[@date-type]" mode="publication-history-item">
@@ -1228,18 +1212,6 @@
   </xsl:template>
 
   <!-- Start transforming sections to heading levels -->
-  <!--    <xsl:template match="supplementary-material">
-        <xsl:variable name="id">
-            <xsl:value-of select="@id"/>
-        </xsl:variable>
-        <xsl:variable name="data-doi" select="child::object-id[@pub-id-type='doi']/text()"/>
-        <div class="supplementary-material" data-doi="{$data-doi}">
-            <div class="supplementary-material-expansion" id="{$id}">
-                <xsl:apply-templates/>
-            </div>
-        </div>
-    </xsl:template>-->
-
   <!-- No need to proceed sec-type="additional-information", sec-type="supplementary-material" and sec-type="datasets"-->
   <xsl:template match="
       sec[not(@sec-type = 'additional-information')][not(@sec-type = 'datasets')]
@@ -2063,7 +2035,7 @@
   </xsl:template>
   <!-- Acknowledgement -->
 
-  <xsl:template match="ack">
+  <xsl:template match="back/ack">
     <div id="ack-1">
       <h2>
         <xsl:apply-templates select="label"/>
@@ -2079,21 +2051,21 @@
         <xsl:apply-templates/>
       </xsl:for-each>
       <xsl:if test="
-          following-sibling::fn-group/fn[@fn-type = 'con'] and (//author-notes/fn[@fn-type = 'con'] | //author-notes/fn[@fn-type = 'equal'] |
-          //contrib[@equal-contrib = 'yes'])">
+        following-sibling::fn-group/fn[@fn-type = 'con'] and (parent::back/preceding-sibling::*//author-notes/fn[@fn-type = 'con'] | parent::back/preceding-sibling::*//author-notes/fn[@fn-type = 'equal'] |
+        parent::back/preceding-sibling::*//contrib[@equal-contrib = 'yes'])">
         <div id="author-info-equal-contrib">
-          <xsl:apply-templates select="//author-notes/fn[@fn-type = 'con']"/>
-          <xsl:apply-templates select="//author-notes/fn[@fn-type = 'equal']"/>
-          <xsl:apply-templates select="//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
+          <xsl:apply-templates select="parent::back/preceding-sibling::*//author-notes/fn[@fn-type = 'con']"/>
+          <xsl:apply-templates select="parent::back/preceding-sibling::*//author-notes/fn[@fn-type = 'equal']"/>
+          <xsl:apply-templates select="parent::back/preceding-sibling::*//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
         </div>
       </xsl:if>
     </div>
-    <xsl:apply-templates select="//author-notes"/>
-    <xsl:if test="not(following-sibling::fn-group/fn[@fn-type = 'con']) and not(//author-notes)">
-      <xsl:apply-templates select="//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
+    <xsl:apply-templates select="parent::back/preceding-sibling::*//author-notes"/>
+    <xsl:if test="not(following-sibling::fn-group/fn[@fn-type = 'con']) and not(parent::back/preceding-sibling::*//author-notes)">
+      <xsl:apply-templates select="parent::back/preceding-sibling::*//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
     </xsl:if>
-    <xsl:if test="//contrib/email and not(//author-notes)">
-      <xsl:call-template name="list-emails"/>
+    <xsl:if test="parent::back/preceding-sibling::*//contrib/email and not(parent::back/preceding-sibling::*//author-notes)">
+      <xsl:apply-templates select="parent::back/preceding-sibling::*" mode="list-emails"/>
     </xsl:if>
   </xsl:template>
 
@@ -2134,11 +2106,11 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:template name="list-emails">
-    <xsl:if test="//contrib/email">
+  <xsl:template match="*" mode="list-emails">
+    <xsl:if test="descendant::contrib/email">
       <p>
         <xsl:text>Author emails: </xsl:text>
-        <xsl:for-each select="//contrib[email]">
+        <xsl:for-each select="descendant::contrib[email]">
           <xsl:value-of select="name/given-names"/>
           <xsl:text> </xsl:text>
           <xsl:value-of select="name/surname"/>
@@ -2157,14 +2129,14 @@
     <xsl:if test="fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')] | p | corresp">
       <h2 id="author-notes">Author Information</h2>
       <xsl:apply-templates select="p | corresp | bio"/>
-      <xsl:call-template name="list-emails"/>
+      <xsl:apply-templates select="parent::*" mode="list-emails"/>
     </xsl:if>
-    <xsl:if test="not(//back/fn-group/fn[@fn-type = 'con']) and (fn[@fn-type = 'con'] | fn[@fn-type = 'equal'] | //contrib[@equal-contrib = 'yes'])">
+    <xsl:if test="not(parent::*/following-sibling::back/fn-group/fn[@fn-type = 'con']) and (fn[@fn-type = 'con'] | fn[@fn-type = 'equal'] | parent::*//contrib[@equal-contrib = 'yes'])">
       <h3>Author Contributions</h3>
       <div id="author-info-equal-contrib">
         <xsl:apply-templates select="fn[@fn-type = 'con']"/>
         <xsl:apply-templates select="fn[@fn-type = 'equal']"/>
-        <xsl:apply-templates select="//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
+        <xsl:apply-templates select="parent::*//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
       </div>
     </xsl:if>
     <xsl:if test="fn[@fn-type = 'present-address']">
@@ -2186,7 +2158,7 @@
     <xsl:variable name="contributeid" select="@id"/>
     <section class="equal-contrib">
       <p>
-        <xsl:if test="//contrib[@equal-contrib and @equal-contrib != 'no']">
+        <xsl:if test="../../contrib-group//contrib[@equal-contrib and @equal-contrib != 'no']">
           <sup>#</sup>
         </xsl:if>
         <xsl:text> The following authors contributed equally: </xsl:text>
@@ -2207,7 +2179,7 @@
     <xsl:variable name="contributeid" select="@id"/>
     <section class="equal-contrib">
       <p>
-        <xsl:if test="//contrib[@equal-contrib and @equal-contrib != 'no']">
+        <xsl:if test="../../contrib-group//contrib[@equal-contrib and @equal-contrib != 'no']">
           <sup>#</sup>
         </xsl:if>
         <xsl:text> The following authors contributed equally: </xsl:text>
@@ -2262,35 +2234,6 @@
       <xsl:apply-templates/>
     </p>
   </xsl:template>
-
-  <!--<xsl:template match="author-notes/fn[not(@fn-type)]/p">
-    <xsl:variable name="id" select="parent::fn/@id"/>
-    <p>
-      <xsl:for-each select="//contrib[xref[@rid = $id]]">
-        <xsl:variable name="count" select="count(//contrib[xref[@rid = $id]])"/>
-        <xsl:if test="$count &gt; 1 and position() = last()">
-          <xsl:text> and </xsl:text>
-        </xsl:if>
-        <xsl:choose>
-          <xsl:when test="name">
-            <xsl:value-of select="concat(name/given-names, ' ', name/surname)"/>
-          </xsl:when>
-          <xsl:otherwise>
-            <xsl:value-of select="*[1]"/>
-          </xsl:otherwise>
-        </xsl:choose>
-        <xsl:choose>
-          <xsl:when test="position() = last()">
-            <xsl:text>: </xsl:text>
-          </xsl:when>
-          <xsl:when test="$count &gt; 2">
-            <xsl:text>, </xsl:text>
-          </xsl:when>
-        </xsl:choose>
-      </xsl:for-each>
-      <xsl:apply-templates/>
-    </p>
-  </xsl:template>-->
 
   <xsl:template match="author-notes/corresp">
     <p class="corresp" id="{@id}">
@@ -2449,7 +2392,7 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:template match="ref/element-citation">
+  <xsl:template match="ref/element-citation|ref/mixed-citation">
     <xsl:variable name="title">
       <xsl:choose>
         <xsl:when test="child::article-title">
@@ -2711,114 +2654,6 @@
 
   <!-- END video handling -->
 
-  <!-- START sub-article -->
-
-  <xsl:template match="sub-article">
-    <xsl:variable name="data-doi" select="child::front-stub/article-id[@pub-id-type = 'doi']/text()"/>
-    <div data-doi="{$data-doi}">
-      <!-- determine the attribute -->
-      <xsl:attribute name="id">
-        <xsl:if test="@article-type = 'article-commentary'">
-          <xsl:text>decision-letter</xsl:text>
-        </xsl:if>
-        <xsl:if test="@article-type = 'reply'">
-          <xsl:text>author-response</xsl:text>
-        </xsl:if>
-      </xsl:attribute>
-      <xsl:apply-templates/>
-
-    </div>
-    <div class="panel-separator"/>
-  </xsl:template>
-
-  <!-- sub-article body -->
-  <xsl:template match="sub-article/body">
-    <div>
-      <xsl:attribute name="class">
-        <xsl:if test="../@article-type = 'article-commentary'">
-          <xsl:text>elife-article-decision-letter</xsl:text>
-        </xsl:if>
-        <xsl:if test="../@article-type = 'reply'">
-          <xsl:text>elife-article-author-response</xsl:text>
-        </xsl:if>
-      </xsl:attribute>
-      <div class="article fulltext-view">
-        <xsl:apply-templates/>
-      </div>
-    </div>
-    <div>
-      <xsl:attribute name="class">
-        <xsl:if test="../@article-type = 'article-commentary'">
-          <xsl:text>elife-article-decision-letter-doi</xsl:text>
-        </xsl:if>
-        <xsl:if test="../@article-type = 'reply'">
-          <xsl:text>elife-article-author-response-doi</xsl:text>
-        </xsl:if>
-      </xsl:attribute>
-      <strong>DOI:</strong>
-      <xsl:text> </xsl:text>
-
-      <xsl:variable name="doino" select="preceding-sibling::*//article-id"/>
-      <a>
-        <xsl:attribute name="href">
-          <xsl:value-of select="concat('/lookup/doi/', $doino)"/>
-        </xsl:attribute>
-        <xsl:value-of select="concat('https://doi.org/', $doino)"/>
-      </a>
-    </div>
-  </xsl:template>
-
-  <!-- START sub-article author contrib information -->
-
-  <xsl:template match="sub-article//contrib-group">
-    <div class="elife-article-editors">
-      <xsl:apply-templates/>
-    </div>
-  </xsl:template>
-
-  <xsl:template match="sub-article//contrib-group/contrib">
-    <div>
-      <xsl:attribute name="class">
-        <xsl:value-of select="concat('elife-article-decision-reviewing', @contrib-type)"/>
-      </xsl:attribute>
-      <xsl:apply-templates/>
-    </div>
-  </xsl:template>
-
-  <xsl:template match="contrib[@contrib-type = 'editor']/name/given-names | contrib[@contrib-type = 'editor']/name/surname">
-    <span class="nlm-given-names">
-      <xsl:value-of select="given-names"/>
-    </span>
-    <xsl:text> </xsl:text>
-    <span class="nlm-surname">
-      <xsl:value-of select="surname"/>
-    </span>
-    <xsl:if test="parent::suffix">
-      <xsl:text> </xsl:text>
-      <span class="nlm-surname">
-        <xsl:value-of select="parent::suffix"/>
-      </span>
-    </xsl:if>
-    <xsl:text>, </xsl:text>
-  </xsl:template>
-
-  <xsl:template match="contrib[@contrib-type = 'editor']//aff">
-    <xsl:apply-templates select="child::*"/>
-  </xsl:template>
-
-  <xsl:template match="
-      contrib[@contrib-type = 'editor']//role | contrib[@contrib-type = 'editor']//institution |
-      contrib[@contrib-type = 'editor']//country">
-    <span class="nlm-{name()}">
-      <xsl:apply-templates/>
-    </span>
-    <xsl:if test="not(parent::aff) or (parent::aff and following-sibling::*)">
-      <xsl:text>, </xsl:text>
-    </xsl:if>
-  </xsl:template>
-
-  <!-- END sub-article author contrib information -->
-
   <!-- box text -->
   <xsl:template match="boxed-text">
     <xsl:variable name="data-doi" select="child::object-id[@pub-id-type = 'doi']/text()"/>
@@ -3059,8 +2894,7 @@
 
   <!-- END - general format -->
 
-  <xsl:template match="
-      sub-article//title-group | sub-article/front-stub | fn-group[@content-type = 'competing-interest']/fn/p |
+  <xsl:template match="fn-group[@content-type = 'competing-interest']/fn/p |
       //history//*[@publication-type = 'journal']/article-title">
     <xsl:apply-templates/>
   </xsl:template>
@@ -3097,8 +2931,6 @@
       ref//publisher-name | ref//issn | red//month | ref//day | ref//season"/>
   <xsl:template match="person-group[@person-group-type = 'author'] | collab"/>
   <xsl:template match="media/label"/>
-  <xsl:template match="sub-article//article-title"/>
-  <xsl:template match="sub-article//article-id"/>
   <xsl:template match="object-id | table-wrap/label"/>
   <xsl:template match="funding-group//institution-wrap/institution-id"/>
   <xsl:template match="table-wrap/graphic"/>

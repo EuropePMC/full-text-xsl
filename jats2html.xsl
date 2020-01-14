@@ -996,6 +996,7 @@
     <xsl:apply-templates/>
   </xsl:template>
   <xsl:template match="fn-group[@content-type = 'ethics-information']/title"/>
+  
   <xsl:template match="contrib" mode="article-info-reviewing-editor">
     <xsl:variable name="level">
       <xsl:choose>
@@ -1007,12 +1008,23 @@
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
+    <xsl:variable name="type" select="@contrib-type"/>
     <xsl:element name="{substring-before($level,'|')}">
-      <xsl:attribute name="id"><xsl:text>article-info-reviewing-editor</xsl:text></xsl:attribute>
-      <xsl:element name="{substring-before(substring-after($level, '|'), '|')}">Reviewed by</xsl:element>
+      <xsl:attribute name="id"><xsl:value-of select="concat('article-info-reviewing-', $type)"/></xsl:attribute>
+      <xsl:element name="{substring-before(substring-after($level, '|'), '|')}">
+        <xsl:choose>
+          <xsl:when test="$type = 'reviewer'">
+            <xsl:text>Reviewed</xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:text>Edited</xsl:text>
+          </xsl:otherwise>
+        </xsl:choose>
+        <xsl:text> by </xsl:text>
+      </xsl:element>
       <xsl:element name="{substring-after(substring-after($level, '|'),'|')}">
         <xsl:apply-templates select="node()"/>
-        <xsl:for-each select="following::contrib[@contrib-type='reviewer' or @contrib-type='editor']">
+        <xsl:for-each select="following::contrib[@contrib-type=$type]">
           <xsl:text>, </xsl:text>
           <xsl:apply-templates select="node()"/>
         </xsl:for-each>

@@ -1208,6 +1208,7 @@
         <xsl:choose>
           <xsl:when test="title">
             <xsl:value-of select="title"/>
+            <xsl:text>: </xsl:text>
           </xsl:when>
           <xsl:otherwise>
             <xsl:text>Keywords: </xsl:text>

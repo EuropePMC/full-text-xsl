@@ -472,21 +472,29 @@
     </xsl:if>
     <xsl:for-each select="following-sibling::xref[@ref-type = 'fn']">
       <xsl:variable name="rid" select="@rid"/>
-      <xsl:for-each select="//fn[@id = $rid]">
-        <xsl:if test="not(@fn-type) or (@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')">
-          <xsl:variable name="count" select="count(preceding-sibling::fn[not(@fn-type)] |
-            preceding-sibling::fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]) + 1"/>
+      <xsl:choose>
+        <xsl:when test=".='iD'">
           <xsl:text> </xsl:text>
-          <a href="{concat('#', $rid)}">
-            <sup class="inline-block">
-              <xsl:call-template name="get-symbol">
-                <xsl:with-param name="count" select="$count"/>
-                <xsl:with-param name="current" select="1"/>
-              </xsl:call-template>
-            </sup>
-          </a>
-        </xsl:if>
-      </xsl:for-each>
+          <a href="{concat('#', $rid)}"><sup class="inline-block">iD</sup></a>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:for-each select="//fn[@id = $rid]">
+            <xsl:if test="not(@fn-type) or (@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')">
+              <xsl:variable name="count" select="count(preceding-sibling::fn[not(@fn-type)] |
+                preceding-sibling::fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]) + 1"/>
+              <xsl:text> </xsl:text>
+              <a href="{concat('#', $rid)}">
+                <sup class="inline-block">
+                  <xsl:call-template name="get-symbol">
+                    <xsl:with-param name="count" select="$count"/>
+                    <xsl:with-param name="current" select="1"/>
+                  </xsl:call-template>
+                </sup>
+              </a>
+            </xsl:if>
+          </xsl:for-each>
+        </xsl:otherwise>
+      </xsl:choose>
     </xsl:for-each>
     <xsl:variable name="corresp" select="following-sibling::xref[@ref-type='corresp']/@rid"/>
     <xsl:choose>
@@ -2144,7 +2152,7 @@
       <xsl:apply-templates select="p | corresp | bio"/>
       <xsl:apply-templates select="parent::*" mode="list-emails"/>
     </xsl:if>
-    <xsl:if test="not(parent::*/following-sibling::back/fn-group/fn[@fn-type = 'con']) and (fn[@fn-type = 'con'] | fn[@fn-type = 'equal'] | parent::*//contrib[@equal-contrib = 'yes'])">
+    <xsl:if test="not(ancestor::*[starts-with(name(), 'front')]/following-sibling::back/fn-group/fn[@fn-type = 'con']) and (fn[@fn-type = 'con'] | fn[@fn-type = 'equal'] | parent::*//contrib[@equal-contrib = 'yes'])">
       <h3>Author Contributions</h3>
       <div id="author-info-equal-contrib">
         <xsl:apply-templates select="fn[@fn-type = 'con']"/>
@@ -2464,6 +2472,9 @@
         <xsl:if test="child::article-title and child::source">
           <xsl:value-of select="'source|'"/>
         </xsl:if>
+        <xsl:if test="child::*[starts-with(name(), 'conf')]">
+          <xsl:value-of select="'conference|'"/>
+        </xsl:if>
         <xsl:if test="child::publisher-name">
           <xsl:value-of select="'publisher-name|'"/>
         </xsl:if>
@@ -2511,6 +2522,23 @@
           <span class="nlm-source">
             <xsl:apply-templates select="child::source/node()"/>
           </span>
+        </span>
+      </xsl:if>
+      <xsl:if test="contains($includes, 'conference|')">
+        <xsl:if test="not(starts-with($includes, 'conference|'))">
+          <xsl:text>, </xsl:text>
+        </xsl:if>
+        <span class="reflink-details-conference">
+          <xsl:apply-templates select="child::conf-name/node()"/>
+          <xsl:if test="child::conf-name and child::conf-loc">
+            <xsl:text>, </xsl:text>
+          </xsl:if>
+          <xsl:apply-templates select="child::conf-loc/node()"/>
+          <xsl:if test="(child::conf-name or child::conf-loc) and child::conf-date">
+            <xsl:text>, </xsl:text>
+          </xsl:if>
+          <xsl:apply-templates select="child::conf-date/node()"/>
+          <xsl:text>.</xsl:text>
         </span>
       </xsl:if>
       <xsl:if test="contains($includes, 'publisher-name|')">
@@ -2586,6 +2614,8 @@
           </xsl:if>
         </span>
       </xsl:if>
+      <xsl:text>.</xsl:text>
+      <xsl:apply-templates select="comment"/>
       <xsl:apply-templates select="pub-id[@pub-id-type = 'doi']" mode="idlinks"/>
       <xsl:apply-templates select="pub-id[not(@pub-id-type = 'doi')]" mode="idlinks"/>
     </div>

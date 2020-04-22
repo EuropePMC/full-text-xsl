@@ -2443,17 +2443,17 @@
           <xsl:apply-templates select="person-group[@person-group-type = 'author'] | collab" mode="list-ref-people"/>
         </span>
       </xsl:if>
-
-      <span class="elife-reflink-title">
-        <span class="nlm-{$title-type}">
-          <xsl:copy-of select="$title"/>
+      <xsl:if test="$title != ''">
+        <span class="elife-reflink-title">
+          <span class="nlm-{$title-type}">
+            <xsl:copy-of select="$title"/>
+          </span>
+          <xsl:if test="not('.' = substring($title, string-length($title) - string-length('.') + 1))">
+            <xsl:text>.</xsl:text>
+          </xsl:if>
+          <xsl:text> </xsl:text>
         </span>
-        <xsl:if test="not('.' = substring($title, string-length($title) - string-length('.') + 1))">
-          <xsl:text>.</xsl:text>
-        </xsl:if>
-        <xsl:text> </xsl:text>
-      </span>
-
+      </xsl:if>
       <!-- move all other elements into details div
                 and comma separate
             -->
@@ -2496,11 +2496,8 @@
         <xsl:if test="child::lpage">
           <xsl:value-of select="'lpage|'"/>
         </xsl:if>
-        <xsl:if test="child::person-group[@person-group-type = 'editor'] and @publication-type='book'">
-          <xsl:value-of select="'book-editor|'"/>
-        </xsl:if>
       </xsl:variable>
-      <xsl:if test="contains($includes, 'book-editor|')">
+      <xsl:if test="child::person-group[@person-group-type = 'editor'] and @publication-type='book'">
         <span>
           <xsl:text>In: </xsl:text>
           <xsl:apply-templates select="person-group[@person-group-type = 'editor']" mode="list-ref-people"/>
@@ -2608,11 +2605,20 @@
           </xsl:if>
         </span>
       </xsl:if>
-      <xsl:text>.</xsl:text>
+      <xsl:if test="$includes != ''">
+        <xsl:text>.</xsl:text>
+      </xsl:if>      
       <xsl:apply-templates select="pub-id[@pub-id-type = 'doi']" mode="idlinks"/>
       <xsl:apply-templates select="pub-id[not(@pub-id-type = 'doi')]" mode="idlinks"/>
+      <xsl:apply-templates select="date-in-citation"/>
       <xsl:apply-templates select="comment|annotation"/>
     </div>
+  </xsl:template>
+  
+  <xsl:template match="ref//date-in-citation">
+    <xsl:text>[</xsl:text>
+    <xsl:apply-templates/>
+    <xsl:text>]</xsl:text>
   </xsl:template>
 
   <xsl:template match="pub-id" mode="idlinks">

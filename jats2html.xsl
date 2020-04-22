@@ -1445,7 +1445,7 @@
   </xsl:template>
 
   <!-- Handle other parts of table -->
-  <xsl:template match="thead | tr">
+  <xsl:template match="thead | tr | tbody | col | colgroup">
     <xsl:element name="{local-name()}">
       <xsl:if test="@style">
         <xsl:attribute name="style">
@@ -1454,12 +1454,6 @@
       </xsl:if>
       <xsl:apply-templates/>
     </xsl:element>
-  </xsl:template>
-
-  <xsl:template match="tbody">
-    <tbody>
-      <xsl:apply-templates/>
-    </tbody>
   </xsl:template>
 
   <xsl:template match="th | td">
@@ -1474,10 +1468,16 @@
           <xsl:value-of select="@colspan"/>
         </xsl:attribute>
       </xsl:if>
-      <xsl:if test="@style | @align">
+      <xsl:if test="@style | @align | @valign">
         <xsl:attribute name="style">
-          <xsl:text>text-align:</xsl:text>
-          <xsl:value-of select="concat(@align, ';')"/>
+          <xsl:if test="@align">
+            <xsl:text>text-align:</xsl:text>
+            <xsl:value-of select="concat(@align, ';')"/>
+          </xsl:if>
+          <xsl:if test="@valign">
+            <xsl:text>vertical-align:</xsl:text>
+            <xsl:value-of select="concat(@align, ';')"/>
+          </xsl:if>
           <xsl:value-of select="@style"/>
         </xsl:attribute>
       </xsl:if>
@@ -2823,6 +2823,13 @@
               </xsl:when>
             </xsl:choose>
           </xsl:attribute>
+          <xsl:if test="@continued-from">
+            <xsl:attribute name="start">
+              <xsl:call-template name="get-list-start">
+                <xsl:with-param name="rid" select="@continued-from"/>
+              </xsl:call-template>
+            </xsl:attribute>
+          </xsl:if>
           <xsl:apply-templates/>
         </ol>
       </xsl:otherwise>
@@ -2837,6 +2844,24 @@
         </xsl:for-each>
       </xsl:if>
     </xsl:if>
+  </xsl:template>
+  
+  <xsl:template name="get-list-start">
+    <xsl:param name="rid"/>
+    <xsl:param name="count" select="1"/>
+    <xsl:variable name="prevList" select="//list[@id=$rid]"/>
+    <xsl:variable name="newCount" select="$count + count($prevList/list-item)"/>
+    <xsl:choose>
+      <xsl:when test="$prevList/@continued-from">
+        <xsl:call-template name="get-list-start">
+          <xsl:with-param name="rid" select="$prevList/@continued-from"/>
+          <xsl:with-param name="count" select="$newCount"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="$newCount"/>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template match="list-item">

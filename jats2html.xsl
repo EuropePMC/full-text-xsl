@@ -2364,8 +2364,8 @@
     </li>
   </xsl:template>
 
-  <xsl:template match="ref//person-group" mode="list-ref-people">
-    <xsl:for-each select="name | collab">
+  <xsl:template match="ref//person-group|collab" mode="list-ref-people">
+    <xsl:for-each select="name | collab | self::collab">
       <xsl:if test="position() != 1">
         <xsl:text>, </xsl:text>
       </xsl:if>
@@ -2389,9 +2389,6 @@
           </span>
         </xsl:when>
       </xsl:choose>
-    </xsl:for-each>
-    <xsl:for-each select="collab">
-      <xsl:value-of select="."/>
     </xsl:for-each>
     <xsl:choose>
       <xsl:when test="@person-group-type = 'editor'">
@@ -2443,7 +2440,7 @@
 
       <xsl:if test="person-group[@person-group-type = 'author'] | collab">
         <span class="authors">
-          <xsl:apply-templates select="person-group[@person-group-type = 'author']" mode="list-ref-people"/>
+          <xsl:apply-templates select="person-group[@person-group-type = 'author'] | collab" mode="list-ref-people"/>
         </span>
       </xsl:if>
 

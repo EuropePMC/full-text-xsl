@@ -2432,9 +2432,6 @@
         <xsl:when test="child::source">
           <xsl:value-of select="'source'"/>
         </xsl:when>
-        <xsl:when test="child::comment">
-          <xsl:value-of select="'comment'"/>
-        </xsl:when>
       </xsl:choose>
     </xsl:variable>
 
@@ -2615,9 +2612,9 @@
         </span>
       </xsl:if>
       <xsl:text>.</xsl:text>
-      <xsl:apply-templates select="comment"/>
       <xsl:apply-templates select="pub-id[@pub-id-type = 'doi']" mode="idlinks"/>
       <xsl:apply-templates select="pub-id[not(@pub-id-type = 'doi')]" mode="idlinks"/>
+      <xsl:apply-templates select="comment|annotation"/>
     </div>
   </xsl:template>
 

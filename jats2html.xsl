@@ -1476,7 +1476,7 @@
           </xsl:if>
           <xsl:if test="@valign">
             <xsl:text>vertical-align:</xsl:text>
-            <xsl:value-of select="concat(@align, ';')"/>
+            <xsl:value-of select="concat(@valign, ';')"/>
           </xsl:if>
           <xsl:value-of select="@style"/>
         </xsl:attribute>

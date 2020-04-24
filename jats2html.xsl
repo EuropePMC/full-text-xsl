@@ -2891,6 +2891,12 @@
       <xsl:apply-templates/>
     </em>
   </xsl:template>
+  
+  <xsl:template match="sc">
+    <span style="font-variant:small-caps">
+      <xsl:apply-templates/>
+    </span>
+  </xsl:template>
 
   <xsl:template match="underline">
     <span style="text-decoration:underline">

@@ -6,6 +6,7 @@
 
   <xsl:output method="html" indent="no" encoding="utf-8" omit-xml-declaration="yes"/>
   <xsl:param name="filelist"/>
+  <xsl:param name="msspreview" select="false()"/>
   <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
   <xsl:variable name="smallcase" select="'abcdefghijklmnopqrstuvwxyz'"/>
   <xsl:variable name="allcase" select="concat($smallcase, $uppercase)"/>
@@ -106,8 +107,14 @@
 
   <xsl:template match="/">
     <xsl:choose>
-      <xsl:when test="normalize-space($emsid) != ''">
-        <div class="page_proper" id="xml-preview-body">
+      <xsl:when test="$msspreview">
+        <div id="xml-preview-body">
+          <xsl:attribute name="class">
+            <xsl:text>page_proper</xsl:text>
+            <xsl:if test="normalize-space($pprid) = ''">
+              <xsl:text> author_manuscript</xsl:text>
+            </xsl:if>
+          </xsl:attribute>
           <div class="epmc_pageHolder articleContentPage fullPage">
             <div class="epmc_wideLeft">
               <xsl:apply-templates/>
@@ -133,7 +140,7 @@
 
   <xsl:template match="front">
     <xsl:choose>
-      <xsl:when test="normalize-space($emsid) != ''">
+      <xsl:when test="normalize-space($emsid) != '' and normalize-space($pprid) = ''">
         <img src="https://europepmc.org/corehtml/pmc/pmcgifs/logo-wtpa2.gif"/>
         <div class="front-matter">
           <xsl:call-template name="identifiers"/>
@@ -154,7 +161,7 @@
           <xsl:call-template name="identifiers"/>
           <xsl:call-template name="authors"/>
           <xsl:apply-templates select="article-meta"/>
-          <xsl:if test="not(following-sibling::back)">
+          <xsl:if test="not(following-sibling::back/ack)">
             <xsl:apply-templates select="article-meta/author-notes"/>
           </xsl:if>
           <xsl:if test="not(article-meta/abstract) or normalize-space($ctxid) != ''">
@@ -221,9 +228,14 @@
             <span class="ppr">
               <xsl:text>PPRID: </xsl:text>
               <xsl:value-of select="$pprid"/>
+              <xsl:if test="normalize-space($emsid) != ''">
+                <br/>
+                <xsl:text>EMSID: </xsl:text>
+                <xsl:value-of select="$emsid"/>
+              </xsl:if>
             </span>
             <span class="pubinfo">
-              <xsl:value-of select="//journal-meta/publisher/publisher-name"/>
+              <xsl:value-of select="//journal-meta/journal-title-group/journal-title"/>
               <xsl:text> preprint, posted </xsl:text>
               <xsl:apply-templates select="//article-meta/pub-date[@pub-type='preprint']"/>
             </span>
@@ -340,7 +352,12 @@
             </xsl:for-each>
           </div>
           <div class="author-affiliations">
-            <h2 id="fulltext--author-affiliations-title" role="button" tabindex="0" onclick="this.classList.toggle('open'); this.blur()">
+            <h2 id="fulltext--author-affiliations-title" role="button" tabindex="0">
+              <xsl:if test="not($msspreview)">
+                <xsl:attribute name="onclick">
+                  <xsl:text>this.classList.toggle('open'); this.blur()</xsl:text>
+                </xsl:attribute>
+              </xsl:if>
               <xsl:text>Affiliations</xsl:text>
             </h2>
             <ol class="affiliations">
@@ -498,7 +515,7 @@
     </xsl:for-each>
     <xsl:variable name="corresp" select="following-sibling::xref[@ref-type='corresp']/@rid"/>
     <xsl:choose>
-      <xsl:when test="normalize-space($emsid) != ''">
+      <xsl:when test="$msspreview">
         <xsl:choose>
           <xsl:when test="following-sibling::corresp//email">
             <xsl:text> </xsl:text>
@@ -552,6 +569,18 @@
   
   <xsl:template match="aff" mode="afflist">
     <xsl:choose>
+      <xsl:when test="normalize-space($pprid) != ''">
+        <xsl:variable name="id" select="@id"/>
+        <xsl:variable name="count" select="'1'"/>
+        <li class="fulltext--author-affiliation-item">
+          <div class="fulltext--author-affiliation-text">
+            <span class="fulltext--author-affiliation-index">
+              <xsl:value-of select="count(preceding::aff)+1"/>
+              <xsl:text>.</xsl:text>
+            </span><span><xsl:apply-templates select="*[not(self::label)]|text()"/></span>
+          </div>
+        </li>
+      </xsl:when>
       <xsl:when test="normalize-space($emsid) != ''">
         <xsl:variable name="alpha" select="'abcdefghijklmnopqrstuvwxyz'"/>
         <li>
@@ -577,18 +606,6 @@
           <xsl:apply-templates select="*[not(self::label)] | text()"/>
         </li>
       </xsl:when>
-      <xsl:otherwise>
-        <xsl:variable name="id" select="@id"/>
-        <xsl:variable name="count" select="'1'"/>
-        <li class="fulltext--author-affiliation-item">
-          <div class="fulltext--author-affiliation-text">
-            <span class="fulltext--author-affiliation-index">
-              <xsl:value-of select="count(preceding::aff)+1"/>
-              <xsl:text>.</xsl:text>
-            </span><span><xsl:apply-templates select="*[not(self::label)]|text()"/></span>
-          </div>
-        </li>
-      </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
   
@@ -1326,8 +1343,9 @@
             <xsl:text>: </xsl:text>
           </span>
         </xsl:if>
-        <xsl:apply-templates/>
+        <xsl:apply-templates select="text()|*[not(*[position()=last()][self::list])]"/>
       </p>
+      <xsl:apply-templates select="*[position()=last()][self::list]"/>
     </xsl:if>
     <xsl:if test="supplementary-material">
       <xsl:if test="ancestor::caption and (count(preceding-sibling::p) = 0) and (ancestor::boxed-text or ancestor::media)">
@@ -1409,7 +1427,7 @@
           </xsl:variable>
           <xsl:variable name="graphics">
             <xsl:choose>
-              <xsl:when test="normalize-space($emsid) != ''">
+              <xsl:when test="$msspreview">
                 <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
               </xsl:when>
               <xsl:otherwise>
@@ -1546,7 +1564,7 @@
         <xsl:value-of select="concat(parent::node()/@id, '-math')"/>
       </xsl:attribute>
       <xsl:choose>
-        <xsl:when test="normalize-space($emsid) != ''">
+        <xsl:when test="$msspreview">
           <xsl:text>&lt;math xmlns="http://www.w3.org/1998/Math/MathML"&gt;</xsl:text>
           <xsl:apply-templates mode="serialize"/>
           <xsl:text>&lt;/math&gt;</xsl:text>
@@ -1660,7 +1678,7 @@
           </xsl:variable>
           <xsl:variable name="graphics">
             <xsl:choose>
-              <xsl:when test="normalize-space($emsid) != ''">
+              <xsl:when test="$msspreview">
                 <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
               </xsl:when>
               <xsl:otherwise>
@@ -1673,7 +1691,7 @@
               <a target="_blank">
                 <xsl:attribute name="href">
                   <xsl:choose>
-                    <xsl:when test="normalize-space($emsid) != ''">
+                    <xsl:when test="$msspreview">
                       <xsl:value-of select="$graphics"/>
                     </xsl:when>
                     <xsl:otherwise>
@@ -1777,6 +1795,7 @@
         </xsl:if>
         <xsl:apply-templates mode="testing"/>
       </p>
+      <xsl:apply-templates select="*[position()=last()][self::list]"/>
     </xsl:if>
     <xsl:if test="supplementary-material">
       <xsl:if test="ancestor::caption and (count(preceding-sibling::p) = 0) and (ancestor::boxed-text or ancestor::media)">
@@ -1951,7 +1970,7 @@
             </xsl:variable>
             <xsl:variable name="graphics">
               <xsl:choose>
-                <xsl:when test="normalize-space($emsid) != ''">
+                <xsl:when test="$msspreview">
                   <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
                 </xsl:when>
                 <xsl:otherwise>
@@ -1961,7 +1980,7 @@
             </xsl:variable>
             <a target="_blank" class="figure-expand" title="{$caption} - Click to open full size">
               <xsl:choose>
-                <xsl:when test="normalize-space($emsid) != ''">
+                <xsl:when test="$msspreview">
                   <xsl:attribute name="href">
                     <xsl:value-of select="$graphics"/>
                   </xsl:attribute>
@@ -1971,7 +1990,7 @@
                   <xsl:attribute name="href">
                     <xsl:value-of select="concat($graphics,'.jpg')"/>
                   </xsl:attribute>
-                  <img data-img="[graphic-{$filename}-medium]" src="{concat($graphics, '-700.jpg')}" alt="{$caption}"/>
+                  <img data-img="[graphic-{$filename}-medium]" src="{concat($graphics, '.jpg')}" alt="{$caption}"/>
                 </xsl:otherwise>
               </xsl:choose>
             </a>
@@ -2021,7 +2040,7 @@
   <xsl:template match="media" mode="testing">
     <xsl:variable name="filename">
       <xsl:choose>
-        <xsl:when test="normalize-space($emsid) != ''">
+        <xsl:when test="$msspreview">
           <xsl:call-template name="get-filename">
             <xsl:with-param name="string" select="@xlink:href"/>
           </xsl:call-template>
@@ -2033,7 +2052,7 @@
     </xsl:variable>
     <xsl:variable name="media-download-href">
       <xsl:choose>
-        <xsl:when test="normalize-space($emsid) != ''">
+        <xsl:when test="$msspreview">
           <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
         </xsl:when>
         <xsl:otherwise>
@@ -2044,7 +2063,7 @@
     <!-- if mimetype is application -->
     <span class="inline-linked-media-wrapper">
       <a href="{$media-download-href}">
-        <xsl:if test="normalize-space($emsid) != ''">
+        <xsl:if test="$msspreview">
           <xsl:attribute name="download">
             <xsl:value-of select="concat($filename, '.')"/>
             <xsl:value-of select="substring-after($media-download-href, '.')"/>
@@ -2258,10 +2277,11 @@
 
   <xsl:template match="author-notes/corresp">
     <p class="corresp" id="{@id}">
-      <xsl:if test="normalize-space($emsid) != ''">
-        <sup>&#9993;</sup>
-        <xsl:text> </xsl:text>
-      </xsl:if>
+      <xsl:choose>
+        <xsl:when test="$msspreview"><sup>&#9993;</sup></xsl:when>
+        <xsl:otherwise><i class="fa fa-envelope author-refine-icon"></i></xsl:otherwise>
+      </xsl:choose>
+      <xsl:text> </xsl:text>
       <xsl:if test="count(node()) = 1">
         <xsl:text>Correspondence: </xsl:text>
       </xsl:if>
@@ -2723,7 +2743,7 @@
     </xsl:variable>
     <xsl:variable name="graphics">
       <xsl:choose>
-        <xsl:when test="normalize-space($emsid) != ''">
+        <xsl:when test="$msspreview">
           <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
         </xsl:when>
         <xsl:otherwise>
@@ -2744,7 +2764,7 @@
     </xsl:variable>
     <xsl:variable name="graphics">
       <xsl:choose>
-        <xsl:when test="normalize-space($emsid) != ''">
+        <xsl:when test="$msspreview">
           <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
         </xsl:when>
         <xsl:otherwise>
@@ -2972,6 +2992,8 @@
       //history//*[@publication-type = 'journal']/article-title">
     <xsl:apply-templates/>
   </xsl:template>
+  
+  <xsl:template match="*[position()=last()][self::list]" mode="testing"/>
 
   <xsl:template match="
       caption | table-wrap/table | table-wrap-foot | fn | bold | italic | underline | preformat | monospace |

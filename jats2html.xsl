@@ -541,15 +541,15 @@
         <xsl:choose>
           <xsl:when test="following-sibling::corresp//email">
             <xsl:text> </xsl:text>
-            <a href="#author-notes"><sup class="inline-block"><i class="fa fa-envelope author-refine-icon"></i></sup></a>
+            <a href="#author-notes"><sup class="inline-block"><i class="fas fa-envelope author-refine-icon"></i></sup></a>
           </xsl:when>
           <xsl:when test="//corresp[@id=$corresp]">
             <xsl:text> </xsl:text>
-            <a href="#author-notes"><sup class="inline-block"><i class="fa fa-envelope author-refine-icon"></i></sup></a>
+            <a href="#author-notes"><sup class="inline-block"><i class="fas fa-envelope author-refine-icon"></i></sup></a>
           </xsl:when>
           <xsl:when test="following-sibling::corresp">
             <xsl:text> </xsl:text>
-            <a href="#author-notes"><sup class="inline-block"><i class="fa fa-envelope author-refine-icon"></i></sup></a>
+            <a href="#author-notes"><sup class="inline-block"><i class="fas fa-envelope author-refine-icon"></i></sup></a>
           </xsl:when>
         </xsl:choose>
       </xsl:otherwise>
@@ -2069,6 +2069,10 @@
             <xsl:value-of select="substring-after($media-download-href, '.')"/>
           </xsl:attribute>
         </xsl:if>
+        <xsl:choose>
+          <xsl:when test="$msspreview">&#x21E9;</xsl:when>
+          <xsl:otherwise><i class="fas fa-download"></i></xsl:otherwise>
+        </xsl:choose>
         <xsl:text> Download source data</xsl:text>
       </a>
     </span>
@@ -2279,7 +2283,7 @@
     <p class="corresp" id="{@id}">
       <xsl:choose>
         <xsl:when test="$msspreview"><sup>&#9993;</sup></xsl:when>
-        <xsl:otherwise><i class="fa fa-envelope author-refine-icon"></i></xsl:otherwise>
+        <xsl:otherwise><i class="fas fa-envelope"></i></xsl:otherwise>
       </xsl:choose>
       <xsl:text> </xsl:text>
       <xsl:if test="count(node()) = 1">

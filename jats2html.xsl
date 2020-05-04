@@ -2975,7 +2975,7 @@
 
   <xsl:template match="
       caption | table-wrap/table | table-wrap-foot | fn | bold | italic | underline | preformat | monospace |
-      styled-content | sub | sup | sec/title | ext-link | app/title | disp-formula | inline-formula | list | list-item | disp-quote | code | verse-group" mode="testing">
+      styled-content | sub | sup | sc | sec/title | ext-link | app/title | disp-formula | inline-formula | list | list-item | disp-quote | code | verse-group" mode="testing">
     <xsl:apply-templates select="."/>
   </xsl:template>
 

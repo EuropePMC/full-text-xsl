@@ -981,14 +981,22 @@
         <xsl:attribute name="class">
           <xsl:value-of select="'publication-history'"/>
         </xsl:attribute>
-        <xsl:for-each select="//article-meta/history/date[@date-type]">
-          <xsl:apply-templates select="." mode="publication-history-item"/>
+        <xsl:apply-templates select="//article-meta/history/date[@date-type]" mode="publication-history-item"/>
+        <xsl:apply-templates select="//article-meta/pub-date[@date-type]" mode="publication-history-item"/>
+        <xsl:for-each select="//article-meta/pub-date[@pub-type and not(@date-type)]">
+          <xsl:apply-templates select="." mode="publication-history-item">
+            <xsl:with-param name="date-type">
+              <xsl:choose>
+                <xsl:when test="contains(@pub-type, 'preprint')">posted</xsl:when>
+                <xsl:when test="starts-with(@pub-type, 'e')">published_online</xsl:when>
+                <xsl:when test="@pub-type = 'collection'">issue_date</xsl:when>
+                <xsl:otherwise>published</xsl:otherwise>
+              </xsl:choose>
+            </xsl:with-param>
+          </xsl:apply-templates>
         </xsl:for-each>
-        <xsl:apply-templates select="//article-meta/pub-date[@date-type]" mode="publication-history-item">
-          <xsl:with-param name="date-type" select="'published'"/>
-        </xsl:apply-templates>
       </ul>
-    </div>
+    </div>    
   </xsl:template>
 
   <xsl:template match="date | pub-date" mode="publication-history-item">
@@ -1002,7 +1010,7 @@
           <xsl:value-of select="concat($date-type, '-label')"/>
         </xsl:attribute>
         <xsl:call-template name="camel-case-word">
-          <xsl:with-param name="text" select="$date-type"/>
+          <xsl:with-param name="text" select="translate($date-type, '_', ' ')"/>
         </xsl:call-template>
       </span>
       <xsl:text> </xsl:text>

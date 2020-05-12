@@ -1,0 +1,3 @@
+An XSL for transforming JATS article full text into three kinds of HTML displays, depending on source type: PPR (Preprint), CTX (Published article full text), or EMS (Europe PMC Funder Author Manuscript Collection)
+
+Additionally it operates specially within the Manuscript Submission System ([xpub-epmc project](https://gitlab.ebi.ac.uk/literature-services/development/xpub-epmc)), based on and using parameter settings.

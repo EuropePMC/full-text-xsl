@@ -111,8 +111,8 @@
         <div id="xml-preview-body">
           <xsl:attribute name="class">
             <xsl:text>page_proper</xsl:text>
-            <xsl:if test="normalize-space($pprid) = ''">
-              <xsl:text> author_manuscript</xsl:text>
+            <xsl:if test="normalize-space($pprid) != ''">
+              <xsl:text> preprint</xsl:text>
             </xsl:if>
           </xsl:attribute>
           <div class="epmc_pageHolder articleContentPage fullPage">

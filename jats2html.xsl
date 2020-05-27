@@ -192,7 +192,7 @@
             <xsl:apply-templates select="preceding-sibling::*" mode="list-emails"/>
           </xsl:if>
         </xsl:if>
-        <xsl:apply-templates select="*[not(self::ack)]"/>
+        <xsl:apply-templates select="*[not(self::ack) and not(self::bio)]"/>
       </xsl:when>
       <xsl:otherwise>
         <xsl:apply-templates/>
@@ -2134,10 +2134,11 @@
 
   <xsl:template match="back/fn-group/fn/p">
     <xsl:choose>
-      <xsl:when test="bold and (not(child::text()) or not(child::text()[normalize-space(.) != '']))">
+      <xsl:when test="*[position()=1][self::bold] and (not(child::text()) or not(child::text()[normalize-space(.) != '']))">
         <h3>
           <xsl:value-of select="bold"/>
         </h3>
+        <xsl:apply-templates select="*[not(self::bold)]"></xsl:apply-templates>
       </xsl:when>
       <xsl:otherwise>
         <p>
@@ -2178,9 +2179,10 @@
 
   <!-- author-notes -->
   <xsl:template match="author-notes">
-    <xsl:if test="fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')] | p | corresp">
+    <xsl:if test="fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')] | p | corresp | bio | ancestor::*[starts-with(name(), 'front')]/following-sibling::back/bio">
       <h2 id="author-notes">Author Information</h2>
-      <xsl:apply-templates select="p | corresp | bio"/>
+      <xsl:apply-templates select="ancestor::*[starts-with(name(), 'front')]/following-sibling::back/bio | bio"/>
+      <xsl:apply-templates select="p | corresp"/>
       <xsl:apply-templates select="parent::*" mode="list-emails"/>
     </xsl:if>
     <xsl:if test="not(ancestor::*[starts-with(name(), 'front')]/following-sibling::back/fn-group/fn[@fn-type = 'con']) and (fn[@fn-type = 'con'] | fn[@fn-type = 'equal'] | parent::*//contrib[@equal-contrib = 'yes'])">
@@ -2747,7 +2749,7 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:template match="inline-graphic">
+  <xsl:template match="inline-graphic|p/graphic">
     <xsl:variable name="filename">
       <xsl:call-template name="get-filename">
         <xsl:with-param name="string" select="@xlink:href"/>
@@ -3014,6 +3016,7 @@
   </xsl:template>
 
   <!-- nodes to remove -->
+  <xsl:template match="@xlink:href"/>
   <xsl:template match="sec[@sec-type = 'supplementary-material'] | sec[@sec-type = 'floats-group']"/>
   <xsl:template match="back/fn-group/fn/label"/>
   <xsl:template match="aff/label"/>

@@ -159,6 +159,9 @@
       <xsl:otherwise>
         <div class="front-matter">
           <xsl:call-template name="identifiers"/>
+          <xsl:if test="normalize-space($pprid) != ''">
+            <xsl:apply-templates select="article-meta/title-group"/>
+          </xsl:if>
           <xsl:call-template name="authors"/>
           <xsl:apply-templates select="article-meta"/>
           <xsl:if test="not(following-sibling::back/ack)">

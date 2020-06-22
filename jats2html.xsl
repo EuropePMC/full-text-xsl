@@ -47,12 +47,12 @@
     </xsl:choose>
   </xsl:variable>
   <xsl:variable name="filebase">
-    <xsl:if test="normalize-space($pprid) != ''">
-      <xsl:value-of select="concat('https://europepmc.org/docs/preprint/', $pprid, '/')"/>
-    </xsl:if>
-    <xsl:if test="normalize-space($ctxid) != ''">
-      <xsl:value-of select="concat('https://europepmc.org/docs/micropublications/', $ctxid, '/')"/>
-    </xsl:if>
+    <xsl:choose>
+      <xsl:when test="normalize-space($ctxid) != ''">
+        <xsl:value-of select="concat('https://europepmc.org/docs/micropublications/', $ctxid, '/')"/>
+      </xsl:when>
+      <xsl:otherwise/>
+    </xsl:choose>    
   </xsl:variable>
 
   <xsl:variable name="fn-symbols" select="'*†‡§‖¶'"/>

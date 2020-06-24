@@ -239,7 +239,13 @@
             </span>
             <span class="pubinfo">
               <xsl:value-of select="//journal-meta/journal-title-group/journal-title"/>
-              <xsl:text> preprint, posted </xsl:text>
+              <xsl:text> preprint,</xsl:text>
+              <xsl:if test="//article-meta/article-version">
+                <xsl:text> version </xsl:text>
+                <xsl:value-of select="//article-meta/article-version"/>
+                <xsl:text>,</xsl:text>
+              </xsl:if>
+              <xsl:text> posted </xsl:text>
               <xsl:apply-templates select="//article-meta/pub-date[@pub-type='preprint']"/>
             </span>
             <br/>

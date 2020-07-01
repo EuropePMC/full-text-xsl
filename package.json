@@ -3,12 +3,17 @@
   "version": "1.0.0",
   "description": "An XSL for transforming JATS article full text into three kinds of HTML displays, depending on source type: PPR (Preprint), CTX (Published article full text), or EMS (Europe PMC Funder Author Manuscript Collection)",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sync": "node sync.js"
   },
   "repository": {
     "type": "git",
     "url": "https://gitlab.ebi.ac.uk/literature-services/public-projects/full-text-xsl.git"
   },
   "author": "Audrey Hamelers",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "dotenv": "^8.2.0",
+    "sync-directory": "^2.2.6"
+  }
 }

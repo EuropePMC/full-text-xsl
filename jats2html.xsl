@@ -625,36 +625,38 @@
   </xsl:template>
   
   <xsl:template name="peer-review-summary">
-    <h2>Peer Review Summary</h2>
-    <table class="peer-review-summary">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Reviewer</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <xsl:for-each select="//sub-article[@article-type='peer-review']">
+    <div id="prs">
+      <h2 id="prstitle">Peer Review Summary</h2>
+      <table class="peer-review-summary">
+        <thead>
           <tr>
-            <td>
-              <xsl:apply-templates select="front-stub/pub-date"/>
-            </td>
-            <td>
-              <xsl:apply-templates select="front-stub/contrib-group[1]/contrib[1]/name"/>
-            </td>
-            <td>
-              <a href="{concat('#', @id)}">
-                <xsl:apply-templates
-                  select="front-stub/custom-meta-group/custom-meta[meta-name='recommendation']/meta-value"
-                  mode="review-map"
-                />
-              </a>
-            </td>
+            <th>Date</th>
+            <th>Reviewer</th>
+            <th>Status</th>
           </tr>
-        </xsl:for-each>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <xsl:for-each select="//sub-article[@article-type='peer-review']">
+            <tr>
+              <td>
+                <xsl:apply-templates select="front-stub/pub-date"/>
+              </td>
+              <td>
+                <xsl:apply-templates select="front-stub/contrib-group[1]/contrib[1]/name"/>
+              </td>
+              <td>
+                <a href="{concat('#', @id)}">
+                  <xsl:apply-templates
+                    select="front-stub/custom-meta-group/custom-meta[meta-name='recommendation']/meta-value"
+                    mode="review-map"
+                  />
+                </a>
+              </td>
+            </tr>
+          </xsl:for-each>
+        </tbody>
+      </table>
+    </div>
   </xsl:template>
   
   <xsl:template match="front-stub">
@@ -2099,7 +2101,7 @@
 
   <xsl:template match="back/ack">
     <div id="ack-1">
-      <h2>
+      <h2 id="ack-1title">
         <xsl:apply-templates select="label"/>
         <xsl:choose>
           <xsl:when test="title">
@@ -2133,8 +2135,10 @@
 
   <xsl:template match="back/fn-group">
     <xsl:if test="fn[not(@fn-type = 'con')]">
-      <h2>Notes</h2>
-      <xsl:apply-templates select="fn[not(@fn-type = 'con')]"/>
+      <div id="notes">
+        <h2 id="notestitle">Notes</h2>
+        <xsl:apply-templates select="fn[not(@fn-type = 'con')]"/>
+      </div>
     </xsl:if>
   </xsl:template>
 
@@ -3120,7 +3124,7 @@
   <xsl:template name="supplementary-material">
     <xsl:if test="//supplementary-material[not(object-id)]">
       <div id="supplementary-material">
-        <h2>Supplementary Material</h2>
+        <h2 id="supplementary-materialtitle">Supplementary Material</h2>
         <ul class="supplementary-material">
           <xsl:for-each select="//supplementary-material[not(object-id)]">
             <li id="{@id}">
@@ -3157,14 +3161,14 @@
   <xsl:template match="glossary">
     <sec id="glossary">
       <xsl:if test="not(title)">
-        <h2>Glossary</h2>
+        <h2 id="glossarytitle">Glossary</h2>
       </xsl:if>
       <xsl:apply-templates/>
     </sec>
   </xsl:template>
 
   <xsl:template match="glossary/title">
-    <h2>
+    <h2 id="glossarytitle">
       <xsl:value-of select="."/>
     </h2>
   </xsl:template>

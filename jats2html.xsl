@@ -2388,8 +2388,14 @@
   <!-- START Reference Handling -->
 
   <xsl:template match="ref-list">
-    <div id="ref-list">
-      <h2 id="ref-listtitle">
+    <xsl:variable name="id">
+      <xsl:text>ref-list</xsl:text>
+      <xsl:if test="preceding::ref-list">
+        <xsl:value-of select="count(preceding::ref-list)"/>
+      </xsl:if>
+    </xsl:variable>
+    <div id="{$id}">
+      <h2 id="{$id}title">
         <xsl:apply-templates select="label"/>
         <xsl:choose>
           <xsl:when test="title">

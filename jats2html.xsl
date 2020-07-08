@@ -1363,9 +1363,8 @@
             <xsl:text>: </xsl:text>
           </span>
         </xsl:if>
-        <xsl:apply-templates select="text()|*[not(*[position()=last()][self::list])]"/>
+        <xsl:apply-templates/>
       </p>
-      <xsl:apply-templates select="*[position()=last()][self::list]"/>
     </xsl:if>
     <xsl:if test="supplementary-material">
       <xsl:if test="ancestor::caption and (count(preceding-sibling::p) = 0) and (ancestor::boxed-text or ancestor::media)">
@@ -1815,7 +1814,6 @@
         </xsl:if>
         <xsl:apply-templates mode="testing"/>
       </p>
-      <xsl:apply-templates select="*[position()=last()][self::list]"/>
     </xsl:if>
     <xsl:if test="supplementary-material">
       <xsl:if test="ancestor::caption and (count(preceding-sibling::p) = 0) and (ancestor::boxed-text or ancestor::media)">
@@ -2882,7 +2880,7 @@
         </ol>
       </xsl:otherwise>
     </xsl:choose>
-    <xsl:if test="not(ancestor::list-item)">
+    <xsl:if test="not(ancestor::p)">
       <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group']">
         <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
           <xsl:variable name="rid" select="@rid"/>
@@ -3020,8 +3018,6 @@
       //history//*[@publication-type = 'journal']/article-title">
     <xsl:apply-templates/>
   </xsl:template>
-  
-  <xsl:template match="*[position()=last()][self::list]" mode="testing"/>
 
   <xsl:template match="
       caption | table-wrap/table | table-wrap-foot | fn | bold | italic | underline | preformat | monospace |

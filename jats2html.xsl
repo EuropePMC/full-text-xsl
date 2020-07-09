@@ -48,12 +48,14 @@
     </xsl:choose>
   </xsl:variable>
   <xsl:variable name="filebase">
-    <xsl:choose>
-      <xsl:when test="normalize-space($ctxid) != ''">
-        <xsl:value-of select="concat('https://europepmc.org/docs/micropublications/', $ctxid, '/')"/>
-      </xsl:when>
-      <xsl:otherwise/>
-    </xsl:choose>    
+    <xsl:if test="normalize-space($ctxid) != ''">
+      <xsl:value-of select="concat('https://europepmc.org/docs/micropublications/', $ctxid, '/')"/>
+    </xsl:if>
+  </xsl:variable>
+  <xsl:variable name="siteUrl">
+    <xsl:if test="$msspreview">
+      <xsl:text>https://europepmc.org</xsl:text>
+    </xsl:if>
   </xsl:variable>
 
   <xsl:variable name="fn-symbols" select="'*†‡§‖¶'"/>
@@ -396,10 +398,10 @@
       <xsl:attribute name="href">
       <xsl:choose>
         <xsl:when test="self::name">
-          <xsl:value-of select="concat('https://europepmc.org/search?query=AUTH:%22', surname, '+', substring(given-names, 1, 1),'%22')"/>
+          <xsl:value-of select="concat($siteUrl,'/search?query=AUTH:%22', surname, '+', substring(given-names, 1, 1),'%22')"/>
         </xsl:when>
         <xsl:when test="self::collab">
-          <xsl:value-of select="concat('/search?query=AUTH:%22', translate(., ' ', '+'), '%22')"/>
+          <xsl:value-of select="concat($siteUrl,'/search?query=AUTH:%22', translate(., ' ', '+'), '%22')"/>
         </xsl:when>
       </xsl:choose>
       </xsl:attribute>
@@ -2677,7 +2679,12 @@
     <xsl:choose>
       <xsl:when test="@pub-id-type = 'pmid'">
         <xsl:text> </xsl:text>
-        <a href="http://europepmc.org/abstract/MED/{.}" target="_blank">
+        <a href="{$siteUrl}/abstract/MED/{.}">
+          <xsl:if test="$msspreview">
+            <xsl:attribute name="target">
+              <xsl:text>_blank</xsl:text>
+            </xsl:attribute>
+          </xsl:if>
           <xsl:text>[Europe PMC Abstract]</xsl:text>
         </a>
       </xsl:when>
@@ -2694,19 +2701,34 @@
       </xsl:when>
       <xsl:when test="@pub-id-type = 'pmcid'">
         <xsl:text> </xsl:text>
-        <a href="http://europepmc.org/articles/{.}" target="_blank">
+        <a href="{$siteUrl}/articles/{.}">
+          <xsl:if test="$msspreview">
+            <xsl:attribute name="target">
+              <xsl:text>_blank</xsl:text>
+            </xsl:attribute>
+          </xsl:if>
           <xsl:text>[Europe PMC Full Text]</xsl:text>
         </a>
       </xsl:when>
-      <xsl:when test="@pub-id-type = 'PPR'">
+      <xsl:when test="@pub-id-type = 'archive' and starts-with(translate(., $uppercase, $smallcase), 'ppr')">
         <xsl:text> </xsl:text>
-        <a href="http://europepmc.org/preprints/{.}" target="_blank">
+        <a href="{$siteUrl}/preprints/{.}">
+          <xsl:if test="$msspreview">
+            <xsl:attribute name="target">
+              <xsl:text>_blank</xsl:text>
+            </xsl:attribute>
+          </xsl:if>
           <xsl:text>[Europe PMC Preprint]</xsl:text>
         </a>
       </xsl:when>
-      <xsl:when test="@pub-id-type = 'AGR'">
+      <xsl:when test="@pub-id-type = 'other' and starts-with(translate(., $uppercase, $smallcase), 'ind')">
         <xsl:text> </xsl:text>
-        <a href="http://europepmc.org/abstract/AGR/{.}" target="_blank">
+        <a href="{$siteUrl}/abstract/AGR/{.}">
+          <xsl:if test="$msspreview">
+            <xsl:attribute name="target">
+              <xsl:text>_blank</xsl:text>
+            </xsl:attribute>
+          </xsl:if>
           <xsl:text>[Europe PMC Abstract]</xsl:text>
         </a>
       </xsl:when>

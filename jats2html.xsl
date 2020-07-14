@@ -246,10 +246,12 @@
               <xsl:if test="//article-meta/article-version">
                 <xsl:text> version </xsl:text>
                 <xsl:value-of select="//article-meta/article-version"/>
-                <xsl:text>,</xsl:text>
               </xsl:if>
-              <xsl:text> posted </xsl:text>
-              <xsl:apply-templates select="//article-meta/pub-date[@pub-type='preprint']"/>
+              <xsl:if test="//article-meta/pub-date[@pub-type='preprint']">
+                <xsl:text>,</xsl:text>
+                <xsl:text> posted </xsl:text>
+                <xsl:apply-templates select="//article-meta/pub-date[@pub-type='preprint']"/>
+              </xsl:if>
             </span>
             <br/>
             <xsl:if test="$doi">

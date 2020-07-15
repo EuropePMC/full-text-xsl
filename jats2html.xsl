@@ -241,7 +241,14 @@
               </xsl:if>
             </span>
             <span class="pubinfo">
-              <xsl:value-of select="//journal-meta/journal-title-group/journal-title"/>
+              <xsl:choose>
+                <xsl:when test="//journal-meta/journal-id[@journal-id-type='nlm-ta']">
+                  <xsl:value-of select="//journal-meta/journal-id[@journal-id-type='nlm-ta']"/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select="//journal-meta/journal-title-group/journal-title"/>
+                </xsl:otherwise>
+              </xsl:choose>              
               <xsl:text> preprint,</xsl:text>
               <xsl:if test="//article-meta/article-version">
                 <xsl:text> version </xsl:text>

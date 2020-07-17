@@ -249,9 +249,9 @@
                   <xsl:value-of select="//journal-meta/journal-title-group/journal-title"/>
                 </xsl:otherwise>
               </xsl:choose>              
-              <xsl:text> preprint,</xsl:text>
+              <xsl:text> preprint</xsl:text>
               <xsl:if test="//article-meta/article-version">
-                <xsl:text> version </xsl:text>
+                <xsl:text>, version </xsl:text>
                 <xsl:value-of select="//article-meta/article-version"/>
               </xsl:if>
               <xsl:if test="//article-meta/pub-date[@pub-type='preprint']">

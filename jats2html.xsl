@@ -635,7 +635,7 @@
     <xsl:choose>
       <xsl:when test=".='iD'">
         <xsl:text> </xsl:text>
-        <a href="{concat('#', $rid)}"><sup class="inline-block">iD</sup></a>
+        <a href="{concat('#', $rid)}">iD</a>
       </xsl:when>
       <xsl:otherwise>
         <xsl:for-each select="//fn[@id = $rid]">
@@ -644,12 +644,10 @@
               preceding-sibling::fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]) + 1"/>
             <xsl:text> </xsl:text>
             <a href="{concat('#', $rid)}">
-              <sup class="inline-block">
-                <xsl:call-template name="get-symbol">
-                  <xsl:with-param name="count" select="$count"/>
-                  <xsl:with-param name="current" select="1"/>
-                </xsl:call-template>
-              </sup>
+              <xsl:call-template name="get-symbol">
+                <xsl:with-param name="count" select="$count"/>
+                <xsl:with-param name="current" select="1"/>
+              </xsl:call-template>              
             </a>
           </xsl:if>
         </xsl:for-each>

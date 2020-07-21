@@ -630,6 +630,33 @@
     </xsl:choose>
   </xsl:template>
   
+  <xsl:template match="aff//xref[@ref-type = 'fn']">
+    <xsl:variable name="rid" select="@rid"/>
+    <xsl:choose>
+      <xsl:when test=".='iD'">
+        <xsl:text> </xsl:text>
+        <a href="{concat('#', $rid)}"><sup class="inline-block">iD</sup></a>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:for-each select="//fn[@id = $rid]">
+          <xsl:if test="not(@fn-type) or (@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')">
+            <xsl:variable name="count" select="count(preceding-sibling::fn[not(@fn-type)] |
+              preceding-sibling::fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]) + 1"/>
+            <xsl:text> </xsl:text>
+            <a href="{concat('#', $rid)}">
+              <sup class="inline-block">
+                <xsl:call-template name="get-symbol">
+                  <xsl:with-param name="count" select="$count"/>
+                  <xsl:with-param name="current" select="1"/>
+                </xsl:call-template>
+              </sup>
+            </a>
+          </xsl:if>
+        </xsl:for-each>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
   <xsl:template match="meta-value" mode="review-map">
     <xsl:variable name="str" select="translate(., '-', ' ')"/>
     <xsl:value-of select="concat(translate(substring($str, 1, 1), $smallcase, $uppercase), substring($str, 2))"/>
@@ -3073,9 +3100,7 @@
   <xsl:template match="fn-group[@content-type = 'competing-interest']/title"/>
   <xsl:template match="permissions/copyright-year | permissions/copyright-holder"/>
   <xsl:template match="fn-group[@content-type = 'author-contribution']/title"/>
-  <xsl:template match="author-notes/fn[@fn-type = 'con']/label"/>
-  <xsl:template match="author-notes/fn[@fn-type = 'other']/label"/>
-  <xsl:template match="author-notes/fn[not(@fn-type)]/label"/>
+  <xsl:template match="author-notes/fn/label"/>
   <xsl:template match="author-notes/corresp/label"/>
   <xsl:template match="abstract/title"/>
   <xsl:template match="fig/graphic"/>
@@ -3092,8 +3117,6 @@
   <xsl:template match="object-id | table-wrap/label"/>
   <xsl:template match="funding-group//institution-wrap/institution-id"/>
   <xsl:template match="table-wrap/graphic"/>
-  <xsl:template match="author-notes/fn[@fn-type = 'present-address']/label"/>
-  <xsl:template match="author-notes/fn[@fn-type = 'deceased']/label"/>
   <xsl:template match="table-wrap-foot//fn/label"/>
 
   <xsl:template name="camel-case-word">

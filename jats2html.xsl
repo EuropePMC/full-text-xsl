@@ -279,6 +279,7 @@
                 <xsl:text>CTXID: </xsl:text>
                 <xsl:value-of select="$ctxid"/>
               </xsl:if>
+              <xsl:apply-templates select="//article-meta/article-id"/>
             </span>
           </span>
           <span>
@@ -355,6 +356,15 @@
     <xsl:apply-templates select="contrib-group/contrib[@contrib-type='editor'][1]" mode="article-info-reviewing-editor"/>
     <xsl:apply-templates select="permissions"/>
   </xsl:template>
+  
+  <xsl:template match="article-meta/article-id[@pub-id-type='pmcid' or @pub-id-type='pmid']">
+    <br/>
+    <xsl:value-of select="translate(@pub-id-type, $smallcase, $uppercase)"/>
+    <xsl:text>: </xsl:text>
+    <xsl:value-of select="."/>
+  </xsl:template>
+  
+  <xsl:template match="article-meta/article-id[not(@pub-id-type='pmcid' or @pub-id-type='pmid')]"/>
 
   <xsl:template name="authors">
     <div class="fulltext--author-information">

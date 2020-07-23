@@ -392,11 +392,16 @@
               <xsl:text>Affiliations</xsl:text>
             </h2>
             <ol class="affiliations">
-              <xsl:if test="normalize-space($pprid) != ''">
-                <xsl:attribute name="style">
-                  <xsl:text>list-style-type:none</xsl:text>
-                </xsl:attribute>
-              </xsl:if>
+              <xsl:attribute name="style">
+                <xsl:choose>
+                  <xsl:when test="normalize-space($pprid) != ''">
+                    <xsl:text>list-style-type:none</xsl:text>
+                  </xsl:when>
+                  <xsl:otherwise>
+                    <xsl:text>text-indent:0</xsl:text>
+                  </xsl:otherwise>
+                </xsl:choose>
+              </xsl:attribute>
               <xsl:choose>
                 <xsl:when test="//article-meta//aff[not(parent::contrib)]">
                   <xsl:apply-templates select="//article-meta//aff" mode="afflist"/>

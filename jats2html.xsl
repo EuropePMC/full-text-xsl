@@ -308,7 +308,7 @@
                     <xsl:text>: </xsl:text>
                     <xsl:value-of select="elocation-id"/>
                     <xsl:value-of select="fpage"/>
-                    <xsl:if test="lpage">
+                    <xsl:if test="lpage and lpage != fpage">
                       <xsl:text>-</xsl:text>
                       <xsl:value-of select="lpage"/>
                     </xsl:if>

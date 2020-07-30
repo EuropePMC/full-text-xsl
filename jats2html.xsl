@@ -167,7 +167,7 @@
           </xsl:if>
           <xsl:call-template name="authors"/>
           <xsl:apply-templates select="article-meta"/>
-          <xsl:if test="not(following-sibling::back/ack)">
+          <xsl:if test="not(following-sibling::back)">
             <xsl:apply-templates select="article-meta/author-notes"/>
           </xsl:if>
           <xsl:if test="not(article-meta/abstract) or normalize-space($ctxid) != ''">

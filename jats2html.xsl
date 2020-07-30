@@ -404,10 +404,12 @@
               </xsl:attribute>
               <xsl:choose>
                 <xsl:when test="//article-meta//aff[not(parent::contrib)]">
-                  <xsl:apply-templates select="//article-meta//aff" mode="afflist"/>
+                  <xsl:apply-templates select="//article-meta//aff" mode="afflist"/>                  
                 </xsl:when>
                 <xsl:otherwise>
-                  <xsl:apply-templates select="exsl:node-set($affiliations)/aff" mode="afflist"/>
+                  <xsl:apply-templates select="exsl:node-set($affiliations)/aff" mode="afflist">
+                    <xsl:with-param name="count">position</xsl:with-param>
+                  </xsl:apply-templates>
                 </xsl:otherwise>
               </xsl:choose>
             </ol>
@@ -604,14 +606,21 @@
   </xsl:template>
   
   <xsl:template match="aff" mode="afflist">
+    <xsl:param name="count"/>
     <xsl:choose>
       <xsl:when test="normalize-space($pprid) != ''">
         <xsl:variable name="id" select="@id"/>
-        <xsl:variable name="count" select="'1'"/>
         <li class="fulltext--author-affiliation-item">
           <div class="fulltext--author-affiliation-text">
             <span class="fulltext--author-affiliation-index">
-              <xsl:value-of select="count(preceding::aff)+1"/>
+              <xsl:choose>
+                <xsl:when test="$count = 'position'">
+                  <xsl:value-of select="position()"/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select="count(preceding::aff)+1"/>                  
+                </xsl:otherwise>
+              </xsl:choose>
               <xsl:text>.</xsl:text>
             </span><span><xsl:apply-templates select="*[not(self::label)]|text()"/></span>
           </div>

@@ -1784,7 +1784,7 @@
           </span>
           <span class="fig-label">
             <xsl:value-of select="../label/text()"/>
-            <xsl:if test="title">
+            <xsl:if test="../label/text() and title">
               <xsl:text>: </xsl:text>
             </xsl:if>
           </span>
@@ -2251,7 +2251,7 @@
 
   <!-- author-notes -->
   <xsl:template match="author-notes">
-    <xsl:if test="fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')] | p | corresp | bio | ancestor::*[starts-with(name(), 'front')]/following-sibling::back/bio">
+    <xsl:if test="fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address') or not(@fn-type)] | p | corresp | bio | ancestor::*[starts-with(name(), 'front')]/following-sibling::back/bio">
       <h2 id="author-notes">Author Information</h2>
       <xsl:apply-templates select="ancestor::*[starts-with(name(), 'front')]/following-sibling::back/bio | bio"/>
       <xsl:apply-templates select="p | corresp"/>

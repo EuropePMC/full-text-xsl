@@ -506,7 +506,7 @@
         <xsl:for-each select="//aff[@id=$rid]">
           <sup class="fulltext--author-affiliation-index inline-block">
             <xsl:choose>
-              <xsl:when test="label">
+              <xsl:when test="normalize-space($pprid) = '' and label">
                 <xsl:value-of select="label"/>
               </xsl:when>
               <xsl:otherwise>
@@ -2979,7 +2979,7 @@
         </ol>
       </xsl:otherwise>
     </xsl:choose>
-    <xsl:if test="not(ancestor::p)">
+    <xsl:if test="not(ancestor::p or ancestor::list-item)">
       <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group']">
         <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
           <xsl:variable name="rid" select="@rid"/>

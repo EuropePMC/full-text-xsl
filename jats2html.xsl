@@ -2343,16 +2343,35 @@
   </xsl:template>
 
   <xsl:template match="author-notes/fn[not(@fn-type)]/p | author-notes/fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]/p">
-    <xsl:variable name="count" select="count(parent::fn/preceding-sibling::fn[not(@fn-type)] |
-      preceding-sibling::fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]) + 1"/>
-    <p>
-      <xsl:call-template name="get-symbol">
-        <xsl:with-param name="count" select="$count"/>
-        <xsl:with-param name="current" select="1"/>
-      </xsl:call-template>
-      <xsl:text> </xsl:text>
-      <xsl:apply-templates/>
-    </p>
+    <xsl:variable name="id" select="@id"/>
+    <xsl:variable name="symbol">
+      <xsl:if test="//xref[@rid = $id]">
+        <xsl:if test="position() = 1">
+          <xsl:variable name="count" select="count(parent::fn/preceding-sibling::fn[not(@fn-type)] |
+            preceding-sibling::fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]) + 1"/>    
+          <xsl:call-template name="get-symbol">
+            <xsl:with-param name="count" select="$count"/>
+            <xsl:with-param name="current" select="1"/>
+          </xsl:call-template>
+          <xsl:text> </xsl:text>
+        </xsl:if>
+      </xsl:if>
+    </xsl:variable>
+    <xsl:choose>
+      <xsl:when test="*[position()=1][self::bold] and (not(child::text()) or not(child::text()[normalize-space(.) != '']))">
+        <h3>
+          <xsl:value-of select="$symbol"/>
+          <xsl:value-of select="bold"/>
+        </h3>
+        <xsl:apply-templates select="*[not(self::bold)]"></xsl:apply-templates>
+      </xsl:when>
+      <xsl:otherwise>
+        <p>
+          <xsl:value-of select="$symbol"/>
+          <xsl:apply-templates/>
+        </p>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template match="author-notes/corresp">

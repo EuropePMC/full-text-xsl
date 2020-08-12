@@ -191,7 +191,8 @@
         <xsl:apply-templates select="ack"/>
         <xsl:if test="not(ack)">
           <xsl:apply-templates select="preceding-sibling::*//author-notes"/>
-          <xsl:if test="not(fn-group/fn[@fn-type = 'con']) and not(preceding-sibling::*//author-notes)">
+          <xsl:apply-templates select="fn-group/fn[@fn-type = 'con']"/>  
+          <xsl:if test="not(preceding-sibling::*//author-notes)">
             <xsl:apply-templates select="preceding-sibling::*//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
           </xsl:if>
           <xsl:if test="preceding-sibling::*//contrib/email and not(preceding-sibling::*//author-notes)">
@@ -534,9 +535,9 @@
         </xsl:when>
         <xsl:otherwise>
           <xsl:for-each select="//fn[@id = $rid]">
-            <xsl:if test="not(@fn-type) or (@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')">
+            <xsl:if test="not(@fn-type) or (@fn-type != 'con' and @fn-type != 'present-address')">
               <xsl:variable name="count" select="count(preceding-sibling::fn[not(@fn-type)] |
-                preceding-sibling::fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]) + 1"/>
+                preceding-sibling::fn[(@fn-type != 'con' and @fn-type != 'present-address')]) + 1"/>
               <xsl:text> </xsl:text>
               <a href="{concat('#', $rid)}">
                 <sup class="inline-block">
@@ -663,9 +664,9 @@
       </xsl:when>
       <xsl:otherwise>
         <xsl:for-each select="//fn[@id = $rid]">
-          <xsl:if test="not(@fn-type) or (@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')">
+          <xsl:if test="not(@fn-type) or (@fn-type != 'con' and @fn-type != 'present-address')">
             <xsl:variable name="count" select="count(preceding-sibling::fn[not(@fn-type)] |
-              preceding-sibling::fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]) + 1"/>
+              preceding-sibling::fn[(@fn-type != 'con' and @fn-type != 'present-address')]) + 1"/>
             <xsl:text> </xsl:text>
             <a href="{concat('#', $rid)}">
               <xsl:call-template name="get-symbol">
@@ -2168,14 +2169,12 @@
           <xsl:otherwise>Acknowledgments</xsl:otherwise>
         </xsl:choose>
       </h2>
-      <xsl:apply-templates select="*[not(self::label or self::title)]"/>
-      <xsl:for-each select="following-sibling::fn-group/fn[@fn-type = 'con']">
-        <xsl:apply-templates/>
-      </xsl:for-each>
+      <xsl:apply-templates select="*[not(self::label or self::title)]"/>     
       <xsl:if test="
-        following-sibling::fn-group/fn[@fn-type = 'con'] and (parent::back/preceding-sibling::*//author-notes/fn[@fn-type = 'con'] | parent::back/preceding-sibling::*//author-notes/fn[@fn-type = 'equal'] |
-        parent::back/preceding-sibling::*//contrib[@equal-contrib = 'yes'])">
+        following-sibling::fn-group/fn[@fn-type = 'con'] | parent::back/preceding-sibling::*//author-notes/fn[@fn-type = 'con'] | parent::back/preceding-sibling::*//author-notes/fn[@fn-type = 'equal'] |
+        parent::back/preceding-sibling::*//contrib[@equal-contrib = 'yes']">
         <div id="author-info-equal-contrib">
+          <xsl:apply-templates select="following-sibling::fn-group/fn[@fn-type = 'con']"/> 
           <xsl:apply-templates select="parent::back/preceding-sibling::*//author-notes/fn[@fn-type = 'con']"/>
           <xsl:apply-templates select="parent::back/preceding-sibling::*//author-notes/fn[@fn-type = 'equal']"/>
           <xsl:apply-templates select="parent::back/preceding-sibling::*//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
@@ -2282,13 +2281,8 @@
 
   <xsl:template match="fn[@fn-type = 'equal']">
     <xsl:variable name="contributeid" select="@id"/>
-    <section class="equal-contrib">
-      <p>
-        <xsl:if test="../../contrib-group//contrib[@equal-contrib and @equal-contrib != 'no']">
-          <sup>#</sup>
-        </xsl:if>
-        <xsl:text> The following authors contributed equally: </xsl:text>
-      </p>
+    <section class="equal-contrib" id="{@id}">    
+      <xsl:apply-templates/>
       <ul class="equal-contrib-list">
         <xsl:for-each select="../../contrib-group/contrib/xref[@rid = $contributeid]">
           <li class="equal-contributor">

@@ -185,28 +185,7 @@
     </xsl:choose>
   </xsl:template>
   
-  <xsl:template match="back">
-    <xsl:choose>
-      <xsl:when test="normalize-space($emsid) != ''">
-        <xsl:apply-templates select="ack"/>
-        <xsl:if test="not(ack)">
-          <xsl:apply-templates select="preceding-sibling::*//author-notes"/>
-          <xsl:apply-templates select="fn-group/fn[@fn-type = 'con']"/>  
-          <xsl:if test="not(preceding-sibling::*//author-notes)">
-            <xsl:apply-templates select="preceding-sibling::*//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
-          </xsl:if>
-          <xsl:if test="preceding-sibling::*//contrib/email and not(preceding-sibling::*//author-notes)">
-            <xsl:apply-templates select="preceding-sibling::*" mode="list-emails"/>
-          </xsl:if>
-        </xsl:if>
-        <xsl:apply-templates select="*[not(self::ack) and not(self::bio)]"/>
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:apply-templates/>
-        <xsl:call-template name="article-info-history"/>
-      </xsl:otherwise>
-    </xsl:choose>
-  </xsl:template>
+
   
   <xsl:template match="sub-article">
     <hr class="sub-article-divider"/>
@@ -2156,6 +2135,29 @@
       </a>
     </span>
   </xsl:template>
+  
+  <!-- Back -->
+  
+  <xsl:template match="back">
+  <xsl:apply-templates select="ack"/>
+  <xsl:apply-templates select="preceding-sibling::*//author-notes"/>
+  <xsl:if test="not(preceding-sibling::*//author-notes)">
+    <xsl:if test="fn-group/fn[@fn-type = 'con'] | preceding-sibling::*//contrib[@equal-contrib = 'yes']">
+      <div id="author-info-equal-contrib">
+        <xsl:apply-templates select="following-sibling::fn-group/fn[@fn-type = 'con']"/> 
+        <xsl:apply-templates select="preceding-sibling::*//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
+      </div>
+    </xsl:if>
+    <xsl:if test="preceding-sibling::*//contrib/email">
+      <xsl:apply-templates select="preceding-sibling::*" mode="list-emails"/>
+    </xsl:if>
+  </xsl:if>
+  <xsl:apply-templates select="*[not(self::ack) and not(self::bio)]"/>
+  <xsl:if test="normalize-space($pprid) != ''">
+    <xsl:call-template name="article-info-history"/>
+  </xsl:if>
+  </xsl:template>
+  
   <!-- Acknowledgement -->
 
   <xsl:template match="back/ack">
@@ -2169,24 +2171,36 @@
           <xsl:otherwise>Acknowledgments</xsl:otherwise>
         </xsl:choose>
       </h2>
-      <xsl:apply-templates select="*[not(self::label or self::title)]"/>     
-      <xsl:if test="
-        following-sibling::fn-group/fn[@fn-type = 'con'] | parent::back/preceding-sibling::*//author-notes/fn[@fn-type = 'con'] | parent::back/preceding-sibling::*//author-notes/fn[@fn-type = 'equal'] |
-        parent::back/preceding-sibling::*//contrib[@equal-contrib = 'yes']">
-        <div id="author-info-equal-contrib">
-          <xsl:apply-templates select="following-sibling::fn-group/fn[@fn-type = 'con']"/> 
-          <xsl:apply-templates select="parent::back/preceding-sibling::*//author-notes/fn[@fn-type = 'con']"/>
-          <xsl:apply-templates select="parent::back/preceding-sibling::*//author-notes/fn[@fn-type = 'equal']"/>
-          <xsl:apply-templates select="parent::back/preceding-sibling::*//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
-        </div>
-      </xsl:if>
+      <xsl:apply-templates select="*[not(self::label or self::title)]"/>
     </div>
-    <xsl:apply-templates select="parent::back/preceding-sibling::*//author-notes"/>
-    <xsl:if test="not(following-sibling::fn-group/fn[@fn-type = 'con']) and not(parent::back/preceding-sibling::*//author-notes)">
-      <xsl:apply-templates select="parent::back/preceding-sibling::*//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
+  </xsl:template>
+  
+  <!-- author-notes -->
+  <xsl:template match="author-notes">
+    <xsl:if test="fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address') or not(@fn-type)] | p | corresp | bio | ancestor::*[starts-with(name(), 'front')]/following-sibling::back/bio">
+      <h2 id="author-notes">Author Information</h2>
+      <xsl:apply-templates select="ancestor::*[starts-with(name(), 'front')]/following-sibling::back/bio | bio"/>
+      <xsl:apply-templates select="p | corresp"/>
+      <xsl:apply-templates select="parent::*" mode="list-emails"/>
     </xsl:if>
-    <xsl:if test="parent::back/preceding-sibling::*//contrib/email and not(parent::back/preceding-sibling::*//author-notes)">
-      <xsl:apply-templates select="parent::back/preceding-sibling::*" mode="list-emails"/>
+    <xsl:if test="ancestor::*[starts-with(name(), 'front')]/following-sibling::back/fn-group/fn[@fn-type = 'con'] | fn[@fn-type = 'con'] | fn[@fn-type = 'equal'] | parent::*//contrib[@equal-contrib = 'yes']">
+      <h3>Author Contributions</h3>
+      <div id="author-info-equal-contrib">
+        <xsl:apply-templates select="ancestor::*[starts-with(name(), 'front')]/following-sibling::back/fn-group/fn[@fn-type = 'con']"/> 
+        <xsl:apply-templates select="fn[@fn-type = 'con']"/>
+        <xsl:apply-templates select="fn[@fn-type = 'equal']"/>
+        <xsl:apply-templates select="parent::*//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
+      </div>
+    </xsl:if>
+    <xsl:if test="fn[@fn-type = 'present-address']">
+      <div id="author-info-additional-address">
+        <xsl:apply-templates select="fn[@fn-type = 'present-address'][1]"/>
+      </div>
+    </xsl:if>
+    <xsl:if test="fn[not(@fn-type)] | fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]">
+      <div id="author-info-other-footnotes">
+        <xsl:apply-templates select="fn[not(@fn-type)] | fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]"/>
+      </div>
     </xsl:if>
   </xsl:template>
 
@@ -2246,37 +2260,6 @@
         </xsl:for-each>
       </p>
     </xsl:if>
-  </xsl:template>
-
-  <!-- author-notes -->
-  <xsl:template match="author-notes">
-    <xsl:if test="fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address') or not(@fn-type)] | p | corresp | bio | ancestor::*[starts-with(name(), 'front')]/following-sibling::back/bio">
-      <h2 id="author-notes">Author Information</h2>
-      <xsl:apply-templates select="ancestor::*[starts-with(name(), 'front')]/following-sibling::back/bio | bio"/>
-      <xsl:apply-templates select="p | corresp"/>
-      <xsl:apply-templates select="parent::*" mode="list-emails"/>
-    </xsl:if>
-    <xsl:if test="not(ancestor::*[starts-with(name(), 'front')]/following-sibling::back/fn-group/fn[@fn-type = 'con']) and (fn[@fn-type = 'con'] | fn[@fn-type = 'equal'] | parent::*//contrib[@equal-contrib = 'yes'])">
-      <h3>Author Contributions</h3>
-      <div id="author-info-equal-contrib">
-        <xsl:apply-templates select="fn[@fn-type = 'con']"/>
-        <xsl:apply-templates select="fn[@fn-type = 'equal']"/>
-        <xsl:apply-templates select="parent::*//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
-      </div>
-    </xsl:if>
-    <xsl:if test="fn[@fn-type = 'present-address']">
-      <div id="author-info-additional-address">
-        <xsl:apply-templates select="fn[@fn-type = 'present-address'][1]"/>
-      </div>
-    </xsl:if>
-    <xsl:if test="fn[not(@fn-type)] | fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]">
-      <div id="author-info-other-footnotes">
-        <xsl:apply-templates select="fn[not(@fn-type)] | fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]"/>
-      </div>
-    </xsl:if>
-    <!--        <div id="author-info-contributions">
-            <xsl:apply-templates select="ancestor::article/back//fn-group[@content-type='author-contribution']"/>
-        </div>-->
   </xsl:template>
 
   <xsl:template match="fn[@fn-type = 'equal']">

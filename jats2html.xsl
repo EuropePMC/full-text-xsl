@@ -2343,12 +2343,12 @@
   </xsl:template>
 
   <xsl:template match="author-notes/fn[not(@fn-type)]/p | author-notes/fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]/p">
-    <xsl:variable name="id" select="@id"/>
+    <xsl:variable name="id" select="parent::fn/@id"/>
     <xsl:variable name="symbol">
       <xsl:if test="//xref[@rid = $id]">
-        <xsl:if test="position() = 1">
+        <xsl:if test="not(preceding-sibling::p)">
           <xsl:variable name="count" select="count(parent::fn/preceding-sibling::fn[not(@fn-type)] |
-            preceding-sibling::fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]) + 1"/>    
+            parent::fn/preceding-sibling::fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]) + 1"/>    
           <xsl:call-template name="get-symbol">
             <xsl:with-param name="count" select="$count"/>
             <xsl:with-param name="current" select="1"/>

@@ -1880,7 +1880,7 @@
 
   <xsl:template match="xref" mode="testing">
     <xsl:choose>
-      <xsl:when test="ancestor::fn">
+      <xsl:when test="ancestor::fn and ancestor::table">
         <span class="xref-table">
           <xsl:apply-templates/>
         </span>
@@ -2917,7 +2917,7 @@
   <xsl:template match="list">
     <xsl:choose>
       <xsl:when test="@list-type = 'simple' or @list-type = 'bullet'">
-        <ul>
+        <ul id="{@id}">
           <xsl:attribute name="style">
             <xsl:text>list-style-type:</xsl:text>
             <xsl:choose>
@@ -2933,7 +2933,7 @@
         </ul>
       </xsl:when>
       <xsl:otherwise>
-        <ol>
+        <ol id="{@id}">
           <xsl:attribute name="style">
             <xsl:text>list-style-type:</xsl:text>
             <xsl:choose>

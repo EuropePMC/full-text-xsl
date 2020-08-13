@@ -3007,6 +3007,10 @@
       </xsl:choose>
     </li>
   </xsl:template>
+  
+  <xsl:template match="hr">
+    <xsl:copy/>
+  </xsl:template>
 
   <xsl:template match="bold">
     <strong>
@@ -3103,7 +3107,7 @@
 
   <xsl:template match="
       caption | table-wrap/table | table-wrap-foot | fn | bold | italic | underline | preformat | monospace |
-      styled-content | sub | sup | sc | sec/title | ext-link | app/title | disp-formula | inline-formula | list | list-item | disp-quote | code | verse-group" mode="testing">
+      styled-content | sub | sup | sc | sec/title | ext-link | app/title | disp-formula | inline-formula | list | list-item | hr | disp-quote | code | verse-group" mode="testing">
     <xsl:apply-templates select="."/>
   </xsl:template>
 

@@ -424,7 +424,7 @@
           <xsl:text> fulltext--affiliation-group-</xsl:text>
           <xsl:value-of select="count(preceding::aff)"/>
         </xsl:for-each>
-        <xsl:for-each select="//aff[parent::contrib-group]">
+        <xsl:for-each select="ancestor::contrib-group/aff">
           <xsl:variable name="id" select="@id"/>
           <xsl:if test="not(//xref[@rid = $id])">
             <xsl:text> fulltext--affiliation-group-</xsl:text>
@@ -450,53 +450,52 @@
         </xsl:choose>
       </span>
       <xsl:apply-templates select="following-sibling::degrees"/>
-      <xsl:for-each select="following-sibling::aff">
-        <xsl:variable name="current" select="."/>
+      <xsl:for-each select="following-sibling::aff | ancestor::contrib-group/aff | following-sibling::xref[@ref-type='aff']">
         <xsl:variable name="position">
           <xsl:if test="position() = last()">
             <xsl:text>last</xsl:text>
           </xsl:if>
         </xsl:variable>
-        <xsl:for-each select="exsl:node-set($affiliations)/aff">
-          <xsl:if test=". = $current">
-            <sup class="fulltext--author-affiliation-index inline-block">
-              <xsl:choose>
-                <xsl:when test="label">
-                  <xsl:value-of select="label"/>
-                </xsl:when>
-                <xsl:otherwise>
-                  <xsl:value-of select="position()"/>
-                </xsl:otherwise>
-              </xsl:choose>
-              <xsl:if test="$position != 'last'">
-                <xsl:text>, </xsl:text>
+        <xsl:choose>
+          <xsl:when test="self::aff">
+            <xsl:variable name="current" select="."/>
+            <xsl:for-each select="exsl:node-set($affiliations)/aff">
+              <xsl:if test=". = $current">
+                <sup class="fulltext--author-affiliation-index inline-block">
+                  <xsl:choose>
+                    <xsl:when test="normalize-space($pprid) = '' and label">
+                      <xsl:value-of select="label"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                      <xsl:value-of select="position()"/>
+                    </xsl:otherwise>
+                  </xsl:choose>
+                  <xsl:if test="$position!='last'">
+                    <xsl:text>, </xsl:text>
+                  </xsl:if>
+                </sup>
               </xsl:if>
-            </sup>
-          </xsl:if>
-        </xsl:for-each>
-      </xsl:for-each>
-      <xsl:for-each select="following-sibling::xref[@ref-type='aff']">
-        <xsl:variable name="position">
-          <xsl:if test="position()=last()">
-            <xsl:text>last</xsl:text>
-          </xsl:if>
-        </xsl:variable>
-        <xsl:variable name="rid" select="@rid"/>
-        <xsl:for-each select="//aff[@id=$rid]">
-          <sup class="fulltext--author-affiliation-index inline-block">
-            <xsl:choose>
-              <xsl:when test="normalize-space($pprid) = '' and label">
-                <xsl:value-of select="label"/>
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:value-of select="count(preceding::aff) + 1"/>
-              </xsl:otherwise>
-            </xsl:choose>
-            <xsl:if test="$position!='last'">
-              <xsl:text>, </xsl:text>
-            </xsl:if>
-          </sup>
-        </xsl:for-each>
+            </xsl:for-each>
+          </xsl:when>
+          <xsl:when test="self::xref">
+            <xsl:variable name="rid" select="@rid"/>
+            <xsl:for-each select="//aff[@id=$rid]">
+              <sup class="fulltext--author-affiliation-index inline-block">
+                <xsl:choose>
+                  <xsl:when test="normalize-space($pprid) = '' and label">
+                    <xsl:value-of select="label"/>
+                  </xsl:when>
+                  <xsl:otherwise>
+                    <xsl:value-of select="count(preceding::aff) + 1"/>
+                  </xsl:otherwise>
+                </xsl:choose>
+                <xsl:if test="$position!='last'">
+                  <xsl:text>, </xsl:text>
+                </xsl:if>
+              </sup>
+            </xsl:for-each>
+          </xsl:when>
+        </xsl:choose>
       </xsl:for-each>
     </a>
     <xsl:if test="parent::contrib[@equal-contrib and @equal-contrib != 'no']">
@@ -632,6 +631,10 @@
         </li>
       </xsl:when>
     </xsl:choose>
+  </xsl:template>
+  
+  <xsl:template match="aff/text()">
+    <xsl:value-of select="normalize-space(.)"/>
   </xsl:template>
   
   <xsl:template match="aff//xref[@ref-type = 'fn']">

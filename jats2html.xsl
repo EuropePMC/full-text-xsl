@@ -3012,7 +3012,7 @@
   </xsl:template>
   
   <xsl:template match="hr">
-    <xsl:copy/>
+    <hr/>
   </xsl:template>
 
   <xsl:template match="bold">

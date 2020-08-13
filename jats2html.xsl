@@ -1038,7 +1038,7 @@
         </xsl:attribute>
         <xsl:apply-templates select="//article-meta/history/date[@date-type]" mode="publication-history-item"/>
         <xsl:apply-templates select="//article-meta/pub-date[@date-type]" mode="publication-history-item"/>
-        <xsl:for-each select="//article-meta/pub-date[@pub-type and not(@date-type)]">
+        <xsl:for-each select="//article-meta/pub-date[@pub-type and not(@date-type) and not(@pub-type='nihms-submitted')]">
           <xsl:apply-templates select="." mode="publication-history-item">
             <xsl:with-param name="date-type">
               <xsl:choose>

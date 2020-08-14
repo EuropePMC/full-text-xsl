@@ -96,11 +96,30 @@
   </xsl:template>
   
   <xsl:variable name="affiliations">
-    <xsl:for-each select="//article-meta//aff">
+    <xsl:for-each select="//article-meta//aff[not(ancestor::contrib-group[@content-type='collab-list'])]">
       <xsl:choose>
-        <xsl:when test=". = preceding::aff"/>
+        <xsl:when test=". = preceding::aff[not(ancestor::contrib-group[@content-type='collab-list'])]"/>
         <xsl:otherwise>
           <aff>
+            <xsl:if test="label">
+              <label><xsl:value-of select="label"/></label>
+            </xsl:if>
+            <xsl:apply-templates/>
+          </aff>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:for-each>
+  </xsl:variable>
+  
+  <xsl:variable name="collab-affs">
+    <xsl:for-each select="//article-meta/contrib-group[@content-type='collab-list']//aff">
+      <xsl:choose>
+        <xsl:when test=". = preceding::aff[ancestor::contrib-group[@content-type='collab-list']]"/>
+        <xsl:otherwise>
+          <aff>
+            <xsl:if test="label">
+              <label><xsl:value-of select="label"/></label>
+            </xsl:if>
             <xsl:apply-templates/>
           </aff>
         </xsl:otherwise>
@@ -169,6 +188,7 @@
           <xsl:apply-templates select="article-meta"/>
           <xsl:if test="not(following-sibling::back)">
             <xsl:apply-templates select="article-meta/author-notes"/>
+            <xsl:apply-templates select="article-meta/contrib-group[@content-type='collab-list']"/>
           </xsl:if>
           <xsl:if test="not(article-meta/abstract) or normalize-space($ctxid) != ''">
             <xsl:apply-templates select="article-meta/kwd-group"/>
@@ -352,7 +372,7 @@
         <xsl:when test="normalize-space($ctxid) != ''"/>
         <xsl:otherwise>
           <div>
-            <xsl:for-each select="//article-meta//contrib-group/contrib[@contrib-type = 'author']">
+            <xsl:for-each select="//article-meta//contrib-group[not(@content-type = 'collab-list')]/contrib[@contrib-type = 'author']">
               <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
               <xsl:if test="position() != last()">
                 <xsl:text>, </xsl:text>
@@ -384,7 +404,7 @@
               </xsl:attribute>
               <xsl:choose>
                 <xsl:when test="//article-meta//aff[not(parent::contrib)]">
-                  <xsl:apply-templates select="//article-meta//aff" mode="afflist"/>                  
+                  <xsl:apply-templates select="//article-meta//aff[not(parent::contrib-group[@content-type='collab-list'])]" mode="afflist"/>                  
                 </xsl:when>
                 <xsl:otherwise>
                   <xsl:apply-templates select="exsl:node-set($affiliations)/aff" mode="afflist">
@@ -450,7 +470,17 @@
         </xsl:choose>
       </span>
       <xsl:apply-templates select="following-sibling::degrees"/>
-      <xsl:for-each select="following-sibling::aff | ancestor::contrib-group/aff | following-sibling::xref[@ref-type='aff']">
+      <xsl:variable name="set">
+        <xsl:choose>
+          <xsl:when test="ancestor::contrib-group[@content-type='collab-list']">
+            <xsl:copy-of select="$collab-affs"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:copy-of select="$affiliations"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:variable>
+      <xsl:for-each select="following-sibling::aff | ancestor::contrib-group/aff[not(@id = //xref/@rid)] | following-sibling::xref[@ref-type='aff']">
         <xsl:variable name="position">
           <xsl:if test="position() = last()">
             <xsl:text>last</xsl:text>
@@ -458,8 +488,8 @@
         </xsl:variable>
         <xsl:choose>
           <xsl:when test="self::aff">
-            <xsl:variable name="current" select="."/>
-            <xsl:for-each select="exsl:node-set($affiliations)/aff">
+            <xsl:variable name="current" select="."/>            
+            <xsl:for-each select="exsl:node-set($set)/aff">
               <xsl:if test=". = $current">
                 <sup class="fulltext--author-affiliation-index inline-block">
                   <xsl:choose>
@@ -475,29 +505,40 @@
                   </xsl:if>
                 </sup>
               </xsl:if>
-            </xsl:for-each>
+            </xsl:for-each>            
           </xsl:when>
           <xsl:when test="self::xref">
             <xsl:variable name="rid" select="@rid"/>
             <xsl:for-each select="//aff[@id=$rid]">
-              <sup class="fulltext--author-affiliation-index inline-block">
-                <xsl:choose>
-                  <xsl:when test="normalize-space($pprid) = '' and label">
-                    <xsl:value-of select="label"/>
-                  </xsl:when>
-                  <xsl:otherwise>
-                    <xsl:value-of select="count(preceding::aff) + 1"/>
-                  </xsl:otherwise>
-                </xsl:choose>
-                <xsl:if test="$position!='last'">
-                  <xsl:text>, </xsl:text>
+              <xsl:variable name="current" select="."/>
+              <xsl:for-each select="exsl:node-set($set)/aff">
+                <xsl:if test=". = $current">
+                  <sup class="fulltext--author-affiliation-index inline-block">
+                    <xsl:choose>
+                      <xsl:when test="normalize-space($pprid) = '' and label">
+                        <xsl:value-of select="label"/>
+                      </xsl:when>
+                      <xsl:otherwise>
+                        <xsl:value-of select="position()"/>
+                      </xsl:otherwise>
+                    </xsl:choose>
+                    <xsl:if test="$position!='last'">
+                      <xsl:text>, </xsl:text>
+                    </xsl:if>
+                  </sup>
                 </xsl:if>
-              </sup>
+              </xsl:for-each>
             </xsl:for-each>
           </xsl:when>
         </xsl:choose>
       </xsl:for-each>
     </a>
+    <xsl:if test="parent::contrib[@id = //contrib-group[@content-type='collab-list']/contrib/@rid]">
+      <xsl:text> </xsl:text>
+      <a href="#collab-list">
+        <sup class="inline-block">&#10019;</sup>
+      </a>
+    </xsl:if>
     <xsl:if test="parent::contrib[@equal-contrib and @equal-contrib != 'no']">
       <xsl:text> </xsl:text>
       <a href="#author-info-equal-contrib">
@@ -755,6 +796,7 @@
       <xsl:apply-templates select="permissions"/>
       <xsl:if test="not(following-sibling::back)">
         <xsl:apply-templates select="author-notes"/>
+        <xsl:apply-templates select="contrib-group[@content-type='collab-list']"/>
       </xsl:if>
       <xsl:if test="not(abstract)">
         <xsl:apply-templates select="kwd-group"/>
@@ -2136,6 +2178,7 @@
       <xsl:apply-templates select="preceding-sibling::*" mode="list-emails"/>
     </xsl:if>
   </xsl:if>
+  <xsl:apply-templates select="preceding-sibling::*//contrib-group[@content-type='collab-list']"/>
   <xsl:apply-templates select="*[not(self::ack) and not(self::bio)]"/>
   <xsl:if test="normalize-space($pprid) != ''">
     <xsl:call-template name="article-info-history"/>
@@ -2430,6 +2473,59 @@
         <xsl:copy-of select="."/>
       </xsl:otherwise>
     </xsl:choose>
+  </xsl:template>
+  
+  <xsl:template match="contrib-group[@content-type='collab-list']">
+    <div class="fulltext--collab-author-information" id="collab-list">
+      <xsl:for-each select="contrib">
+        <xsl:choose>
+          <xsl:when test="@rid = preceding::contrib/@rid"/>
+          <xsl:otherwise>
+            <xsl:call-template name="make-collab-list">
+              <xsl:with-param name="list" select="parent::contrib-group"/>
+              <xsl:with-param name="rid" select="@rid"/>
+            </xsl:call-template> 
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:for-each>
+      <div class="collab-author-affiliations">
+        <h4>Affiliations</h4>
+        <ol class="affiliations">
+          <xsl:attribute name="style">
+            <xsl:choose>
+              <xsl:when test="normalize-space($pprid) != ''">
+                <xsl:text>list-style-type:none</xsl:text>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:text>text-indent:0</xsl:text>
+              </xsl:otherwise>
+            </xsl:choose>
+          </xsl:attribute>
+          <xsl:apply-templates select="exsl:node-set($collab-affs)/aff" mode="afflist">
+            <xsl:with-param name="count">position</xsl:with-param>
+          </xsl:apply-templates>
+        </ol>
+      </div>
+    </div>
+  </xsl:template>
+  
+  <xsl:template name="make-collab-list">
+    <xsl:param name="list"/>
+    <xsl:param name="rid"/>
+    <h3>
+      <xsl:value-of select="//contrib[@id=$rid]/collab"/>
+    </h3>
+    <div>
+      <xsl:for-each select="$list//contrib[@rid=$rid]">
+        <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
+        <xsl:if test="position() != last()">
+          <xsl:text>, </xsl:text>
+        </xsl:if>
+        <xsl:if test="position() = last()-1">
+          <xsl:text>and </xsl:text>
+        </xsl:if>
+      </xsl:for-each>
+    </div>    
   </xsl:template>
 
   <!-- START Reference Handling -->

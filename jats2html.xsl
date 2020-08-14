@@ -2889,6 +2889,11 @@
       <xsl:apply-templates mode="testing"/>
     </div>
   </xsl:template>
+  
+  <xsl:template match="fn-group[@content-type = 'competing-interest']/fn/p |
+    //history//*[@publication-type = 'journal']/article-title">
+    <xsl:apply-templates/>
+  </xsl:template>
 
   <!-- START - general format -->
 
@@ -3086,50 +3091,54 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-
-  <!-- END - general format -->
-
-  <xsl:template match="fn-group[@content-type = 'competing-interest']/fn/p |
-      //history//*[@publication-type = 'journal']/article-title">
+  
+  <xsl:template match="glossary">
+    <sec id="glossary">
+      <xsl:if test="not(title)">
+        <h2 id="glossarytitle">Glossary</h2>
+      </xsl:if>
+      <xsl:apply-templates/>
+    </sec>
+  </xsl:template>
+  
+  <xsl:template match="glossary/title">
+    <h2 id="glossarytitle">
+      <xsl:value-of select="."/>
+    </h2>
+  </xsl:template>
+  
+  <xsl:template match="def-list">
+    <dl>
+      <xsl:apply-templates/>
+    </dl>
+  </xsl:template>
+  
+  <xsl:template match="def-item">
     <xsl:apply-templates/>
   </xsl:template>
-
-  <xsl:template match="
-      caption | table-wrap/table | table-wrap-foot | fn | bold | italic | underline | preformat | monospace |
-      styled-content | sub | sup | sc | sec/title | boxed-text | ext-link | app/title | disp-formula | inline-formula | list | list-item | hr | disp-quote | code | verse-group" mode="testing">
-    <xsl:apply-templates select="."/>
+  
+  <xsl:template match="def-item/term">
+    <dt>
+      <xsl:apply-templates/>
+    </dt>
   </xsl:template>
-
-  <!-- nodes to remove -->
-  <xsl:template match="@xlink:href"/>
-  <xsl:template match="sec[@sec-type = 'supplementary-material'] | sec[@sec-type = 'floats-group']"/>
-  <xsl:template match="back/fn-group/fn/label"/>
-  <xsl:template match="aff/label"/>
-  <xsl:template match="list-item/label"/>
-  <xsl:template match="disp-formula/label"/>
-  <xsl:template match="app/title"/>
-  <xsl:template match="fn-group[@content-type = 'competing-interest']/title"/>
-  <xsl:template match="permissions/copyright-year | permissions/copyright-holder"/>
-  <xsl:template match="fn-group[@content-type = 'author-contribution']/title"/>
-  <xsl:template match="author-notes/fn/label"/>
-  <xsl:template match="author-notes/corresp/label"/>
-  <xsl:template match="abstract/title"/>
-  <xsl:template match="fig/graphic"/>
-  <xsl:template match="fig-group//object-id | fig-group//graphic | fig//label"/>
-  <xsl:template match="ack/title"/>
-  <xsl:template match="ref-list/title"/>
-  <xsl:template match="
-      ref//label | ref//year | ref//article-title | ref//fpage | ref//volume | ref//issue | ref//source | ref//pub-id |
-      ref//lpage | ref//supplement | ref//person-group[@person-group-type = 'editor'] | ref//edition | ref//publisher-loc |
-      ref//lpage | ref//supplement | ref//edition | ref//publisher-loc |
-      ref//publisher-name | ref//issn | red//month | ref//day | ref//season"/>
-  <xsl:template match="person-group[@person-group-type = 'author'] | collab"/>
-  <xsl:template match="media/label"/>
-  <xsl:template match="object-id | table-wrap/label"/>
-  <xsl:template match="funding-group//institution-wrap/institution-id"/>
-  <xsl:template match="table-wrap/graphic"/>
-  <xsl:template match="table-wrap-foot//fn/label"/>
-
+  
+  <xsl:template match="def">
+    <dd>
+      <xsl:apply-templates select="p/* | p/text()"/>
+    </dd>
+  </xsl:template>
+  
+  <xsl:template match="bio">
+    <xsl:apply-templates/>
+  </xsl:template>
+  
+  <xsl:template match="verse-line">
+    <span style="display: block; text-indent: -1em; margin-left: 1em; ">
+      <xsl:apply-templates/>
+    </span>
+  </xsl:template>
+  
   <xsl:template name="camel-case-word">
     <xsl:param name="text"/>
     <xsl:value-of select="translate(substring($text, 1, 1), $smallcase, $uppercase)"/>
@@ -3224,54 +3233,9 @@
       </div>
     </xsl:if>
   </xsl:template>
-
-  <xsl:template match="glossary">
-    <sec id="glossary">
-      <xsl:if test="not(title)">
-        <h2 id="glossarytitle">Glossary</h2>
-      </xsl:if>
-      <xsl:apply-templates/>
-    </sec>
-  </xsl:template>
-
-  <xsl:template match="glossary/title">
-    <h2 id="glossarytitle">
-      <xsl:value-of select="."/>
-    </h2>
-  </xsl:template>
-
-  <xsl:template match="def-list">
-    <dl>
-      <xsl:apply-templates/>
-    </dl>
-  </xsl:template>
-
-  <xsl:template match="def-item">
-    <xsl:apply-templates/>
-  </xsl:template>
-
-  <xsl:template match="def-item/term">
-    <dt>
-      <xsl:apply-templates/>
-    </dt>
-  </xsl:template>
-
-  <xsl:template match="def">
-    <dd>
-      <xsl:apply-templates select="p/* | p/text()"/>
-    </dd>
-  </xsl:template>
-
-  <xsl:template match="bio">
-    <xsl:apply-templates/>
-  </xsl:template>
-
-  <xsl:template match="verse-line">
-    <span style="display: block; text-indent: -1em; margin-left: 1em; ">
-      <xsl:apply-templates/>
-    </span>
-  </xsl:template>
-
+  
+  <!-- END - general format -->
+  
   <xsl:template match="*">
     <xsl:apply-templates select="@* | node()"/>
   </xsl:template>
@@ -3279,5 +3243,41 @@
   <xsl:template match="@* | text()">
     <xsl:copy/>
   </xsl:template>
+
+  <xsl:template match="
+      caption | table-wrap/table | table-wrap-foot | fn | bold | italic | underline | preformat | monospace |
+      styled-content | sub | sup | sc | sec/title | boxed-text | ext-link | app/title | disp-formula | inline-formula | list | list-item | hr | disp-quote | code | verse-group" mode="testing">
+    <xsl:apply-templates select="."/>
+  </xsl:template>
+
+  <!-- nodes to remove -->
+  <xsl:template match="@xlink:href"/>
+  <xsl:template match="sec[@sec-type = 'supplementary-material'] | sec[@sec-type = 'floats-group']"/>
+  <xsl:template match="back/fn-group/fn/label"/>
+  <xsl:template match="aff/label"/>
+  <xsl:template match="list-item/label"/>
+  <xsl:template match="disp-formula/label"/>
+  <xsl:template match="app/title"/>
+  <xsl:template match="fn-group[@content-type = 'competing-interest']/title"/>
+  <xsl:template match="permissions/copyright-year | permissions/copyright-holder"/>
+  <xsl:template match="fn-group[@content-type = 'author-contribution']/title"/>
+  <xsl:template match="author-notes/fn/label"/>
+  <xsl:template match="author-notes/corresp/label"/>
+  <xsl:template match="abstract/title"/>
+  <xsl:template match="fig/graphic"/>
+  <xsl:template match="fig-group//object-id | fig-group//graphic | fig//label"/>
+  <xsl:template match="ack/title"/>
+  <xsl:template match="ref-list/title"/>
+  <xsl:template match="
+      ref//label | ref//year | ref//article-title | ref//fpage | ref//volume | ref//issue | ref//source | ref//pub-id |
+      ref//lpage | ref//supplement | ref//person-group[@person-group-type = 'editor'] | ref//edition | ref//publisher-loc |
+      ref//lpage | ref//supplement | ref//edition | ref//publisher-loc |
+      ref//publisher-name | ref//issn | red//month | ref//day | ref//season"/>
+  <xsl:template match="person-group[@person-group-type = 'author'] | collab"/>
+  <xsl:template match="media/label"/>
+  <xsl:template match="object-id | table-wrap/label"/>
+  <xsl:template match="funding-group//institution-wrap/institution-id"/>
+  <xsl:template match="table-wrap/graphic"/>
+  <xsl:template match="table-wrap-foot//fn/label"/>
 
 </xsl:stylesheet>

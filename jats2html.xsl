@@ -339,15 +339,7 @@
         <xsl:when test="normalize-space($ctxid) != ''"/>
         <xsl:otherwise>
           <div>
-            <xsl:for-each select="//article-meta//contrib-group[not(@content-type = 'collab-list')]/contrib[@contrib-type = 'author']">
-              <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
-              <xsl:if test="position() != last()">
-                <xsl:text>, </xsl:text>
-              </xsl:if>
-              <xsl:if test="position() = last()-1">
-                <xsl:text>and </xsl:text>
-              </xsl:if>
-            </xsl:for-each>
+            <xsl:apply-templates select="//article-meta//contrib-group[not(@content-type = 'collab-list')]" mode="authorlist"/>
           </div>
           <div class="author-affiliations">
             <h2 id="fulltext--author-affiliations-title" role="button" tabindex="0">
@@ -375,6 +367,24 @@
         </xsl:otherwise>
       </xsl:choose>
     </div>
+  </xsl:template>
+  
+  <xsl:template match="contrib-group" mode="authorlist">
+    <xsl:for-each select="contrib[@contrib-type = 'author']">
+      <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
+      <xsl:if test="position() != last()">
+        <xsl:text>, </xsl:text>
+      </xsl:if>
+      <xsl:if test="position() = last()-1">
+        <xsl:text>and </xsl:text>
+      </xsl:if>
+      <xsl:if test="position() = last()">
+        <xsl:apply-templates select="following-sibling::on-behalf-of"/>
+      </xsl:if>
+    </xsl:for-each>
+    <xsl:if test="following-sibling::contrib-group[not(@content-type = 'collab-list')]">
+      <xsl:text>. </xsl:text>
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="name|collab" mode="authorlist">
@@ -563,7 +573,7 @@
   
   <xsl:template match="on-behalf-of">
     <xsl:text> </xsl:text>
-    <xsl:value-of select="."/>
+    <xsl:apply-templates/>
   </xsl:template>
   
   <xsl:template match="aff" mode="list-xrefs">

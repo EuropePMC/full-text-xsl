@@ -535,8 +535,8 @@
     </a>
     <xsl:if test="parent::contrib[@id = //contrib-group[@content-type='collab-list']/contrib/@rid]">
       <xsl:text> </xsl:text>
-      <a href="#collab-list">
-        <sup class="inline-block">&#10019;</sup>
+      <a href="{concat('#', parent::contrib/@id)}">
+        <sup class="inline-block">&#9432;</sup>
       </a>
     </xsl:if>
     <xsl:if test="parent::contrib[@equal-contrib and @equal-contrib != 'no']">
@@ -2476,56 +2476,54 @@
   </xsl:template>
   
   <xsl:template match="contrib-group[@content-type='collab-list']">
-    <div class="fulltext--collab-author-information" id="collab-list">
-      <xsl:for-each select="contrib">
-        <xsl:choose>
-          <xsl:when test="@rid = preceding::contrib/@rid"/>
-          <xsl:otherwise>
-            <xsl:call-template name="make-collab-list">
-              <xsl:with-param name="list" select="parent::contrib-group"/>
-              <xsl:with-param name="rid" select="@rid"/>
-            </xsl:call-template> 
-          </xsl:otherwise>
-        </xsl:choose>
-      </xsl:for-each>
-      <div class="collab-author-affiliations">
-        <h4>Affiliations</h4>
-        <ol class="affiliations">
-          <xsl:attribute name="style">
-            <xsl:choose>
-              <xsl:when test="normalize-space($pprid) != ''">
-                <xsl:text>list-style-type:none</xsl:text>
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:text>text-indent:0</xsl:text>
-              </xsl:otherwise>
-            </xsl:choose>
-          </xsl:attribute>
-          <xsl:apply-templates select="exsl:node-set($collab-affs)/aff" mode="afflist">
-            <xsl:with-param name="count">position</xsl:with-param>
+    <xsl:for-each select="contrib">
+      <xsl:choose>
+        <xsl:when test="@rid = preceding::contrib/@rid"/>
+        <xsl:otherwise>
+          <xsl:apply-templates select="parent::contrib-group" mode="make-collab-list">
+            <xsl:with-param name="rid" select="@rid"/>
           </xsl:apply-templates>
-        </ol>
-      </div>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:for-each>
+    <div class="collab-author-affiliations">
+      <h4>Affiliations</h4>
+      <ol class="affiliations">
+        <xsl:attribute name="style">
+          <xsl:choose>
+            <xsl:when test="normalize-space($pprid) != ''">
+              <xsl:text>list-style-type:none</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:text>text-indent:0</xsl:text>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:attribute>
+        <xsl:apply-templates select="exsl:node-set($collab-affs)/aff" mode="afflist">
+          <xsl:with-param name="count">position</xsl:with-param>
+        </xsl:apply-templates>
+      </ol>
     </div>
   </xsl:template>
   
-  <xsl:template name="make-collab-list">
-    <xsl:param name="list"/>
+  <xsl:template match="contrib-group" mode="make-collab-list">
     <xsl:param name="rid"/>
-    <h3>
-      <xsl:value-of select="//contrib[@id=$rid]/collab"/>
-    </h3>
-    <div>
-      <xsl:for-each select="$list//contrib[@rid=$rid]">
-        <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
-        <xsl:if test="position() != last()">
-          <xsl:text>, </xsl:text>
-        </xsl:if>
-        <xsl:if test="position() = last()-1">
-          <xsl:text>and </xsl:text>
-        </xsl:if>
-      </xsl:for-each>
-    </div>    
+    <div class="fulltext--collab-author-information" id="{$rid}">
+      <h3>
+        <xsl:value-of select="//contrib[@id=$rid]/collab"/>
+      </h3>
+      <div>
+        <xsl:for-each select="contrib[@rid=$rid]">
+          <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
+          <xsl:if test="position() != last()">
+            <xsl:text>, </xsl:text>
+          </xsl:if>
+          <xsl:if test="position() = last()-1">
+            <xsl:text>and </xsl:text>
+          </xsl:if>
+        </xsl:for-each>
+      </div>
+    </div>
   </xsl:template>
 
   <!-- START Reference Handling -->

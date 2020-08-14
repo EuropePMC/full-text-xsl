@@ -155,7 +155,7 @@
           <xsl:apply-templates select="article-meta"/>
           <xsl:if test="not(following-sibling::back)">
             <xsl:apply-templates select="article-meta/author-notes"/>
-            <xsl:apply-templates select="article-meta/contrib-group[@content-type='collab-list']">
+            <xsl:apply-templates select="article-meta/contrib-group[@content-type='collab-list']"/>
             <xsl:apply-templates select="article-meta//collab/contrib-group" mode="collab-list-container"/>
           </xsl:if>
           <xsl:if test="not(article-meta/abstract) or normalize-space($ctxid) != ''">
@@ -766,7 +766,7 @@
       <xsl:apply-templates select="permissions"/>
       <xsl:if test="not(following-sibling::back)">
         <xsl:apply-templates select="author-notes"/>
-        <xsl:apply-templates select="contrib-group[@content-type='collab-list']"
+        <xsl:apply-templates select="contrib-group[@content-type='collab-list']"/>
         <xsl:apply-templates select="contrib-group//collab/contrib-group" mode="collab-list-container"/>
       </xsl:if>
       <xsl:if test="not(abstract)">

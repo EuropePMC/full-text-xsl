@@ -1342,7 +1342,9 @@
       <xsl:choose>
         <xsl:when test="ancestor::app">
           <xsl:element name="h{count(ancestor::sec) + 3}">
-            <xsl:apply-templates select="@* | preceding-sibling::*[1][self::label] | node()"/>
+            <xsl:apply-templates select="@* | preceding-sibling::*[1][self::label]"/>
+            <xsl:apply-templates select="parent::caption/preceding-sibling::*[1][self::label]" mode="label-title"/>
+            <xsl:apply-templates select="node()"/>
           </xsl:element>
         </xsl:when>
         <xsl:otherwise>
@@ -1361,22 +1363,26 @@
                 </xsl:otherwise>
               </xsl:choose>
             </xsl:attribute>
-            <xsl:apply-templates select="@* | preceding-sibling::*[1][self::label] | node()"/>
+            <xsl:apply-templates select="@* | preceding-sibling::*[1][self::label]"/>
+            <xsl:apply-templates select="parent::caption/preceding-sibling::*[1][self::label]" mode="label-title"/>
+            <xsl:apply-templates select="node()"/>
           </xsl:element>
         </xsl:otherwise>
       </xsl:choose>
     </xsl:if>
   </xsl:template>
+  
+  <xsl:template match="boxed-text/label"/>
 
   <xsl:template match="sec/label | ack/label | ref-list/label">
     <xsl:value-of select="."/>
     <xsl:text>. </xsl:text>
   </xsl:template>
 
-  <xsl:template match="boxed-text/label">
+  <xsl:template match="boxed-text/label" mode="label-title">
     <xsl:if test="following-sibling::caption/title">
       <xsl:value-of select="."/>
-      <xsl:text> </xsl:text>
+      <xsl:text>. </xsl:text>
     </xsl:if>
   </xsl:template>
 
@@ -1982,31 +1988,6 @@
       </xsl:if>
       <xsl:apply-templates/>
     </div>
-  </xsl:template>
-
-  <xsl:template match="boxed-text" mode="testing">
-    <!-- For the citation links, take the id from the boxed-text -->
-    <xsl:choose>
-      <xsl:when test="child::object-id[@pub-id-type = 'doi']/text() != ''">
-        <div class="boxed-text">
-          <xsl:attribute name="id">
-            <xsl:value-of select="@id"/>
-          </xsl:attribute>
-          <xsl:apply-templates/>
-        </div>
-      </xsl:when>
-      <xsl:otherwise>
-        <div>
-          <xsl:attribute name="class">
-            <xsl:value-of select="'boxed-text'"/>
-            <xsl:if test="//article/@article-type != 'research-article' and .//inline-graphic">
-              <xsl:value-of select="' insight-image'"/>
-            </xsl:if>
-          </xsl:attribute>
-          <xsl:apply-templates/>
-        </div>
-      </xsl:otherwise>
-    </xsl:choose>
   </xsl:template>
 
   <xsl:template match="fig" mode="testing">
@@ -2837,20 +2818,12 @@
 
   <!-- box text -->
   <xsl:template match="boxed-text">
-    <xsl:variable name="data-doi" select="child::object-id[@pub-id-type = 'doi']/text()"/>
-    <xsl:choose>
-      <xsl:when test="$data-doi != ''">
-        <div class="boxed-text">
-          <xsl:attribute name="data-doi">
-            <xsl:value-of select="$data-doi"/>
-          </xsl:attribute>
-          <xsl:apply-templates select="." mode="testing"/>
-        </div>
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:apply-templates select="." mode="testing"/>
-      </xsl:otherwise>
-    </xsl:choose>
+    <div class="boxed-text">
+      <xsl:attribute name="id">
+        <xsl:value-of select="@id"/>
+      </xsl:attribute>
+      <xsl:apply-templates/>
+    </div>
   </xsl:template>
 
   <xsl:template match="inline-graphic|p/graphic">

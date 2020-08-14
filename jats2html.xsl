@@ -434,12 +434,11 @@
             </xsl:choose>
           </xsl:when>
           <xsl:when test="self::collab">
-            <xsl:value-of select="."/>
+            <xsl:apply-templates select="node()[not(self::contrib-group)]"/>
           </xsl:when>
         </xsl:choose>
       </span>
-      <xsl:apply-templates select="following-sibling::degrees"/>
-    
+      <xsl:apply-templates select="following-sibling::degrees"/>    
       <xsl:for-each select="following-sibling::aff | ancestor::contrib-group/aff[not(@id = //xref/@rid)] | following-sibling::xref[@ref-type='aff']">
         <xsl:variable name="position">
           <xsl:if test="position() = last()">
@@ -578,6 +577,9 @@
   </xsl:template>
   
   <xsl:template match="on-behalf-of">
+    <xsl:if test="preceding-sibling::contrib">
+      <xsl:text>,</xsl:text>
+    </xsl:if>
     <xsl:text> </xsl:text>
     <xsl:apply-templates/>
   </xsl:template>

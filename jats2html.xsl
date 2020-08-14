@@ -2441,7 +2441,14 @@
       </xsl:choose>
     </xsl:for-each>
     <div class="collab-author-affiliations">
-      <h4>Affiliations</h4>
+      <h4 id="fulltext--collab-author-affiliations-title" class="pmctoggle" role="button" tabindex="0">
+        <xsl:if test="not($msspreview)">
+          <xsl:attribute name="onclick">
+            <xsl:text>this.classList.toggle('open'); this.blur()</xsl:text>
+          </xsl:attribute>
+        </xsl:if>
+        <xsl:text>Affiliations</xsl:text>
+      </h4>
       <ol class="affiliations">
         <xsl:attribute name="style">
           <xsl:choose>

@@ -2210,7 +2210,14 @@
   <xsl:template match="back/fn-group">
     <xsl:if test="fn[not(@fn-type = 'con')]">
       <div id="notes">
-        <h2 id="notestitle">Notes</h2>
+        <h2 id="notestitle">
+          <xsl:choose>
+            <xsl:when test="title">
+              <xsl:apply-templates select="title"/>
+            </xsl:when>
+            <xsl:otherwise>Notes</xsl:otherwise>
+          </xsl:choose>
+        </h2>
         <xsl:apply-templates select="fn[not(@fn-type = 'con')]"/>
       </div>
     </xsl:if>

@@ -2504,7 +2504,7 @@
   </xsl:template>
   
   <xsl:template match="contrib-group" mode="collab-list-container">
-    <div class="fulltext--collab-author-information" id="{$rid}">
+    <div class="fulltext--collab-author-information" id="{concat('collab', count(preceding::contrib-group[parent::collab])+1)}">
       <h3>
         <xsl:apply-templates select="parent::collab/node()[not(self::contrib-group)]"/>
       </h3>

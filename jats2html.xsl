@@ -2510,7 +2510,7 @@
     <xsl:param name="rid"/>
     <div class="fulltext--collab-author-information" id="{$rid}">
       <h3>
-        <xsl:value-of select="//contrib[@id=$rid]/collab"/>
+        <xsl:apply-templates select="//contrib[@id=$rid]/collab/node()"/>
       </h3>
       <div>
         <xsl:for-each select="contrib[@rid=$rid]">

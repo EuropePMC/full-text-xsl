@@ -2250,11 +2250,11 @@
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="back/fn-group/fn">
+  <xsl:template match="back/fn-group/fn | author-notes/fn[@fn-type = 'con']">
     <xsl:apply-templates/>
   </xsl:template>
 
-  <xsl:template match="back/fn-group/fn/p">
+  <xsl:template match="back/fn-group/fn/p | author-notes/fn[@fn-type = 'con']/p">
     <xsl:choose>
       <xsl:when test="*[position()=1][self::bold] and (not(child::text()) or not(child::text()[normalize-space(.) != '']))">
         <h3>
@@ -2301,7 +2301,7 @@
 
   <xsl:template match="fn[@fn-type = 'equal']">
     <xsl:variable name="contributeid" select="@id"/>
-    <section class="equal-contrib" id="{@id}">    
+    <div class="equal-contrib" id="{@id}">    
       <xsl:apply-templates/>
       <ul class="equal-contrib-list">
         <xsl:for-each select="../../contrib-group/contrib/xref[@rid = $contributeid]">
@@ -2312,12 +2312,12 @@
           </li>
         </xsl:for-each>
       </ul>
-    </section>
+    </div>
   </xsl:template>
 
   <xsl:template match="contrib" mode="equal">
     <xsl:variable name="contributeid" select="@id"/>
-    <section class="equal-contrib">
+    <div class="equal-contrib">
       <p>
         <xsl:if test="../../contrib-group//contrib[@equal-contrib and @equal-contrib != 'no']">
           <sup>#</sup>
@@ -2333,7 +2333,7 @@
           </li>
         </xsl:for-each>
       </ul>
-    </section>
+    </div>
   </xsl:template>
 
   <xsl:template match="fn-group[@content-type = 'author-contribution']">
@@ -2349,10 +2349,6 @@
   </xsl:template>
 
   <xsl:template match="fn-group[@content-type = 'author-contribution']/fn/p">
-    <xsl:apply-templates/>
-  </xsl:template>
-
-  <xsl:template match="author-notes/fn[@fn-type = 'con']/p">
     <xsl:apply-templates/>
   </xsl:template>
 

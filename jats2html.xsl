@@ -2166,8 +2166,10 @@
     <xsl:if test="not(preceding-sibling::*//author-notes)">
       <xsl:if test="fn-group/fn[@fn-type = 'con'] | preceding-sibling::*//contrib[@equal-contrib = 'yes']">
         <div id="author-info-equal-contrib">
-          <h3>Author Contributions</h3>
           <xsl:apply-templates select="following-sibling::fn-group/fn[@fn-type = 'con']"/> 
+          <xsl:if test="not(following-sibling::fn-group/fn[@fn-type = 'con'])">
+            <h3>Author Contributions</h3>
+          </xsl:if>
           <xsl:apply-templates select="preceding-sibling::*//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
         </div>
       </xsl:if>
@@ -2211,9 +2213,11 @@
     </xsl:if>
     <xsl:if test="ancestor::*[starts-with(name(), 'front')]/following-sibling::back/fn-group/fn[@fn-type = 'con'] | fn[@fn-type = 'con'] | fn[@fn-type = 'equal'] | parent::*//contrib[@equal-contrib = 'yes']">
       <div id="author-info-equal-contrib">
-        <h3>Author Contributions</h3>
         <xsl:apply-templates select="ancestor::*[starts-with(name(), 'front')]/following-sibling::back/fn-group/fn[@fn-type = 'con']"/> 
         <xsl:apply-templates select="fn[@fn-type = 'con']"/>
+        <xsl:if test="not(fn[@fn-type = 'con'] or ancestor::*[starts-with(name(), 'front')]/following-sibling::back/fn-group/fn[@fn-type = 'con'])">
+          <h3>Author Contributions</h3>
+        </xsl:if>
         <xsl:apply-templates select="fn[@fn-type = 'equal']"/>
         <xsl:apply-templates select="parent::*//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
       </div>
@@ -2253,11 +2257,9 @@
   <xsl:template match="back/fn-group/fn/p">
     <xsl:choose>
       <xsl:when test="*[position()=1][self::bold] and (not(child::text()) or not(child::text()[normalize-space(.) != '']))">
-        <xsl:if test="parent::fn[not(@fn-type) or @fn-type != 'con']">
-          <h3>
-            <xsl:value-of select="bold"/>
-          </h3>
-        </xsl:if>
+        <h3>
+          <xsl:value-of select="bold"/>
+        </h3>
         <xsl:apply-templates select="*[not(self::bold)]"></xsl:apply-templates>
       </xsl:when>
       <xsl:otherwise>

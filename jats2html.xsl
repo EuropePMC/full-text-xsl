@@ -173,8 +173,6 @@
     </xsl:choose>
   </xsl:template>
   
-
-  
   <xsl:template match="sub-article">
     <hr class="sub-article-divider"/>
     <div class="sub-article" id="{@id}">
@@ -393,7 +391,7 @@
   </xsl:template>
 
   <xsl:template match="name|collab" mode="authorlist">
-    <a data-target="authspan{count(parent::contrib/preceding-sibling::contrib)+1}">
+    <a>
       <xsl:attribute name="href">
       <xsl:choose>
         <xsl:when test="self::name">
@@ -406,27 +404,6 @@
           <xsl:value-of select="concat($siteUrl,'/search?query=AUTH:%22', $collab-url, '%22')"/>
         </xsl:when>
       </xsl:choose>
-      </xsl:attribute>
-      <xsl:attribute name="class">
-        <xsl:text>fulltext--affiliation-group</xsl:text>
-        <xsl:for-each select="following-sibling::xref[@ref-type = 'aff']">
-          <xsl:variable name="rid" select="@rid"/>
-          <xsl:for-each select="//aff[@id = $rid]">
-            <xsl:text> fulltext--affiliation-group-</xsl:text>
-            <xsl:value-of select="count(preceding::aff)"/>
-          </xsl:for-each>
-        </xsl:for-each>
-        <xsl:for-each select="following-sibling::aff">
-          <xsl:text> fulltext--affiliation-group-</xsl:text>
-          <xsl:value-of select="count(preceding::aff)"/>
-        </xsl:for-each>
-        <xsl:for-each select="ancestor::contrib-group/aff">
-          <xsl:variable name="id" select="@id"/>
-          <xsl:if test="not(//xref[@rid = $id])">
-            <xsl:text> fulltext--affiliation-group-</xsl:text>
-            <xsl:value-of select="count(preceding::aff)"/>
-          </xsl:if>
-        </xsl:for-each>
       </xsl:attribute>
       <span class="fulltext--author-name">
         <xsl:choose>
@@ -445,52 +422,52 @@
           </xsl:when>
         </xsl:choose>
       </span>
-      <xsl:apply-templates select="following-sibling::degrees"/>    
-      <xsl:for-each select="following-sibling::aff | ancestor::contrib-group/aff[not(@id = //xref/@rid)] | following-sibling::xref[@ref-type='aff']">
-        <xsl:variable name="position">
-          <xsl:if test="position() = last()">
-            <xsl:text>last</xsl:text>
-          </xsl:if>
-        </xsl:variable>
-        <xsl:choose>
-          <xsl:when test="self::aff">
-            <xsl:variable name="current" select="."/>
-            <xsl:choose>
-              <xsl:when test="ancestor::contrib-group[@content-type='collab-list']/aff or ancestor::collab//aff">
-                <xsl:apply-templates select="ancestor::contrib-group[@content-type='collab-list']/aff | ancestor::collab//aff" mode="list-xrefs">
-                  <xsl:with-param name="current" select="$current"/>
-                  <xsl:with-param name="position" select="$position"/>
-                </xsl:apply-templates>
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:apply-templates select="//article-meta//aff[not(ancestor::contrib-group[@content-type='collab-list'] or ancestor::collab)]" mode="list-xrefs">
-                  <xsl:with-param name="current" select="$current"/>
-                  <xsl:with-param name="position" select="$position"/>
-                </xsl:apply-templates>
-              </xsl:otherwise>
-            </xsl:choose>          
-          </xsl:when>
-          <xsl:when test="self::xref">
-            <xsl:variable name="rid" select="@rid"/>
-            <xsl:variable name="current" select="//aff[@id=$rid]"/>
-            <xsl:choose>
-              <xsl:when test="ancestor::contrib-group[@content-type='collab-list']/aff or ancestor::collab//aff">
-                <xsl:apply-templates select="ancestor::contrib-group[@content-type='collab-list']/aff | ancestor::collab//aff" mode="list-xrefs">
-                  <xsl:with-param name="current" select="$current"/>
-                  <xsl:with-param name="position" select="$position"/>
-                </xsl:apply-templates>
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:apply-templates select="//article-meta//aff[not(ancestor::contrib-group[@content-type='collab-list'] or ancestor::collab)]" mode="list-xrefs">
-                  <xsl:with-param name="current" select="$current"/>
-                  <xsl:with-param name="position" select="$position"/>
-                </xsl:apply-templates>
-              </xsl:otherwise>
-            </xsl:choose>    
-          </xsl:when>
-        </xsl:choose>
-      </xsl:for-each>
+      <xsl:apply-templates select="following-sibling::degrees"/>  
     </a>
+    <xsl:for-each select="following-sibling::aff | ancestor::contrib-group/aff[not(@id = //xref/@rid)] | following-sibling::xref[@ref-type='aff']">
+      <xsl:variable name="position">
+        <xsl:if test="position() = last()">
+          <xsl:text>last</xsl:text>
+        </xsl:if>
+      </xsl:variable>
+      <xsl:choose>
+        <xsl:when test="self::aff">
+          <xsl:variable name="current" select="."/>
+          <xsl:choose>
+            <xsl:when test="ancestor::contrib-group[@content-type='collab-list']/aff or ancestor::collab//aff">
+              <xsl:apply-templates select="ancestor::contrib-group[@content-type='collab-list']/aff | ancestor::collab//aff" mode="list-xrefs">
+                <xsl:with-param name="current" select="$current"/>
+                <xsl:with-param name="position" select="$position"/>
+              </xsl:apply-templates>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:apply-templates select="//article-meta//aff[not(ancestor::contrib-group[@content-type='collab-list'] or ancestor::collab)]" mode="list-xrefs">
+                <xsl:with-param name="current" select="$current"/>
+                <xsl:with-param name="position" select="$position"/>
+              </xsl:apply-templates>
+            </xsl:otherwise>
+          </xsl:choose>          
+        </xsl:when>
+        <xsl:when test="self::xref">
+          <xsl:variable name="rid" select="@rid"/>
+          <xsl:variable name="current" select="//aff[@id=$rid]"/>
+          <xsl:choose>
+            <xsl:when test="ancestor::contrib-group[@content-type='collab-list']/aff or ancestor::collab//aff">
+              <xsl:apply-templates select="ancestor::contrib-group[@content-type='collab-list']/aff | ancestor::collab//aff" mode="list-xrefs">
+                <xsl:with-param name="current" select="$current"/>
+                <xsl:with-param name="position" select="$position"/>
+              </xsl:apply-templates>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:apply-templates select="//article-meta//aff[not(ancestor::contrib-group[@content-type='collab-list'] or ancestor::collab)]" mode="list-xrefs">
+                <xsl:with-param name="current" select="$current"/>
+                <xsl:with-param name="position" select="$position"/>
+              </xsl:apply-templates>
+            </xsl:otherwise>
+          </xsl:choose>    
+        </xsl:when>
+      </xsl:choose>
+    </xsl:for-each>
     <xsl:if test="parent::contrib[@id = //contrib-group[@content-type='collab-list']/contrib/@rid]">
       <xsl:text> </xsl:text>
       <a href="{concat('#', parent::contrib/@id)}">
@@ -595,19 +572,49 @@
     <xsl:param name="current"/>
     <xsl:param name="position"/>
     <xsl:if test=". = $current">
-      <sup class="fulltext--author-affiliation-index inline-block">
-        <xsl:choose>
-          <xsl:when test="normalize-space($pprid) = '' and label">
-            <xsl:value-of select="label"/>
-          </xsl:when>
-          <xsl:otherwise>
-            <xsl:value-of select="position()"/>
-          </xsl:otherwise>
-        </xsl:choose>
-        <xsl:if test="$position!='last'">
-          <xsl:text>, </xsl:text>
+      <xsl:text> </xsl:text>
+      <a>
+        <xsl:attribute name="href">
+          <xsl:choose>
+            <xsl:when test="@id">
+              <xsl:value-of select="concat('#',@id)"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="concat('#', 'aff', position())"/>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:attribute>
+        <xsl:if test="not($msspreview) and normalize-space($pprid) != ''">
+          <xsl:attribute name="onclick">
+            <xsl:text>document.getElementById('</xsl:text>
+            <xsl:choose>
+              <xsl:when test="@id">
+                <xsl:value-of select="@id"/>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:value-of select="concat('aff', position())"/>
+              </xsl:otherwise>
+            </xsl:choose>
+            <xsl:text>').closest('ol').previousElementSibling.classList.add('open')</xsl:text>
+          </xsl:attribute>
         </xsl:if>
-      </sup>
+        <sup class="fulltext--author-affiliation-index inline-block">
+          <xsl:choose>
+            <xsl:when test="normalize-space($pprid) = '' and label">
+              <xsl:value-of select="label"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="position()"/>
+            </xsl:otherwise>
+          </xsl:choose>
+          <xsl:if test="$position!='last'">
+            <xsl:text>,</xsl:text>
+          </xsl:if>
+        </sup>
+      </a>
+      <xsl:if test="$position!='last'">
+        <xsl:text> </xsl:text>
+      </xsl:if>
     </xsl:if>      
   </xsl:template>
   
@@ -615,8 +622,17 @@
     <xsl:param name="count"/>
     <xsl:choose>
       <xsl:when test="normalize-space($pprid) != ''">
-        <xsl:variable name="id" select="@id"/>
         <li class="fulltext--author-affiliation-item">
+          <xsl:attribute name="id">
+            <xsl:choose>
+              <xsl:when test="@id">
+                <xsl:value-of select="@id"/>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:value-of select="concat('aff', position())"/>
+              </xsl:otherwise>
+            </xsl:choose>
+          </xsl:attribute>
           <div class="fulltext--author-affiliation-text">
             <span class="fulltext--author-affiliation-index">
               <xsl:value-of select="position()"/>
@@ -2529,7 +2545,7 @@
         </xsl:for-each>
       </div>
     </div>
-    <xsl:if test="descendant::aff or contrib/xref[@ref-type='aff']">
+    <xsl:if test="descendant::aff">
       <div class="collab-author-affiliations">
         <h4 id="fulltext--collab-author-affiliations-title" class="pmctoggle" role="button" tabindex="0">
           <xsl:if test="not($msspreview)">
@@ -2550,14 +2566,7 @@
               </xsl:otherwise>
             </xsl:choose>
           </xsl:attribute>
-          <xsl:choose>
-            <xsl:when test="descendant::aff">
-              <xsl:apply-templates select="descendant::aff" mode="afflist"/>
-            </xsl:when>
-            <xsl:otherwise>
-              <xsl:apply-templates select="//aff" mode="afflist"/>
-            </xsl:otherwise>
-          </xsl:choose>
+          <xsl:apply-templates select="descendant::aff" mode="afflist"/>
         </ol>
       </div>
     </xsl:if>

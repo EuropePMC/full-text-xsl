@@ -2166,11 +2166,13 @@
     <xsl:if test="not(preceding-sibling::*//author-notes)">
       <xsl:if test="fn-group/fn[@fn-type = 'con'] | preceding-sibling::*//contrib[@equal-contrib = 'yes']">
         <div id="author-info-equal-contrib">
+          <h3>Author Contributions</h3>
           <xsl:apply-templates select="following-sibling::fn-group/fn[@fn-type = 'con']"/> 
           <xsl:apply-templates select="preceding-sibling::*//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
         </div>
       </xsl:if>
       <xsl:if test="preceding-sibling::*//contrib/email">
+        <h3>Author Information</h3>
         <xsl:apply-templates select="preceding-sibling::*" mode="list-emails"/>
       </xsl:if>
     </xsl:if>

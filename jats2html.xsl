@@ -387,6 +387,10 @@
       <xsl:text>. </xsl:text>
     </xsl:if>
   </xsl:template>
+  
+  <xsl:template match="node()" mode="make-url">
+    <xsl:value-of select="translate(., ' &#xA;', '+')"/>
+  </xsl:template>
 
   <xsl:template match="name|collab" mode="authorlist">
     <a data-target="authspan{count(parent::contrib/preceding-sibling::contrib)+1}">
@@ -396,7 +400,10 @@
           <xsl:value-of select="concat($siteUrl,'/search?query=AUTH:%22', surname, '+', substring(given-names, 1, 1),'%22')"/>
         </xsl:when>
         <xsl:when test="self::collab">
-          <xsl:value-of select="concat($siteUrl,'/search?query=AUTH:%22', translate(node()[not(self::contrib-group)], ' ', '+'), '%22')"/>
+          <xsl:variable name="collab-url">
+            <xsl:apply-templates select="node()[not(self::contrib-group)]" mode="make-url"/>
+          </xsl:variable>
+          <xsl:value-of select="concat($siteUrl,'/search?query=AUTH:%22', $collab-url, '%22')"/>
         </xsl:when>
       </xsl:choose>
       </xsl:attribute>

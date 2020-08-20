@@ -1562,7 +1562,7 @@
   <xsl:template match="table-wrap/table">
     <div class="table-overflow">
       <table>
-        <xsl:apply-templates select="@rules | @frame"/>
+        <xsl:apply-templates select="@rules | @frame | @style"/>
         <xsl:apply-templates/>
       </table>
     </div>

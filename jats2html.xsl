@@ -3342,7 +3342,10 @@
   <xsl:template name="supplementary-material">
     <xsl:if test="//supplementary-material[not(object-id)]">
       <div id="supplementary-material">
-        <h2 id="supplementary-materialtitle">Supplementary Material</h2>
+        <h2 id="supplementary-materialtitle">
+          <xsl:apply-templates select="//sec[@sec-type='supplementary-material'][1]/label"/>
+          <xsl:apply-templates select="//sec[@sec-type='supplementary-material'][1]/title/node()"/>
+        </h2>
         <ul class="supplementary-material">
           <xsl:for-each select="//supplementary-material[not(object-id)]">
             <li id="{@id}">

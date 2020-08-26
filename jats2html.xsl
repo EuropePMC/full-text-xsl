@@ -533,6 +533,11 @@
               <sup class="inline-block"><big>&#9993;</big></sup>
             </a>
           </xsl:when>
+          <xsl:when test="parent::contrib[@corresp and @corresp != 'no'] and //corresp">
+            <a href="#{//corresp/@id}">
+              <sup class="inline-block"><big>&#9993;</big></sup>
+            </a>
+          </xsl:when>
         </xsl:choose>
       </xsl:when>
       <xsl:otherwise>
@@ -547,6 +552,9 @@
           </xsl:when>
           <xsl:when test="following-sibling::corresp">
             <xsl:text> </xsl:text>
+            <a href="#author-notes"><sup class="inline-block"><i class="fas fa-envelope author-refine-icon"></i></sup></a>
+          </xsl:when>
+          <xsl:when test="parent::contrib[@corresp and @corresp != 'no'] and //corresp">
             <a href="#author-notes"><sup class="inline-block"><i class="fas fa-envelope author-refine-icon"></i></sup></a>
           </xsl:when>
         </xsl:choose>

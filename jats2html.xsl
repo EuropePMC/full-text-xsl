@@ -1584,6 +1584,11 @@
           <xsl:value-of select="@style"/>
         </xsl:attribute>
       </xsl:if>
+      <xsl:if test="@span">
+        <xsl:attribute name="span">
+          <xsl:value-of select="@span"/>
+        </xsl:attribute>
+      </xsl:if>
       <xsl:apply-templates/>
     </xsl:element>
   </xsl:template>
@@ -1617,7 +1622,7 @@
       <xsl:apply-templates/>
     </xsl:element>
   </xsl:template>
-
+  
   <!-- Handle Table FootNote -->
   <xsl:template match="table-wrap-foot">
     <div class="table-foot">

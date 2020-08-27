@@ -609,7 +609,15 @@
         <sup class="fulltext--author-affiliation-index inline-block">
           <xsl:choose>
             <xsl:when test="normalize-space($pprid) = '' and label">
-              <xsl:value-of select="label"/>
+              <xsl:variable name="alpha" select="'abcdefghijklmnopqrstuvwxyz'"/>
+              <xsl:choose>
+                <xsl:when test="label and contains($alpha, label)">
+                  <xsl:value-of select="label"/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select="position()"/>
+                </xsl:otherwise>
+              </xsl:choose>
             </xsl:when>
             <xsl:otherwise>
               <xsl:value-of select="position()"/>
@@ -649,7 +657,7 @@
           </div>
         </li>
       </xsl:when>
-      <xsl:when test="normalize-space($emsid) != ''">
+      <xsl:otherwise>
         <xsl:variable name="alpha" select="'abcdefghijklmnopqrstuvwxyz'"/>
         <li>
           <xsl:attribute name="id">
@@ -666,14 +674,14 @@
                   <xsl:value-of select="string-length(substring-before($alpha, label))+1"/>
                 </xsl:when>
                 <xsl:otherwise>
-                  <xsl:value-of select="label"/>
+                  <xsl:value-of select="position()"/>
                 </xsl:otherwise>
               </xsl:choose>
             </xsl:attribute>
           </xsl:if>
           <xsl:apply-templates select="*[not(self::label)] | text()"/>
         </li>
-      </xsl:when>
+      </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
   

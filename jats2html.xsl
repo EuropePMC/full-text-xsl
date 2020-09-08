@@ -360,7 +360,7 @@
                   </xsl:otherwise>
                 </xsl:choose>
               </xsl:attribute>
-              <xsl:apply-templates select="//article-meta//aff[not(parent::contrib-group[@content-type='collab-list'] or ancestor::collab)]" mode="afflist"/>
+              <xsl:apply-templates select="//article-meta//aff[not(parent::contrib-group[@content-type='collab-list'] or ancestor::collab)][not(. = preceding::aff)]" mode="afflist"/>
             </ol>
           </div>
         </xsl:otherwise>
@@ -452,13 +452,13 @@
           <xsl:variable name="current" select="."/>
           <xsl:choose>
             <xsl:when test="ancestor::contrib-group[@content-type='collab-list']/aff or ancestor::collab//aff">
-              <xsl:apply-templates select="ancestor::contrib-group[@content-type='collab-list']/aff | ancestor::collab//aff" mode="list-xrefs">
+              <xsl:apply-templates select="ancestor::contrib-group[@content-type='collab-list']/aff[not(. = preceding::aff)] | ancestor::collab//aff[not(. = preceding::aff)]" mode="list-xrefs">
                 <xsl:with-param name="current" select="$current"/>
                 <xsl:with-param name="position" select="$position"/>
               </xsl:apply-templates>
             </xsl:when>
             <xsl:otherwise>
-              <xsl:apply-templates select="//article-meta//aff[not(ancestor::contrib-group[@content-type='collab-list'] or ancestor::collab)]" mode="list-xrefs">
+              <xsl:apply-templates select="//article-meta//aff[not(ancestor::contrib-group[@content-type='collab-list'] or ancestor::collab)][not(. = preceding::aff)]" mode="list-xrefs">
                 <xsl:with-param name="current" select="$current"/>
                 <xsl:with-param name="position" select="$position"/>
               </xsl:apply-templates>
@@ -470,13 +470,13 @@
           <xsl:variable name="current" select="//aff[@id=$rid]"/>
           <xsl:choose>
             <xsl:when test="ancestor::contrib-group[@content-type='collab-list']/aff or ancestor::collab//aff">
-              <xsl:apply-templates select="ancestor::contrib-group[@content-type='collab-list']/aff | ancestor::collab//aff" mode="list-xrefs">
+              <xsl:apply-templates select="ancestor::contrib-group[@content-type='collab-list']/aff[not(. = preceding::aff)] | ancestor::collab//aff[not(. = preceding::aff)]" mode="list-xrefs">
                 <xsl:with-param name="current" select="$current"/>
                 <xsl:with-param name="position" select="$position"/>
               </xsl:apply-templates>
             </xsl:when>
             <xsl:otherwise>
-              <xsl:apply-templates select="//article-meta//aff[not(ancestor::contrib-group[@content-type='collab-list'] or ancestor::collab)]" mode="list-xrefs">
+              <xsl:apply-templates select="//article-meta//aff[not(ancestor::contrib-group[@content-type='collab-list'] or ancestor::collab)][not(. = preceding::aff)]" mode="list-xrefs">
                 <xsl:with-param name="current" select="$current"/>
                 <xsl:with-param name="position" select="$position"/>
               </xsl:apply-templates>
@@ -596,7 +596,7 @@
   <xsl:template match="aff" mode="list-xrefs">
     <xsl:param name="current"/>
     <xsl:param name="position"/>
-    <xsl:if test=". = $current and not(preceding::aff = $current)">
+    <xsl:if test=". = $current">
       <xsl:text> </xsl:text>
       <a>
         <xsl:attribute name="href">
@@ -654,7 +654,6 @@
   <xsl:template match="aff" mode="afflist">
     <xsl:param name="count"/>
     <xsl:choose>
-      <xsl:when test=". = preceding::aff"/>
       <xsl:when test="normalize-space($pprid) != ''">
         <li class="fulltext--author-affiliation-item">
           <xsl:attribute name="id">
@@ -817,7 +816,7 @@
               <xsl:text>list-style-type:none</xsl:text>
             </xsl:attribute>
           </xsl:if>
-          <xsl:apply-templates select="descendant::aff" mode="afflist"/>
+          <xsl:apply-templates select="descendant::aff[not(. = preceding::aff)]" mode="afflist"/>
         </ol>
       </div>
       <xsl:apply-templates select="contrib-group/contrib[@contrib-type='reviewer'][1]" mode="article-info-reviewing-editor"/>
@@ -2544,7 +2543,7 @@
             </xsl:otherwise>
           </xsl:choose>
         </xsl:attribute>
-        <xsl:apply-templates select="parent::*/contrib-group[@content-type='collab-list']//aff" mode="afflist"/>
+        <xsl:apply-templates select="parent::*/contrib-group[@content-type='collab-list']//aff[not(. = preceding::aff)]" mode="afflist"/>
       </ol>
     </div>
   </xsl:template>
@@ -2607,7 +2606,7 @@
               </xsl:otherwise>
             </xsl:choose>
           </xsl:attribute>
-          <xsl:apply-templates select="descendant::aff" mode="afflist"/>
+          <xsl:apply-templates select="descendant::aff[not(. = preceding::aff)]" mode="afflist"/>
         </ol>
       </div>
     </xsl:if>

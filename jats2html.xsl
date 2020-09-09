@@ -422,17 +422,12 @@
         </xsl:when>
       </xsl:choose>
       </xsl:attribute>
+      <xsl:apply-templates select="prefix"/>
       <span class="fulltext--author-name">
         <xsl:choose>
           <xsl:when test="self::name">
-            <xsl:choose>
-              <xsl:when test="normalize-space($emsid) != ''">
-                <xsl:value-of select="concat(given-names, ' ', surname)"/>
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:value-of select="concat(surname, ' ', substring(given-names, 1, 1))"/>
-              </xsl:otherwise>
-            </xsl:choose>
+            <xsl:value-of select="concat(given-names, ' ', surname)"/>
+            <xsl:apply-templates select="suffix"/>
           </xsl:when>
           <xsl:when test="self::collab">
             <xsl:apply-templates select="node()[not(self::contrib-group)]"/>
@@ -580,7 +575,12 @@
     <xsl:apply-templates select="following-sibling::on-behalf-of"/>
   </xsl:template>
   
-  <xsl:template match="contrib/degrees">
+  <xsl:template match="name/prefix">
+    <xsl:value-of select="."/>
+    <xsl:text> </xsl:text>
+  </xsl:template>
+  
+  <xsl:template match="contrib/degrees | name/suffix">
     <xsl:text>, </xsl:text>
     <xsl:value-of select="."/>
   </xsl:template>

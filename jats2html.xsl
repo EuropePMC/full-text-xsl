@@ -371,7 +371,7 @@
   <xsl:template match="contrib-group" mode="authorlist">
     <xsl:choose>
       <xsl:when test="parent::*/contrib-group/on-behalf-of">
-        <xsl:for-each select="parent::*/contrib-group">
+        <xsl:for-each select="parent::*/contrib-group[not(@content-type = 'collab-list' or parent::collab)]">
           <xsl:for-each select="contrib[@contrib-type = 'author']">
             <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
             <xsl:if test="position() != last()">
@@ -390,7 +390,7 @@
         </xsl:for-each>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:for-each select="parent::*//contrib[@contrib-type = 'author']">
+        <xsl:for-each select="parent::*/contrib-group[not(@content-type = 'collab-list' or parent::collab)]/contrib[@contrib-type = 'author']">
           <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
           <xsl:if test="position() != last()">
             <xsl:text>, </xsl:text>

@@ -3283,14 +3283,39 @@
   
   <xsl:template match="glossary/title">
     <h2 id="glossarytitle">
-      <xsl:value-of select="."/>
+      <xsl:apply-templates/>
     </h2>
   </xsl:template>
   
-  <xsl:template match="def-list">
-    <dl>
+  <xsl:template match="def-list/label">
+    <xsl:apply-templates/>
+    <xsl:text>. </xsl:text>
+  </xsl:template>
+  
+  <xsl:template match="def-list/title">
+    <h3>
+      <xsl:apply-templates select="preceding-sibling::label"/>
       <xsl:apply-templates/>
+    </h3>
+  </xsl:template>
+  
+  <xsl:template match="def-list">
+    <xsl:apply-templates select="title"/>
+    <dl>
+      <xsl:apply-templates select="term-head|def-head|def-item|def-list"/>
     </dl>
+  </xsl:template>
+  
+  <xsl:template match="term-head">
+    <dt><h4>
+      <xsl:apply-templates/>
+    </h4></dt>
+  </xsl:template>
+
+  <xsl:template match="def-head">
+    <dd><h4>
+      <xsl:apply-templates/>
+    </h4></dd>
   </xsl:template>
   
   <xsl:template match="def-item">

@@ -1932,6 +1932,11 @@
   <xsl:template match="p" mode="testing">
     <xsl:if test="not(supplementary-material)">
       <p>
+        <xsl:if test="@id">
+          <xsl:attribute name="id">
+            <xsl:value-of select="@id"/>
+          </xsl:attribute>
+        </xsl:if>
         <xsl:if test="ancestor::caption and (count(preceding-sibling::p) = 0) and (ancestor::boxed-text or ancestor::media)">
           <xsl:attribute name="class">
             <xsl:value-of select="'first-child'"/>

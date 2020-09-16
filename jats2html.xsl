@@ -2451,7 +2451,7 @@
     <a href="mailto:dev@null" data-email="{$email}" class="oemail">
       <xsl:value-of select="$email"/>
     </a>
-    <xsl:if test="following-sibling::email">
+    <xsl:if test="ancestor::contrib and following-sibling::email">
       <xsl:text>, </xsl:text>
     </xsl:if>
   </xsl:template>

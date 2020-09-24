@@ -2697,7 +2697,7 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:template match="ref/element-citation|ref/mixed-citation">
+  <xsl:template match="ref//element-citation|ref//mixed-citation">
     <xsl:variable name="title">
       <xsl:choose>
         <xsl:when test="child::article-title">
@@ -2966,6 +2966,10 @@
         </a>
       </xsl:when>
     </xsl:choose>
+  </xsl:template>
+  
+  <xsl:template match="ref/note">
+    <xsl:apply-templates select="p/node()"/>
   </xsl:template>
 
   <!-- START video handling -->

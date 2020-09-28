@@ -2579,8 +2579,9 @@
   <xsl:template match="contrib-group" mode="collab-list-container">
     <div class="fulltext--collab-author-information" id="{concat('collab', count(preceding::contrib-group[parent::collab])+1)}">
       <h3>
-        <xsl:apply-templates select="parent::collab/node()[not(self::contrib-group)]"/>
+        <xsl:apply-templates select="parent::collab/node()[not(self::contrib-group) and not(self::author-comment)]"/>
       </h3>
+      <xsl:apply-templates select="parent::collab/author-comment[following-sibling::contrib-group]/node()"/>
       <div>
         <xsl:for-each select="contrib">
           <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
@@ -2593,6 +2594,7 @@
         </xsl:for-each>
       </div>
     </div>
+    <xsl:apply-templates select="parent::collab/author-comment[preceding-sibling::contrib-group]/node()"/>
     <xsl:if test="descendant::aff">
       <div class="collab-author-affiliations">
         <h4 id="fulltext--collab-author-affiliations-title" class="pmctoggle" role="button" tabindex="0">
@@ -3471,6 +3473,7 @@
   </xsl:template>
 
   <!-- nodes to remove -->
+  <xsl:template match="author-comment"/>
   <xsl:template match="@xlink:href"/>
   <xsl:template match="sec[@sec-type = 'supplementary-material'] | sec[@sec-type = 'floats-group']"/>
   <xsl:template match="back/fn-group/fn/label"/>

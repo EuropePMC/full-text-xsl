@@ -156,7 +156,7 @@
           <xsl:if test="not(following-sibling::back)">
             <xsl:apply-templates select="article-meta/author-notes"/>
             <xsl:apply-templates select="article-meta/contrib-group[@content-type='collab-list']"/>
-            <xsl:apply-templates select="article-meta//collab/contrib-group" mode="collab-list-container"/>
+            <xsl:apply-templates select="article-meta//collab[contrib-group]" mode="collab-list-container"/>
           </xsl:if>
           <xsl:if test="not(article-meta/abstract) or normalize-space($ctxid) != ''">
             <xsl:apply-templates select="article-meta/kwd-group"/>
@@ -825,7 +825,7 @@
       <xsl:if test="not(following-sibling::back)">
         <xsl:apply-templates select="author-notes"/>
         <xsl:apply-templates select="contrib-group[@content-type='collab-list']"/>
-        <xsl:apply-templates select="contrib-group//collab/contrib-group" mode="collab-list-container"/>
+        <xsl:apply-templates select="contrib-group//collab[contrib-group]" mode="collab-list-container"/>
       </xsl:if>
       <xsl:if test="not(abstract)">
         <xsl:apply-templates select="kwd-group"/>
@@ -2222,7 +2222,7 @@
       </xsl:if>
     </xsl:if>
     <xsl:apply-templates select="preceding-sibling::*//contrib-group[@content-type='collab-list']"/>
-    <xsl:apply-templates select="preceding-sibling::*//contrib-group[parent::collab]" mode="collab-list-container"/>
+    <xsl:apply-templates select="preceding-sibling::*//contrib-group/parent::collab" mode="collab-list-container"/>
     <xsl:apply-templates select="*[not(self::ack) and not(self::bio)]"/>
     <xsl:if test="normalize-space($pprid) != ''">
       <xsl:call-template name="article-info-history"/>
@@ -2576,14 +2576,14 @@
     </div>
   </xsl:template>
   
-  <xsl:template match="contrib-group" mode="collab-list-container">
-    <div class="fulltext--collab-author-information" id="{concat('collab', count(preceding::contrib-group[parent::collab])+1)}">
+  <xsl:template match="collab" mode="collab-list-container">
+    <div class="fulltext--collab-author-information" id="{concat('collab', count(preceding::collab[contrib-group])+1)}">
       <h3>
-        <xsl:apply-templates select="parent::collab/node()[not(self::contrib-group) and not(self::author-comment)]"/>
+        <xsl:apply-templates select="node()[not(self::contrib-group) and not(self::author-comment)]"/>
       </h3>
-      <xsl:apply-templates select="parent::collab/author-comment[following-sibling::contrib-group]/node()"/>
+      <xsl:apply-templates select="author-comment[following-sibling::contrib-group]/node()"/>
       <div>
-        <xsl:for-each select="contrib">
+        <xsl:for-each select="descendant::contrib">
           <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
           <xsl:if test="position() != last()">
             <xsl:text>, </xsl:text>
@@ -2594,7 +2594,7 @@
         </xsl:for-each>
       </div>
     </div>
-    <xsl:apply-templates select="parent::collab/author-comment[preceding-sibling::contrib-group]/node()"/>
+    <xsl:apply-templates select="author-comment[preceding-sibling::contrib-group]/node()"/>
     <xsl:if test="descendant::aff">
       <div class="collab-author-affiliations">
         <h4 id="fulltext--collab-author-affiliations-title" class="pmctoggle" role="button" tabindex="0">

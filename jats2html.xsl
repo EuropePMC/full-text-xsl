@@ -1600,7 +1600,9 @@
   <xsl:template match="table-wrap/label" mode="captionLabel">
     <span class="table-label">
       <xsl:apply-templates/>
-      <xsl:text>.</xsl:text>
+      <xsl:if test="following-sibling::caption/title">
+        <xsl:text>. </xsl:text>
+      </xsl:if>      
     </span>
     <xsl:text> </xsl:text>
   </xsl:template>

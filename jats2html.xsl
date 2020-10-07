@@ -1871,7 +1871,7 @@
           </span>
           <span class="fig-label">
             <xsl:value-of select="label/text()"/>
-            <xsl:if test="label/text() and title">
+            <xsl:if test="label/text() and caption/title">
               <xsl:text>: </xsl:text>
             </xsl:if>
           </span>

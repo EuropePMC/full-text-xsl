@@ -1408,23 +1408,18 @@
     </div>
   </xsl:template>
 
-  <xsl:template match="sec/title | boxed-text/caption/title">
+  <xsl:template match="sec/title">
     <xsl:if test="node() != ''">
       <xsl:choose>
         <xsl:when test="ancestor::app">
           <xsl:element name="h{count(ancestor::sec) + 3}">
             <xsl:apply-templates select="@* | preceding-sibling::*[1][self::label]"/>
-            <xsl:apply-templates select="parent::caption/preceding-sibling::*[1][self::label]" mode="label-title"/>
             <xsl:apply-templates select="node()"/>
           </xsl:element>
         </xsl:when>
         <xsl:otherwise>
           <xsl:element name="h{count(ancestor::sec)+count(ancestor::abstract)+count(ancestor::boxed-text)+count(ancestor::ack) + 1}">
             <xsl:attribute name="id">
-              <!-- marinos: micropubs have secs without @ids. Therefore, the html created
-              has elements with the same id (which break the FT navigation menu.
-              When there is no @id, I append a number to the 'title' to make it unique.
-               -->
               <xsl:choose>
                 <xsl:when test="parent::sec/@id">
                   <xsl:value-of select="concat(parent::sec/@id, 'title')"/>
@@ -1435,7 +1430,6 @@
               </xsl:choose>
             </xsl:attribute>
             <xsl:apply-templates select="@* | preceding-sibling::*[1][self::label]"/>
-            <xsl:apply-templates select="parent::caption/preceding-sibling::*[1][self::label]" mode="label-title"/>
             <xsl:apply-templates select="node()"/>
           </xsl:element>
         </xsl:otherwise>
@@ -1443,18 +1437,44 @@
     </xsl:if>
   </xsl:template>
   
-  <xsl:template match="boxed-text/label"/>
+  <xsl:template match="boxed-text/label">
+    <xsl:if test="node() != ''">
+      <xsl:choose>
+        <xsl:when test="ancestor::app">
+          <xsl:element name="h{count(ancestor::sec) + 3}">
+            <xsl:apply-templates select="." mode="label-title"/>
+          </xsl:element>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:element name="h{count(ancestor::sec)+count(ancestor::abstract)+count(ancestor::boxed-text)+count(ancestor::ack) + 1}">
+            <xsl:attribute name="id">
+              <xsl:choose>
+                <xsl:when test="parent::sec/@id">
+                  <xsl:value-of select="concat(parent::sec/@id, 'title')"/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select="concat('sec', count(../preceding::sec), 'title')"/>
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:attribute>
+            <xsl:apply-templates select="." mode="label-title"/>
+          </xsl:element>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:if>
+  </xsl:template>
+  
+  <xsl:template match="boxed-text/label" mode="label-title">
+    <xsl:value-of select="."/>
+    <xsl:if test="following-sibling::caption/title">
+      <xsl:text>. </xsl:text>
+      <xsl:apply-templates select="following-sibling::caption/title/node()"/>
+    </xsl:if>
+  </xsl:template>
 
   <xsl:template match="sec/label | ack/label | ref-list/label">
     <xsl:value-of select="."/>
     <xsl:text>. </xsl:text>
-  </xsl:template>
-
-  <xsl:template match="boxed-text/label" mode="label-title">
-    <xsl:if test="following-sibling::caption/title">
-      <xsl:value-of select="."/>
-      <xsl:text>. </xsl:text>
-    </xsl:if>
   </xsl:template>
 
   <!-- END transforming sections to heading levels -->
@@ -1554,8 +1574,6 @@
 
   <xsl:template match="caption">
     <xsl:choose>
-      <!-- if article-title exists, make it as title.
-                     Otherwise, make source -->
       <xsl:when test="parent::table-wrap">
         <xsl:if test="following-sibling::graphic">
           <xsl:variable name="caption" select="parent::table-wrap/label/text()"/>
@@ -1801,10 +1819,10 @@
   </xsl:template>
 
   <!-- fig caption -->
-  <xsl:template match="fig//caption">
+  <xsl:template match="fig" mode="caption">
     <xsl:variable name="graphic-type">
       <xsl:choose>
-        <xsl:when test="substring-after(../graphic/@xlink:href, '.') = 'gif'">
+        <xsl:when test="substring-after(graphic/@xlink:href, '.') = 'gif'">
           <xsl:value-of select="'animation'"/>
         </xsl:when>
         <xsl:otherwise>
@@ -1813,11 +1831,11 @@
       </xsl:choose>
     </xsl:variable>
     <xsl:choose>
-      <xsl:when test="not(parent::supplementary-material)">
+      <xsl:when test="not(supplementary-material)">
         <div class="fig-caption">
           <xsl:variable name="filename">
             <xsl:call-template name="get-filename">
-              <xsl:with-param name="string" select="following-sibling::graphic/@xlink:href"/>
+              <xsl:with-param name="string" select="graphic/@xlink:href"/>
             </xsl:call-template>
           </xsl:variable>
           <xsl:variable name="graphics">
@@ -1848,18 +1866,19 @@
             </span>
           </span>
           <span class="fig-label">
-            <xsl:value-of select="../label/text()"/>
-            <xsl:if test="../label/text() and title">
+            <xsl:value-of select="label/text()"/>
+            <xsl:if test="label/text() and title">
               <xsl:text>: </xsl:text>
             </xsl:if>
           </span>
           <xsl:text> </xsl:text>
-          <xsl:apply-templates/>
+          <xsl:apply-templates select="descendant::caption/node()"/>
         </div>
+        <xsl:apply-templates/>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:apply-templates select="../label" mode="supplementary-material"/>
-        <xsl:apply-templates/>
+        <xsl:apply-templates select="label" mode="supplementary-material"/>
+        <xsl:apply-templates select="descendant::caption/node()"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
@@ -2119,7 +2138,7 @@
             </a>
           </xsl:for-each>
         </div>
-        <xsl:apply-templates/>
+        <xsl:apply-templates select="." mode="caption"/>
       </div>
     </div>
   </xsl:template>
@@ -3487,8 +3506,8 @@
   <xsl:template match="author-notes/fn/label"/>
   <xsl:template match="author-notes/corresp/label"/>
   <xsl:template match="abstract/title"/>
-  <xsl:template match="fig/graphic"/>
-  <xsl:template match="fig-group//object-id | fig-group//graphic | fig//label"/>
+  <xsl:template match="fig/graphic | fig/label | fig/caption"/>
+  <xsl:template match="fig-group//object-id | fig-group//graphic"/>
   <xsl:template match="ack/title"/>
   <xsl:template match="ref-list/title"/>
   <xsl:template match="

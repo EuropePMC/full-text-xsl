@@ -1563,6 +1563,39 @@
       <xsl:apply-templates select="." mode="testing"/>
     </div>
   </xsl:template>
+  
+  <xsl:template match="table-wrap" mode="testing">
+    <div class="table-expansion table-overflow">
+      <xsl:if test="@id">
+        <xsl:attribute name="id">
+          <xsl:value-of select="@id"/>
+        </xsl:attribute>
+      </xsl:if>
+      <xsl:if test="graphic">
+        <xsl:variable name="caption" select="label/text()"/>
+        <xsl:variable name="filename">
+          <xsl:call-template name="get-filename">
+            <xsl:with-param name="string" select="graphic/@xlink:href"/>
+          </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="graphics">
+          <xsl:choose>
+            <xsl:when test="$msspreview">
+              <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="concat($filebase,'image/',$filename, '.jpg')"/>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:variable>
+        <a href="{$graphics}" target="_blank" class="figure-expand" title="{$caption} - Click to open full size">
+          <img data-img="[graphic-{$filename}-medium]" src="{$graphics}" alt="{$caption}"/>
+        </a>
+      </xsl:if>
+      <xsl:apply-templates select="label" mode="captionLabel"/>
+      <xsl:apply-templates/>
+    </div>
+  </xsl:template>
 
   <xsl:template match="table-wrap/label" mode="captionLabel">
     <span class="table-label">
@@ -1572,42 +1605,13 @@
     <xsl:text> </xsl:text>
   </xsl:template>
 
-  <xsl:template match="caption">
-    <xsl:choose>
-      <xsl:when test="parent::table-wrap">
-        <xsl:if test="following-sibling::graphic">
-          <xsl:variable name="caption" select="parent::table-wrap/label/text()"/>
-          <xsl:variable name="filename">
-            <xsl:call-template name="get-filename">
-              <xsl:with-param name="string" select="following-sibling::graphic/@xlink:href"/>
-            </xsl:call-template>
-          </xsl:variable>
-          <xsl:variable name="graphics">
-            <xsl:choose>
-              <xsl:when test="$msspreview">
-                <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:value-of select="concat($filebase,'image/',$filename, '.jpg')"/>
-              </xsl:otherwise>
-            </xsl:choose>
-          </xsl:variable>
-          <a href="{$graphics}" target="_blank" class="figure-expand" title="{$caption} - Click to open full size">
-            <img data-img="[graphic-{$filename}-medium]" src="{$graphics}" alt="{$caption}"/>
-          </a>
-        </xsl:if>
-        <xsl:apply-templates select="parent::table-wrap/label" mode="captionLabel"/>
-        <xsl:apply-templates select="title"/>
-        <xsl:if test="child::*[not(self::title)]">
-          <div class="table-caption">
-            <xsl:apply-templates select="child::*[not(self::title)]"/>
-          </div>
-        </xsl:if>
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:apply-templates/>
-      </xsl:otherwise>
-    </xsl:choose>
+  <xsl:template match="table-wrap/caption">
+    <xsl:apply-templates select="title"/>
+    <xsl:if test="child::*[not(self::title)]">
+      <div class="table-caption">
+        <xsl:apply-templates select="child::*[not(self::title)]"/>
+      </div>
+    </xsl:if>    
   </xsl:template>
 
   <xsl:template match="table-wrap/table">
@@ -1898,6 +1902,10 @@
       <xsl:apply-templates/>
     </span>
   </xsl:template>
+  
+  <xsl:template match="caption">
+    <xsl:apply-templates/>
+  </xsl:template>
 
   <!-- END Figure Handling -->
 
@@ -2077,17 +2085,6 @@
         </sup>
       </xsl:otherwise>
     </xsl:choose>
-  </xsl:template>
-
-  <xsl:template match="table-wrap" mode="testing">
-    <div class="table-expansion table-overflow">
-      <xsl:if test="@id">
-        <xsl:attribute name="id">
-          <xsl:value-of select="@id"/>
-        </xsl:attribute>
-      </xsl:if>
-      <xsl:apply-templates/>
-    </div>
   </xsl:template>
 
   <xsl:template match="fig" mode="testing">

@@ -1437,7 +1437,7 @@
     </xsl:if>
   </xsl:template>
   
-  <xsl:template match="boxed-text/label">
+  <xsl:template match="boxed-text" mode="label-title">
     <xsl:if test="node() != ''">
       <xsl:choose>
         <xsl:when test="ancestor::app">
@@ -1457,18 +1457,14 @@
                 </xsl:otherwise>
               </xsl:choose>
             </xsl:attribute>
-            <xsl:apply-templates select="." mode="label-title"/>
+            <xsl:value-of select="label"/>
+            <xsl:if test="label and caption/title">
+              <xsl:text>. </xsl:text>
+            </xsl:if>
+            <xsl:apply-templates select="caption/title/node()"/>
           </xsl:element>
         </xsl:otherwise>
       </xsl:choose>
-    </xsl:if>
-  </xsl:template>
-  
-  <xsl:template match="boxed-text/label" mode="label-title">
-    <xsl:value-of select="."/>
-    <xsl:if test="following-sibling::caption/title">
-      <xsl:text>. </xsl:text>
-      <xsl:apply-templates select="following-sibling::caption/title/node()"/>
     </xsl:if>
   </xsl:template>
 
@@ -3044,6 +3040,7 @@
       <xsl:attribute name="id">
         <xsl:value-of select="@id"/>
       </xsl:attribute>
+      <xsl:apply-templates select="." mode="label-title"/>
       <xsl:apply-templates/>
     </div>
   </xsl:template>

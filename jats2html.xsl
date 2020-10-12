@@ -1446,7 +1446,7 @@
           </xsl:element>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:element name="h{count(ancestor::sec)+count(ancestor::abstract)+count(ancestor::boxed-text)+count(ancestor::ack) + 1}">
+          <xsl:element name="h{count(ancestor::sec)+count(ancestor::abstract)+count(ancestor::ack) + 2}">
             <xsl:attribute name="id">
               <xsl:choose>
                 <xsl:when test="parent::sec/@id">
@@ -3512,6 +3512,7 @@
   <xsl:template match="author-notes/fn/label"/>
   <xsl:template match="author-notes/corresp/label"/>
   <xsl:template match="abstract/title"/>
+  <xsl:template match="boxed-text/caption/title | boxed-text/label"/>
   <xsl:template match="fig/graphic | fig/label | fig/caption"/>
   <xsl:template match="fig-group//object-id | fig-group//graphic"/>
   <xsl:template match="ack/title"/>

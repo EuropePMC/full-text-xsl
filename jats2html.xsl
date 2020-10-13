@@ -1584,8 +1584,18 @@
             </xsl:otherwise>
           </xsl:choose>
         </xsl:variable>
+        <xsl:variable name="alt">
+          <xsl:choose>
+            <xsl:when test="descendant::alt-text">
+              <xsl:value-of select="descendant::alt-text"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="$caption"/>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:variable>
         <a href="{$graphics}" target="_blank" class="figure-expand" title="{$caption} - Click to open full size">
-          <img data-img="[graphic-{$filename}-medium]" src="{$graphics}" alt="{$caption}"/>
+          <img data-img="[graphic-{$filename}-medium]" src="{$graphics}" alt="{alt}"/>
         </a>
       </xsl:if>
       <xsl:apply-templates select="label" mode="captionLabel"/>
@@ -1750,6 +1760,30 @@
         </xsl:otherwise>
       </xsl:choose>
     </span>
+  </xsl:template>
+  
+  <xsl:template match="mml:mglyph">
+    <xsl:variable name="filename">
+      <xsl:call-template name="get-filename">
+        <xsl:with-param name="string" select="@src"/>
+      </xsl:call-template>
+    </xsl:variable>
+    <xsl:variable name="graphics">
+      <xsl:choose>
+        <xsl:when test="$msspreview">
+          <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="concat($filebase,'image/',$filename)"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    <xsl:element name="{local-name(.)}">
+      <xsl:attribute name="src">
+        <xsl:value-of select="$graphics"/>
+      </xsl:attribute>
+      <xsl:apply-templates select="@alt"/>
+    </xsl:element>
   </xsl:template>
 
   <xsl:template match="mml:*">
@@ -2125,6 +2159,16 @@
                 </xsl:otherwise>
               </xsl:choose>
             </xsl:variable>
+            <xsl:variable name="alt">
+              <xsl:choose>
+                <xsl:when test="descendant::alt-text">
+                  <xsl:value-of select="descendant::alt-text"/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select="$caption"/>
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:variable>
             <a target="_blank" class="figure-expand" title="{$caption} - Click to open full size">
               <xsl:choose>
                 <xsl:when test="$msspreview">
@@ -2137,7 +2181,7 @@
                   <xsl:attribute name="href">
                     <xsl:value-of select="concat($graphics,'.jpg')"/>
                   </xsl:attribute>
-                  <img data-img="[graphic-{$filename}-medium]" src="{concat($graphics, '.jpg')}" alt="{$caption}"/>
+                  <img data-img="[graphic-{$filename}-medium]" src="{concat($graphics, '.jpg')}" alt="{$alt}"/>
                 </xsl:otherwise>
               </xsl:choose>
             </a>
@@ -3061,29 +3105,16 @@
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
-    <a href="{$graphics}" target="_blank" class="figure-expand" title="Click to open full size">
-      <img data-img="[graphic-{$filename}-medium]" src="{$graphics}" alt="inline image"/>
-    </a>
-  </xsl:template>
-
-  <xsl:template match="inline-graphic" mode="testing">
-    <xsl:variable name="filename">
-      <xsl:call-template name="get-filename">
-        <xsl:with-param name="string" select="@xlink:href"/>
-      </xsl:call-template>
-    </xsl:variable>
-    <xsl:variable name="graphics">
+    <xsl:variable name="alt">
       <xsl:choose>
-        <xsl:when test="$msspreview">
-          <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
+        <xsl:when test="alt-text">
+          <xsl:value-of select="alt-text"/>
         </xsl:when>
-        <xsl:otherwise>
-          <xsl:value-of select="concat($filebase,'image/',$filename,'.jpg')"/>
-        </xsl:otherwise>
+        <xsl:otherwise>inline image</xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
     <a href="{$graphics}" target="_blank" class="figure-expand" title="Click to open full size">
-      <img data-img="[graphic-{$filename}-medium]" src="{$graphics}" alt="inline image"/>
+      <img data-img="[graphic-{$filename}-medium]" src="{$graphics}" alt="{$alt}"/>
     </a>
   </xsl:template>
 
@@ -3493,7 +3524,7 @@
 
   <xsl:template match="
       caption | table-wrap/table | table-wrap-foot | fn | bold | italic | underline | preformat | monospace |
-      styled-content | sub | sup | sc | sec/title | boxed-text | ext-link | app/title | disp-formula | inline-formula | list | list-item | hr | disp-quote | code | verse-group | def-list" mode="testing">
+      styled-content | sub | sup | sc | sec/title | boxed-text | ext-link | app/title | disp-formula | inline-formula | list | list-item | hr | disp-quote | code | verse-group | def-list | inline-graphic" mode="testing">
     <xsl:apply-templates select="."/>
   </xsl:template>
 

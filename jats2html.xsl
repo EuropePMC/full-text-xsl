@@ -1761,11 +1761,18 @@
       </xsl:choose>
     </span>
   </xsl:template>
+
+  <xsl:template match="mml:*">
+    <xsl:element name="{local-name(.)}">
+      <xsl:apply-templates select="@*"/>
+      <xsl:apply-templates/>
+    </xsl:element>
+  </xsl:template>
   
-  <xsl:template match="mml:mglyph">
+  <xsl:template match="mml:mglyph/@src">
     <xsl:variable name="filename">
       <xsl:call-template name="get-filename">
-        <xsl:with-param name="string" select="@src"/>
+        <xsl:with-param name="string" select="."/>
       </xsl:call-template>
     </xsl:variable>
     <xsl:variable name="graphics">
@@ -1774,25 +1781,14 @@
           <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:value-of select="concat($filebase,'image/',$filename)"/>
+          <xsl:value-of select="concat($filebase,'image/',$filename,'.jpg')"/>
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
-    <xsl:element name="{local-name(.)}">
-      <xsl:attribute name="src">
-        <xsl:value-of select="$graphics"/>
-      </xsl:attribute>
-      <xsl:apply-templates select="@alt"/>
-    </xsl:element>
+    <xsl:attribute name="src">
+      <xsl:value-of select="$graphics"/>
+    </xsl:attribute>
   </xsl:template>
-
-  <xsl:template match="mml:*">
-    <xsl:element name="{local-name(.)}">
-      <xsl:apply-templates select="@*"/>
-      <xsl:apply-templates/>
-    </xsl:element>
-  </xsl:template>
-
 
   <xsl:template match="*" mode="serialize">
       <xsl:text>&lt;</xsl:text>

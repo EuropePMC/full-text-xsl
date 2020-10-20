@@ -2849,6 +2849,9 @@
         <xsl:if test="child::lpage">
           <xsl:value-of select="'lpage|'"/>
         </xsl:if>
+        <xsl:if test="child::elocation-id">
+          <xsl:value-of select="'elocation|'"/>
+        </xsl:if>
       </xsl:variable>
       <xsl:if test="child::person-group[@person-group-type = 'editor'] and @publication-type='book'">
         <span>
@@ -2956,6 +2959,14 @@
             <xsl:text>-</xsl:text>
             <xsl:apply-templates select="child::lpage/node()"/>
           </xsl:if>
+        </span>
+      </xsl:if>
+      <xsl:if test="contains($includes, 'elocation|')">
+        <xsl:if test="not(starts-with($includes, 'elocation|'))">
+          <xsl:text>: </xsl:text>
+        </xsl:if>
+        <span class="reflink-details-pages">
+          <xsl:apply-templates select="child::elocation-id/node()"/>
         </span>
       </xsl:if>
       <xsl:if test="$includes != ''">

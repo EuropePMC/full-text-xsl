@@ -1778,19 +1778,22 @@
         <xsl:with-param name="string" select="."/>
       </xsl:call-template>
     </xsl:variable>
-    <xsl:variable name="graphics">
-      <xsl:choose>
-        <xsl:when test="$msspreview">
-          <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:value-of select="concat($filebase,'image/',$filename,'.jpg')"/>
-        </xsl:otherwise>
-      </xsl:choose>
-    </xsl:variable>
     <xsl:attribute name="src">
-      <xsl:value-of select="$graphics"/>
+      <xsl:value-of select="concat($filebase,'image/',$filename,'.jpg')"/>
     </xsl:attribute>
+  </xsl:template>
+  
+  <xsl:template match="mml:mglyph/@src" mode="serialize">
+    <xsl:variable name="filename">
+      <xsl:call-template name="get-filename">
+        <xsl:with-param name="string" select="."/>
+      </xsl:call-template>
+    </xsl:variable>
+    <xsl:text> </xsl:text>
+    <xsl:value-of select="name()"/>
+    <xsl:text>="</xsl:text>
+    <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
+    <xsl:text>"</xsl:text>
   </xsl:template>
 
   <xsl:template match="*" mode="serialize">

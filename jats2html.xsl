@@ -1671,6 +1671,9 @@
             <xsl:value-of select="concat(@valign, ';')"/>
           </xsl:if>
           <xsl:value-of select="@style"/>
+          <xsl:if test="contains(@style, 'vertical-rl')">
+            <xsl:text>inline-size: max-content; block-size: max-content; min-width: 1.65em;</xsl:text>
+          </xsl:if>
         </xsl:attribute>
       </xsl:if>
 

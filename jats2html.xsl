@@ -2317,9 +2317,9 @@
   <xsl:template match="author-notes">
     <xsl:if test="fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address') or not(@fn-type)] | p | corresp | bio | ancestor::*[starts-with(name(), 'front')]/following-sibling::back/bio">
       <h2 id="author-notes">Author Information</h2>
-      <xsl:apply-templates select="ancestor::*[starts-with(name(), 'front')]/following-sibling::back/bio | bio"/>
       <xsl:apply-templates select="p | corresp"/>
       <xsl:apply-templates select="parent::*" mode="list-emails"/>
+      <xsl:apply-templates select="ancestor::*[starts-with(name(), 'front')]/following-sibling::back/bio | bio"/>
     </xsl:if>
     <xsl:if test="ancestor::*[starts-with(name(), 'front')]/following-sibling::back/fn-group/fn[@fn-type = 'con'] | fn[@fn-type = 'con'] | fn[@fn-type = 'equal'] | parent::*//contrib[@equal-contrib = 'yes']">
       <div id="author-info-equal-contrib">
@@ -3416,6 +3416,10 @@
   
   <xsl:template match="bio">
     <xsl:apply-templates/>
+  </xsl:template>
+  
+  <xsl:template match="bio/title">
+    <h3 id="{parent::bio/@id}"><xsl:apply-templates/></h3>
   </xsl:template>
   
   <xsl:template match="verse-line">

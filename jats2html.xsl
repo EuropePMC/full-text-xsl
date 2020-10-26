@@ -2653,7 +2653,7 @@
       </h3>
       <xsl:apply-templates select="author-comment[following-sibling::contrib-group]/node()"/>
       <div>
-        <xsl:for-each select="descendant::contrib">
+        <xsl:for-each select="contrib-group/contrib">
           <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
           <xsl:if test="position() != last()">
             <xsl:text>, </xsl:text>

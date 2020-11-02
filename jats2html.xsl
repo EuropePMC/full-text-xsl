@@ -2288,8 +2288,9 @@
       </xsl:if>
       <xsl:if test="preceding-sibling::*//contrib/email">
         <h3>Author Information</h3>
-        <xsl:apply-templates select="preceding-sibling::*" mode="list-emails"/>
+        <xsl:apply-templates select="preceding-sibling::*" mode="list-emails"/>        
       </xsl:if>
+      <xsl:apply-templates select="bio"/>
     </xsl:if>
     <xsl:apply-templates select="preceding-sibling::*//contrib-group[@content-type='collab-list']"/>
     <xsl:apply-templates select="preceding-sibling::*//contrib-group/parent::collab" mode="collab-list-container"/>

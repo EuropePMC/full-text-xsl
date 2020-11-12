@@ -1219,9 +1219,6 @@
           </xsl:attribute>
         </xsl:otherwise>
       </xsl:choose>
-      <xsl:if test="not(parent::article-meta/abstract)">
-        <h2>Copyright</h2>
-      </xsl:if>
       <xsl:apply-templates/>
       <xsl:if test="parent::article-meta">
         <xsl:apply-templates select="//body//permissions"/>
@@ -1230,11 +1227,9 @@
   </xsl:template>
 
   <xsl:template match="permissions/copyright-statement">
-    <!--<ul class="copyright-statement">
-            <li>
-                <xsl:apply-templates/>
-            </li>
-        </ul>-->
+    <div class="copyright">
+      <p><xsl:apply-templates/></p>
+    </div>
   </xsl:template>
 
   <xsl:template match="license">

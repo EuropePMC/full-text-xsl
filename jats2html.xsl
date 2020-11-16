@@ -1219,27 +1219,41 @@
           </xsl:attribute>
         </xsl:otherwise>
       </xsl:choose>
-      <xsl:apply-templates/>
-      <xsl:if test="parent::article-meta">
-        <xsl:apply-templates select="//body//permissions"/>
-      </xsl:if>
+      <h2 id="fulltext--permissions-title" class="pmctoggle" role="button" tabindex="0">
+        <xsl:if test="not($msspreview)">
+          <xsl:attribute name="onclick">
+            <xsl:text>this.classList.toggle('open'); this.blur()</xsl:text>
+          </xsl:attribute>
+        </xsl:if>
+        <xsl:text>Copyright and license information</xsl:text>
+      </h2>
+      <div class="permissions">
+        <xsl:if test="$emsid != ''">
+          <p><a href="https://europepmc.org/pmc/about/copyright/">
+            <xsl:if test="$msspreview">
+              <xsl:attribute name="target">_blank</xsl:attribute>
+            </xsl:if>
+            <xsl:text>Copyright notice</xsl:text>
+          </a></p>
+        </xsl:if>
+        <xsl:apply-templates/>
+        <xsl:if test="parent::article-meta">
+          <xsl:apply-templates select="//body//permissions"/>
+        </xsl:if>
+      </div>
     </div>
   </xsl:template>
 
   <xsl:template match="permissions/copyright-statement">
-    <div class="copyright">
-      <p><xsl:apply-templates/></p>
-    </div>
+    <p class="copyright"><xsl:apply-templates/></p>    
   </xsl:template>
 
   <xsl:template match="license">
-    <div class="license">
-      <xsl:apply-templates/>
-    </div>
+    <xsl:apply-templates/>    
   </xsl:template>
 
   <xsl:template match="license-p">
-    <p>
+    <p class="license">
       <xsl:apply-templates/>
     </p>
   </xsl:template>

@@ -116,7 +116,13 @@
 		<xsl:value-of select="$newline"/>
 		<xsl:value-of select="$newline"/>
 	</xsl:template>
-	
+    
+    <xsl:template match="abstractText">
+		<xsl:text>AB  - </xsl:text>
+		<xsl:apply-templates/>
+		<xsl:value-of select="$newline"/>
+	</xsl:template>
+
 	<xsl:template match="title">
 		<xsl:text>TI  - </xsl:text>
 		<xsl:apply-templates>
@@ -347,16 +353,6 @@
 			</xsl:otherwise>
 		</xsl:choose>
 		<xsl:value-of select="$newline"/>
-	</xsl:template>
-
-	<xsl:template match="abstractText">
-		<xsl:if test="$inclAbstracts='Y' and string-length(text()) &gt; 12">
-			<!-- NOTE: This assumes that any legitimate abstract has more than 12 chars. As well as records with single spaces 
-					there are some with, for example, "Images" or "No Abstract" -->
-			<xsl:text>AB  - </xsl:text>
-			<xsl:apply-templates/>
-			<xsl:value-of select="$newline"/>
-		</xsl:if>
 	</xsl:template>
 
 	<xsl:template match="doi">

@@ -138,6 +138,13 @@
 		<xsl:value-of select="$newline"/>
 	</xsl:template>
 	
+    <xsl:template match="abstractText">
+		<xsl:text>	Abstract = {</xsl:text>
+		<xsl:apply-templates/>
+		<xsl:text>},</xsl:text>
+		<xsl:value-of select="$newline"/>
+	</xsl:template>
+
 	<xsl:template match="title">
 		<xsl:text>	Title = {</xsl:text>
 		<xsl:apply-templates>

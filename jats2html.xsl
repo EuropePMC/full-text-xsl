@@ -1840,15 +1840,6 @@
   <!-- Start Figure Handling -->
   <!-- fig with atrtribute specific-use are supplement figures -->
 
-  <!-- NOTE: PATH/LINK to be replaced -->
-  <xsl:template match="fig-group">
-    <!-- set main figure's DOI -->
-    <xsl:variable name="data-doi" select="child::fig[1]/object-id[@pub-id-type = 'doi']/text()"/>
-    <div class="fig-group" id="{concat('fig-group-', count(preceding::fig-group)+1)}" data-doi="{$data-doi}">
-      <xsl:apply-templates select="." mode="testing"/>
-    </div>
-  </xsl:template>
-
   <xsl:template match="fig | table-wrap | boxed-text | supplementary-material | media" mode="dc-description">
     <xsl:param name="doi"/>
     <xsl:variable name="data-dc-description">
@@ -1863,15 +1854,6 @@
     </xsl:variable>
     <div data-dc-description="{$doi}">
       <xsl:value-of select="substring-after($data-dc-description, ' ')"/>
-    </div>
-  </xsl:template>
-
-  <!-- individual fig in fig-group -->
-
-  <xsl:template match="fig">
-    <xsl:variable name="data-doi" select="child::object-id[@pub-id-type = 'doi']/text()"/>
-    <div class="fig" data-doi="{$data-doi}">
-      <xsl:apply-templates select="." mode="testing"/>
     </div>
   </xsl:template>
 
@@ -1950,7 +1932,7 @@
     </span>
   </xsl:template>
 
-  <xsl:template match="fig//caption/title | supplementary-material/caption/title | table-wrap/caption/title">
+  <xsl:template match="fig-group//caption/title | fig//caption/title | supplementary-material/caption/title | table-wrap/caption/title">
     <span class="caption-title">
       <xsl:apply-templates/>
     </span>
@@ -2038,7 +2020,7 @@
         <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
           <xsl:variable name="rid" select="@rid"/>
           <xsl:if test="not(preceding::xref[@rid = $rid])">
-            <xsl:apply-templates select="//*[@id = $rid][@position != 'anchor']" mode="testing"/>
+            <xsl:apply-templates select="//floats-group/*[@id = $rid][@position != 'anchor']" mode="testing"/>
           </xsl:if>
         </xsl:for-each>
       </xsl:if>
@@ -2139,6 +2121,24 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  
+  <xsl:template match="fig-group"/>
+  
+  <xsl:template match="fig-group" mode="testing">
+    <div class="elife-fig-image-caption-wrapper" id="{@id}">
+      <div class="fig-caption fig-group">
+        <span class="fig-label">
+          <xsl:value-of select="label/text()"/>
+          <xsl:if test="label/text() and caption/title">
+            <xsl:text>: </xsl:text>
+          </xsl:if>
+        </span>
+        <xsl:text> </xsl:text>
+        <xsl:apply-templates select="caption/node()"/>
+      </div>
+      <xsl:apply-templates select="fig" mode="testing"/>
+    </div>
+  </xsl:template>
 
   <xsl:template match="fig" mode="testing">
     <xsl:variable name="caption" select="child::label/text()"/>
@@ -2199,42 +2199,6 @@
           </xsl:for-each>
         </div>
         <xsl:apply-templates select="." mode="caption"/>
-      </div>
-    </div>
-  </xsl:template>
-
-  <xsl:template match="fig-group" mode="testing">
-    <!-- set main figure's DOI -->
-    <div class="fig-inline-img-set-carousel">
-      <div class="elife-fig-slider-wrapper">
-        <div class="elife-fig-slider">
-          <div class="elife-fig-slider-img elife-fig-slider-primary">
-            <!-- use variables to set src and alt -->
-            <xsl:variable name="primaryid" select="concat('#', child::fig[not(@specific-use)]/@id)"/>
-            <xsl:variable name="primarycap" select="child::fig[not(@specific-use)]//label/text()"/>
-            <xsl:variable name="graphichref" select="substring-before(concat(child::fig[not(@specific-use)]/graphic/@xlink:href, '.'), '.')"/>
-            <a href="{$primaryid}">
-              <img src="[graphic-{$graphichref}-small]" alt="{$primarycap}"/>
-            </a>
-          </div>
-          <div class="figure-carousel-inner-wrapper">
-            <div class="figure-carousel">
-              <xsl:for-each select="child::fig[@specific-use]">
-                <!-- use variables to set src and alt -->
-                <xsl:variable name="secondarycap" select="child::label/text()"/>
-                <xsl:variable name="secgraphichref" select="substring-before(concat(child::graphic/@xlink:href, '.'), '.')"/>
-                <div class="elife-fig-slider-img elife-fig-slider-secondary">
-                  <a href="#{@id}">
-                    <img src="[graphic-{$secgraphichref}-small]" alt="{$secondarycap}"/>
-                  </a>
-                </div>
-              </xsl:for-each>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="elife-fig-image-caption-wrapper">
-        <xsl:apply-templates/>
       </div>
     </div>
   </xsl:template>
@@ -3572,7 +3536,6 @@
   <xsl:template match="abstract/title"/>
   <xsl:template match="boxed-text/caption/title | boxed-text/label"/>
   <xsl:template match="fig/graphic | fig/label | fig/caption"/>
-  <xsl:template match="fig-group//object-id | fig-group//graphic"/>
   <xsl:template match="ack/title"/>
   <xsl:template match="ref-list/title"/>
   <xsl:template match="

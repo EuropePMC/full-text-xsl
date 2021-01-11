@@ -1574,7 +1574,7 @@
         </xsl:attribute>
       </xsl:if>
       <xsl:apply-templates select="label" mode="captionLabel"/>
-      <xsl:apply-templates/>
+      <xsl:apply-templates mode="testing"/>
     </div>
   </xsl:template>
   

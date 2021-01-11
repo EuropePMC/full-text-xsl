@@ -1578,6 +1578,8 @@
     </div>
   </xsl:template>
   
+  <xsl:template match="table-wrap-group/label" mode="testing"/>
+  
   <xsl:template match="table-wrap">
     <xsl:variable name="data-doi" select="child::object-id[@pub-id-type = 'doi']/text()"/>
     <div class="table-wrap" data-doi="{$data-doi}">

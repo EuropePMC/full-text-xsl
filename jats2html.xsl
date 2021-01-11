@@ -1567,7 +1567,7 @@
 
   <!-- START Table Handling -->
   <xsl:template match="table-wrap-group" mode="testing">
-    <div class="table-group">
+    <div class="table-expansion table-group">
       <xsl:if test="@id">
         <xsl:attribute name="id">
           <xsl:value-of select="@id"/>

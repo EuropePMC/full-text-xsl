@@ -1566,6 +1566,18 @@
   <!-- END handling citation objects -->
 
   <!-- START Table Handling -->
+  <xsl:template match="table-wrap-group" mode="testing">
+    <div class="table-group">
+      <xsl:if test="@id">
+        <xsl:attribute name="id">
+          <xsl:value-of select="@id"/>
+        </xsl:attribute>
+      </xsl:if>
+      <xsl:apply-templates select="label" mode="captionLabel"/>
+      <xsl:apply-templates/>
+    </div>
+  </xsl:template>
+  
   <xsl:template match="table-wrap">
     <xsl:variable name="data-doi" select="child::object-id[@pub-id-type = 'doi']/text()"/>
     <div class="table-wrap" data-doi="{$data-doi}">
@@ -1616,7 +1628,7 @@
     </div>
   </xsl:template>
 
-  <xsl:template match="table-wrap/label" mode="captionLabel">
+  <xsl:template match="table-wrap/label|table-wrap-group/label" mode="captionLabel">
     <span class="table-label">
       <xsl:apply-templates/>
       <xsl:if test="following-sibling::caption/title">
@@ -1626,7 +1638,7 @@
     <xsl:text> </xsl:text>
   </xsl:template>
 
-  <xsl:template match="table-wrap/caption">
+  <xsl:template match="table-wrap/caption|table-wrap-group/caption">
     <xsl:apply-templates select="title"/>
     <xsl:if test="child::*[not(self::title)]">
       <div class="table-caption">
@@ -1936,7 +1948,7 @@
     </span>
   </xsl:template>
 
-  <xsl:template match="fig-group//caption/title | fig//caption/title | supplementary-material/caption/title | table-wrap/caption/title">
+  <xsl:template match="fig-group//caption/title | fig//caption/title | supplementary-material/caption/title | table-wrap/caption/title | table-wrap-group/caption/title">
     <span class="caption-title">
       <xsl:apply-templates/>
     </span>
@@ -3546,7 +3558,7 @@
       ref//publisher-name | ref//issn | red//month | ref//day | ref//season"/>
   <xsl:template match="person-group[@person-group-type = 'author'] | collab"/>
   <xsl:template match="media/label"/>
-  <xsl:template match="object-id | table-wrap/label"/>
+  <xsl:template match="object-id | table-wrap/label | table-wrap-group/label"/>
   <xsl:template match="funding-group//institution-wrap/institution-id"/>
   <xsl:template match="table-wrap/graphic"/>
   <xsl:template match="table-wrap-foot//fn/label"/>

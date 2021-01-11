@@ -122,9 +122,12 @@
   <xsl:template match="article">
     <xsl:apply-templates select="front"/>
     <xsl:apply-templates select="body"/>
-    <xsl:call-template name="supplementary-material"/>
+    <xsl:apply-templates select="body" mode="supplementary-material"/>
     <xsl:apply-templates select="back"/>
     <xsl:apply-templates select="sub-article"/>
+    <xsl:if test="normalize-space($pprid) != ''">
+      <xsl:apply-templates select="front" mode="article-info-history"/>
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="front">
@@ -132,7 +135,7 @@
       <xsl:when test="normalize-space($emsid) != '' and normalize-space($pprid) = ''">
         <img src="https://europepmc.org/corehtml/pmc/pmcgifs/logo-wtpa2.gif"/>
         <div class="front-matter">
-          <xsl:call-template name="identifiers"/>
+          <xsl:apply-templates select="." mode="identifiers"/>
           <xsl:apply-templates select="article-meta/title-group"/>
           <xsl:call-template name="authors"/>
           <xsl:apply-templates select="article-meta"/>
@@ -147,7 +150,7 @@
       </xsl:when>
       <xsl:otherwise>
         <div class="front-matter">
-          <xsl:call-template name="identifiers"/>
+          <xsl:apply-templates select="." mode="identifiers"/>
           <xsl:if test="normalize-space($pprid) != ''">
             <xsl:apply-templates select="article-meta/title-group"/>
           </xsl:if>
@@ -178,17 +181,18 @@
     <div class="sub-article" id="{@id}">
       <xsl:apply-templates select="front-stub"/>
       <xsl:apply-templates select="body"/>
+      <xsl:apply-templates select="body" mode="supplementary-material"/>
       <xsl:apply-templates select="back"/>
     </div>
   </xsl:template>
 
-  <xsl:template name="identifiers">
+  <xsl:template match="front" mode="identifiers">
     <xsl:variable name="doi">
-      <xsl:if test="//article-meta/article-id[@pub-id-type='doi']">
+      <xsl:if test="article-meta/article-id[@pub-id-type='doi']">
         <span class="doi">
           <xsl:text>doi: </xsl:text>
-          <a href="{concat('https://doi.org/', //article-meta/article-id[@pub-id-type='doi'])}" target="_blank">
-            <xsl:value-of select="//article-meta/article-id[@pub-id-type='doi']"/>
+          <a href="{concat('https://doi.org/', article-meta/article-id[@pub-id-type='doi'])}" target="_blank">
+            <xsl:value-of select="article-meta/article-id[@pub-id-type='doi']"/>
           </a>
         </span>
       </xsl:if>
@@ -208,22 +212,22 @@
             </span>
             <span class="pubinfo">
               <xsl:choose>
-                <xsl:when test="//journal-meta/journal-id[@journal-id-type='nlm-ta']">
-                  <xsl:value-of select="//journal-meta/journal-id[@journal-id-type='nlm-ta']"/>
+                <xsl:when test="journal-meta/journal-id[@journal-id-type='nlm-ta']">
+                  <xsl:value-of select="journal-meta/journal-id[@journal-id-type='nlm-ta']"/>
                 </xsl:when>
                 <xsl:otherwise>
-                  <xsl:value-of select="//journal-meta/journal-title-group/journal-title"/>
+                  <xsl:value-of select="journal-meta/journal-title-group/journal-title"/>
                 </xsl:otherwise>
               </xsl:choose>              
               <xsl:text> preprint</xsl:text>
-              <xsl:if test="//article-meta/article-version">
+              <xsl:if test="article-meta/article-version">
                 <xsl:text>, version </xsl:text>
-                <xsl:value-of select="//article-meta/article-version"/>
+                <xsl:value-of select="article-meta/article-version"/>
               </xsl:if>
-              <xsl:if test="//article-meta/pub-date[@pub-type='preprint']">
+              <xsl:if test="article-meta/pub-date[@pub-type='preprint']">
                 <xsl:text>,</xsl:text>
                 <xsl:text> posted </xsl:text>
-                <xsl:apply-templates select="//article-meta/pub-date[@pub-type='preprint']"/>
+                <xsl:apply-templates select="article-meta/pub-date[@pub-type='preprint']"/>
               </xsl:if>
             </span>
             <br/>
@@ -245,23 +249,23 @@
                 <xsl:text>CTXID: </xsl:text>
                 <xsl:value-of select="$ctxid"/>
               </xsl:if>
-              <xsl:apply-templates select="//article-meta/article-id"/>
+              <xsl:apply-templates select="article-meta/article-id"/>
             </span>
           </span>
           <span>
             <span class="pubinfo">
               <xsl:choose>
-                <xsl:when test="//journal-meta/journal-id">
-                  <xsl:value-of select="//journal-meta/journal-id"/>
+                <xsl:when test="journal-meta/journal-id">
+                  <xsl:value-of select="journal-meta/journal-id"/>
                   <xsl:text>.</xsl:text>
                 </xsl:when>
                 <xsl:otherwise>
-                  <xsl:value-of select="//journal-meta//journal-title"/>
+                  <xsl:value-of select="journal-meta//journal-title"/>
                 </xsl:otherwise>
               </xsl:choose>
               <xsl:text> </xsl:text>
-              <xsl:value-of select="//article-meta/pub-date[1]/year"/>
-              <xsl:for-each select="//article-meta[1]">
+              <xsl:value-of select="article-meta/pub-date[1]/year"/>
+              <xsl:for-each select="article-meta[1]">
                 <xsl:if test="volume or issue or fpage or elocation-id">
                   <xsl:if test="volume or issue">
                     <xsl:text>; </xsl:text>
@@ -284,7 +288,7 @@
               <xsl:text>.</xsl:text>
             </span>
             <br/>
-            <xsl:for-each select="//article-meta/pub-date[@pub-type='epub' or @publication-format='electronic'][1]">
+            <xsl:for-each select="article-meta/pub-date[@pub-type='epub' or @publication-format='electronic'][1]">
               <xsl:text>Published online </xsl:text>
               <xsl:value-of select="year"/>
               <xsl:if test="month or season">
@@ -1097,7 +1101,7 @@
     </p>
   </xsl:template>
 
-  <xsl:template name="article-info-history">
+  <xsl:template match="front" mode="article-info-history">
     <div>
       <xsl:attribute name="id">
         <xsl:value-of select="'article-info-history'"/>
@@ -1107,9 +1111,9 @@
         <xsl:attribute name="class">
           <xsl:value-of select="'publication-history'"/>
         </xsl:attribute>
-        <xsl:apply-templates select="//article-meta/history/date[@date-type]" mode="publication-history-item"/>
-        <xsl:apply-templates select="//article-meta/pub-date[@date-type]" mode="publication-history-item"/>
-        <xsl:for-each select="//article-meta/pub-date[@pub-type and not(@date-type) and not(@pub-type='nihms-submitted')]">
+        <xsl:apply-templates select="article-meta/history/date[@date-type]" mode="publication-history-item"/>
+        <xsl:apply-templates select="article-meta/pub-date[@date-type]" mode="publication-history-item"/>
+        <xsl:for-each select="article-meta/pub-date[@pub-type and not(@date-type) and not(@pub-type='nihms-submitted')]">
           <xsl:apply-templates select="." mode="publication-history-item">
             <xsl:with-param name="date-type">
               <xsl:choose>
@@ -2268,9 +2272,6 @@
     <xsl:apply-templates select="preceding-sibling::*//contrib-group[@content-type='collab-list']"/>
     <xsl:apply-templates select="preceding-sibling::*//contrib-group/parent::collab" mode="collab-list-container"/>
     <xsl:apply-templates select="*[not(self::ack) and not(self::bio)]"/>
-    <xsl:if test="normalize-space($pprid) != ''">
-      <xsl:call-template name="article-info-history"/>
-    </xsl:if>
   </xsl:template>
   
   <!-- Acknowledgement -->
@@ -3463,15 +3464,15 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:template name="supplementary-material">
-    <xsl:if test="//supplementary-material[not(object-id)]">
+  <xsl:template match="body" mode="supplementary-material">
+    <xsl:if test="descendant::supplementary-material[not(object-id)]">
       <div id="supplementary-material">
         <h2 id="supplementary-materialtitle">
-          <xsl:apply-templates select="//sec[@sec-type='supplementary-material'][1]/label"/>
-          <xsl:apply-templates select="//sec[@sec-type='supplementary-material'][1]/title/node()"/>
+          <xsl:apply-templates select="descendant::sec[@sec-type='supplementary-material'][1]/label"/>
+          <xsl:apply-templates select="descendant::sec[@sec-type='supplementary-material'][1]/title/node()"/>
         </h2>
         <ul class="supplementary-material">
-          <xsl:for-each select="//supplementary-material[not(object-id)]">
+          <xsl:for-each select="descendant::supplementary-material[not(object-id)]">
             <li id="{@id}">
               <xsl:choose>
                 <xsl:when test="ext-link">

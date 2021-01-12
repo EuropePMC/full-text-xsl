@@ -410,13 +410,30 @@
   <xsl:template match="node()" mode="make-url">
     <xsl:value-of select="translate(., ' &#xA;', '+')"/>
   </xsl:template>
+  
+  <xsl:template name="get-initials">
+    <xsl:param name="string"/>
+    <xsl:value-of select="substring($string, 1, 1)"/>
+    <xsl:if test="contains($string, ' ')">
+      <xsl:call-template name="get-initials">
+        <xsl:with-param name="string">
+          <xsl:value-of select="substring-after($string, ' ')"/>
+        </xsl:with-param>
+      </xsl:call-template>
+    </xsl:if>
+  </xsl:template>
 
   <xsl:template match="name|collab" mode="authorlist">
     <a>
       <xsl:attribute name="href">
       <xsl:choose>
         <xsl:when test="self::name">
-          <xsl:value-of select="concat($siteUrl,'/search?query=AUTH:%22', surname, '+', substring(given-names, 1, 1),'%22')"/>
+          <xsl:variable name="initials">
+            <xsl:call-template name="get-initials">
+              <xsl:with-param name="string" select="given-names"/>
+            </xsl:call-template>
+          </xsl:variable>
+          <xsl:value-of select="concat($siteUrl,'/search?query=AUTH:%22', surname, '+', $initials,'%22')"/>
         </xsl:when>
         <xsl:when test="self::collab">
           <xsl:variable name="collab-url">

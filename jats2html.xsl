@@ -1464,6 +1464,14 @@
           </xsl:element>
         </xsl:otherwise>
       </xsl:choose>
+      <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group']">
+        <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
+          <xsl:variable name="rid" select="@rid"/>
+          <xsl:if test="not(preceding::xref[@rid = $rid])">
+            <xsl:apply-templates select="//floats-group/*[@id = $rid][@position != 'anchor']" mode="testing"/>
+          </xsl:if>
+        </xsl:for-each>
+      </xsl:if>
     </xsl:if>
   </xsl:template>
   

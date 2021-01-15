@@ -3129,7 +3129,7 @@
         <xsl:value-of select="@id"/>
       </xsl:attribute>
       <xsl:apply-templates select="." mode="label-title"/>
-      <xsl:apply-templates/>
+      <xsl:apply-templates mode="testing"/>
     </div>
   </xsl:template>
 
@@ -3284,9 +3284,11 @@
           <xsl:apply-templates/>
         </xsl:when>
         <xsl:when test="count(child::node()) = 1 and child::node()[self::p]">
-          <xsl:attribute name="id">
-            <xsl:value-of select="child::p/@id"/>
-          </xsl:attribute>
+          <xsl:if test="child::p/@id">
+            <xsl:attribute name="id">
+              <xsl:value-of select="child::p/@id"/>
+            </xsl:attribute>
+          </xsl:if>
           <xsl:apply-templates select="child::p/child::node()"/>
         </xsl:when>
         <xsl:otherwise>

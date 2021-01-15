@@ -324,7 +324,16 @@
   <xsl:template match="article-meta">
     <xsl:apply-templates select="contrib-group/contrib[@contrib-type='reviewer'][1]" mode="article-info-reviewing-editor"/>
     <xsl:apply-templates select="contrib-group/contrib[@contrib-type='editor'][1]" mode="article-info-reviewing-editor"/>
-    <xsl:apply-templates select="permissions"/>
+    <xsl:choose>
+      <xsl:when test="permissions">
+        <xsl:apply-templates select="permissions"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:call-template name="permissions">
+          <xsl:with-param name="top" select="1"/>
+        </xsl:call-template>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
   
   <xsl:template match="article-meta/article-id[@pub-id-type='pmcid' or @pub-id-type='pmid']">
@@ -1226,10 +1235,17 @@
   </xsl:template>
 
   <!-- permissions -->
-  <xsl:template match="permissions">
+  <xsl:template match="permissions" name="permissions">
+    <xsl:param name="top"/>
+    <xsl:variable name="head">
+      <xsl:choose>
+        <xsl:when test="parent::article-meta or $top">h2</xsl:when>
+        <xsl:otherwise>b</xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
     <div>
       <xsl:choose>
-        <xsl:when test="parent::article-meta">
+        <xsl:when test="parent::article-meta or $top">
           <xsl:attribute name="id">
             <xsl:value-of select="'article-info-license'"/>
           </xsl:attribute>
@@ -1240,14 +1256,18 @@
           </xsl:attribute>
         </xsl:otherwise>
       </xsl:choose>
-      <h2 id="fulltext--permissions-title" class="pmctoggle" role="button" tabindex="0">
+      <xsl:element name="{$head}">
+        <xsl:attribute name="id">fulltext--permissions-title</xsl:attribute>
+        <xsl:attribute name="class">pmctoggle</xsl:attribute>
+        <xsl:attribute name="role">button</xsl:attribute>
+        <xsl:attribute name="tabindex">0</xsl:attribute>
         <xsl:if test="not($msspreview)">
           <xsl:attribute name="onclick">
             <xsl:text>this.classList.toggle('open'); this.blur()</xsl:text>
           </xsl:attribute>
         </xsl:if>
         <xsl:text>Copyright and license information</xsl:text>
-      </h2>
+      </xsl:element>
       <div class="permissions">
         <xsl:if test="$emsid != ''">
           <p><a href="https://europepmc.org/pmc/about/copyright/">
@@ -1258,9 +1278,6 @@
           </a></p>
         </xsl:if>
         <xsl:apply-templates/>
-        <xsl:if test="parent::article-meta">
-          <xsl:apply-templates select="//body//permissions"/>
-        </xsl:if>
       </div>
     </div>
   </xsl:template>
@@ -3560,7 +3577,7 @@
   </xsl:template>
 
   <!-- nodes to remove -->
-  <xsl:template match="author-comment"/>
+  <xsl:template match="author-comment | article-version | subj-group"/>
   <xsl:template match="@xlink:href"/>
   <xsl:template match="sec[@sec-type = 'supplementary-material'] | sec[@sec-type = 'floats-group']"/>
   <xsl:template match="back/fn-group/fn/label"/>

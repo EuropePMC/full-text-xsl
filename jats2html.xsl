@@ -1277,7 +1277,9 @@
             <xsl:text>Copyright notice</xsl:text>
           </a></p>
         </xsl:if>
-        <xsl:apply-templates/>
+        <xsl:if test="self::permissions">
+          <xsl:apply-templates/>
+        </xsl:if>
       </div>
     </div>
   </xsl:template>

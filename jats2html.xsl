@@ -840,8 +840,10 @@
         <xsl:otherwise>
           <xsl:apply-templates select="title-group"/>
         </xsl:otherwise>
-      </xsl:choose>      
-      <xsl:apply-templates select="." mode="authors"/>
+      </xsl:choose>
+      <xsl:if test="contrib-group/contrib[@contrib-type='author']">
+        <xsl:apply-templates select="." mode="authors"/>
+      </xsl:if>
       <xsl:apply-templates select="contrib-group/contrib[@contrib-type='reviewer'][1]" mode="article-info-reviewing-editor"/>
       <xsl:apply-templates select="contrib-group/contrib[@contrib-type='editor'][1]" mode="article-info-reviewing-editor"/>
       <xsl:apply-templates select="permissions"/>

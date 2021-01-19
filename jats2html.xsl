@@ -137,7 +137,7 @@
         <div class="front-matter">
           <xsl:apply-templates select="." mode="identifiers"/>
           <xsl:apply-templates select="article-meta/title-group"/>
-          <xsl:call-template name="authors"/>
+          <xsl:apply-templates select="article-meta" mode="authors"/>
           <xsl:apply-templates select="article-meta"/>
           <xsl:if test="not(article-meta/abstract)">
             <xsl:apply-templates select="article-meta/kwd-group"/>
@@ -154,7 +154,7 @@
           <xsl:if test="normalize-space($pprid) != ''">
             <xsl:apply-templates select="article-meta/title-group"/>
           </xsl:if>
-          <xsl:call-template name="authors"/>
+          <xsl:apply-templates select="article-meta" mode="authors"/>
           <xsl:apply-templates select="article-meta"/>
           <xsl:if test="not(following-sibling::back)">
             <xsl:apply-templates select="article-meta/author-notes"/>
@@ -345,16 +345,29 @@
   
   <xsl:template match="article-meta/article-id[not(@pub-id-type='pmcid' or @pub-id-type='pmid')]"/>
 
-  <xsl:template name="authors">
+  <xsl:template match="article-meta|front-stub" mode="authors">
     <div class="fulltext--author-information">
       <xsl:choose>
         <xsl:when test="normalize-space($ctxid) != ''"/>
         <xsl:otherwise>
           <div>
-            <xsl:apply-templates select="//article-meta//contrib-group[not(@content-type = 'collab-list' or parent::collab)][1]" mode="authorlist"/>
+            <xsl:apply-templates select=".//contrib-group[not(@content-type = 'collab-list' or parent::collab)][1]" mode="authorlist"/>
           </div>
           <div class="author-affiliations">
-            <h2 id="fulltext--author-affiliations-title" role="button" tabindex="0">
+            <h2 role="button" tabindex="0">
+              <xsl:choose>
+                <xsl:when test="self::article-meta">
+                  <xsl:attribute name="id">fulltext--author-affiliations-title</xsl:attribute>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:attribute name="id">
+                    <xsl:text>fulltext--sub</xsl:text>
+                    <xsl:value-of select="ancestor::sub-article/@id"/>
+                    <xsl:text>-author-affiliations-title</xsl:text>
+                  </xsl:attribute>
+                  <xsl:attribute name="class">pmctoggle</xsl:attribute>
+                </xsl:otherwise>
+              </xsl:choose>
               <xsl:if test="not($msspreview)">
                 <xsl:attribute name="onclick">
                   <xsl:text>this.classList.toggle('open'); this.blur()</xsl:text>
@@ -373,7 +386,7 @@
                   </xsl:otherwise>
                 </xsl:choose>
               </xsl:attribute>
-              <xsl:apply-templates select="//article-meta//aff[not(parent::contrib-group[@content-type='collab-list'] or ancestor::collab)][not(. = preceding::aff)]" mode="afflist"/>
+              <xsl:apply-templates select=".//aff[not(parent::contrib-group[@content-type='collab-list'] or ancestor::collab)][not(. = preceding::aff)]" mode="afflist"/>
             </ol>
           </div>
         </xsl:otherwise>
@@ -828,27 +841,7 @@
           <xsl:apply-templates select="title-group"/>
         </xsl:otherwise>
       </xsl:choose>      
-      <div class="fulltext--author-information">
-        <div>
-          <xsl:for-each select="contrib-group/contrib[@contrib-type = 'author']">
-            <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
-            <xsl:if test="position() != last()">
-              <xsl:text>, </xsl:text>
-            </xsl:if>
-            <xsl:if test="position() = last()-1">
-              <xsl:text>and </xsl:text>
-            </xsl:if>
-          </xsl:for-each>
-        </div>
-        <ol class="affiliations">
-          <xsl:if test="normalize-space($pprid) != ''">
-            <xsl:attribute name="style">
-              <xsl:text>list-style-type:none</xsl:text>
-            </xsl:attribute>
-          </xsl:if>
-          <xsl:apply-templates select="descendant::aff[not(. = preceding::aff)]" mode="afflist"/>
-        </ol>
-      </div>
+      <xsl:apply-templates select="." mode="authors"/>
       <xsl:apply-templates select="contrib-group/contrib[@contrib-type='reviewer'][1]" mode="article-info-reviewing-editor"/>
       <xsl:apply-templates select="contrib-group/contrib[@contrib-type='editor'][1]" mode="article-info-reviewing-editor"/>
       <xsl:apply-templates select="permissions"/>

@@ -1476,11 +1476,11 @@
           </xsl:element>
         </xsl:otherwise>
       </xsl:choose>
-      <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group']">
+      <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group'] or //*[@position = 'float']">
         <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
           <xsl:variable name="rid" select="@rid"/>
           <xsl:if test="not(preceding::xref[@rid = $rid])">
-            <xsl:apply-templates select="//floats-group/*[@id = $rid][@position != 'anchor']" mode="testing"/>
+            <xsl:apply-templates select="//*[@id = $rid][@position = 'float']" mode="display"/>
           </xsl:if>
         </xsl:for-each>
       </xsl:if>
@@ -1603,7 +1603,7 @@
   <!-- END handling citation objects -->
 
   <!-- START Table Handling -->
-  <xsl:template match="table-wrap-group" mode="testing">
+  <xsl:template match="table-wrap-group" mode="display">
     <div class="table-expansion table-group">
       <xsl:if test="@id">
         <xsl:attribute name="id">
@@ -1611,20 +1611,13 @@
         </xsl:attribute>
       </xsl:if>
       <xsl:apply-templates select="label" mode="captionLabel"/>
-      <xsl:apply-templates mode="testing"/>
+      <xsl:apply-templates mode="display"/>
     </div>
   </xsl:template>
   
-  <xsl:template match="table-wrap-group/label" mode="testing"/>
+  <xsl:template match="table-wrap-group/label" mode="display"/>
   
-  <xsl:template match="table-wrap">
-    <xsl:variable name="data-doi" select="child::object-id[@pub-id-type = 'doi']/text()"/>
-    <div class="table-wrap" data-doi="{$data-doi}">
-      <xsl:apply-templates select="." mode="testing"/>
-    </div>
-  </xsl:template>
-  
-  <xsl:template match="table-wrap" mode="testing">
+  <xsl:template match="table-wrap" mode="display">
     <div class="table-expansion table-overflow">
       <xsl:if test="@id">
         <xsl:attribute name="id">
@@ -2071,11 +2064,11 @@
       <xsl:apply-templates/>
     </xsl:if>
     <xsl:if test="not(ancestor::list-item)">
-      <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group']">
+      <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group'] or //*[@position = 'float']">
         <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
           <xsl:variable name="rid" select="@rid"/>
           <xsl:if test="not(preceding::xref[@rid = $rid])">
-            <xsl:apply-templates select="//floats-group/*[@id = $rid][@position != 'anchor']" mode="testing"/>
+            <xsl:apply-templates select="//*[@id = $rid][@position = 'float']" mode="display"/>
           </xsl:if>
         </xsl:for-each>
       </xsl:if>
@@ -2177,9 +2170,7 @@
     </xsl:choose>
   </xsl:template>
   
-  <xsl:template match="fig-group"/>
-  
-  <xsl:template match="fig-group" mode="testing">
+  <xsl:template match="fig-group" mode="display">
     <div class="elife-fig-image-caption-wrapper" id="{@id}">
       <div class="fig-caption fig-group">
         <span class="fig-label">
@@ -2191,11 +2182,11 @@
         <xsl:text> </xsl:text>
         <xsl:apply-templates select="caption/node()"/>
       </div>
-      <xsl:apply-templates select="fig" mode="testing"/>
+      <xsl:apply-templates select="fig" mode="display"/>
     </div>
   </xsl:template>
 
-  <xsl:template match="fig" mode="testing">
+  <xsl:template match="fig" mode="display">
     <xsl:variable name="caption" select="child::label/text()"/>
     <xsl:variable name="id">
       <xsl:value-of select="@id"/>
@@ -3118,7 +3109,7 @@
   <!-- END video handling -->
 
   <!-- box text -->
-  <xsl:template match="boxed-text">
+  <xsl:template match="boxed-text" mode="display">
     <div class="boxed-text">
       <xsl:attribute name="id">
         <xsl:value-of select="@id"/>
@@ -3240,11 +3231,11 @@
       </xsl:otherwise>
     </xsl:choose>
     <xsl:if test="not(ancestor::p or ancestor::list-item)">
-      <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group']">
+      <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group'] or //*[@position = 'float']">
         <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
           <xsl:variable name="rid" select="@rid"/>
           <xsl:if test="not(preceding::xref[@rid = $rid])">
-            <xsl:apply-templates select="//*[@id = $rid][@position != 'anchor']" mode="testing"/>
+            <xsl:apply-templates select="//*[@id = $rid][@position = 'float']" mode="display"/>
           </xsl:if>
         </xsl:for-each>
       </xsl:if>
@@ -3566,10 +3557,16 @@
   <xsl:template match="@* | text()">
     <xsl:copy/>
   </xsl:template>
+  
+  <xsl:template match="table-wrap | boxed-text | fig | fig-group | table-wrap-group" mode="testing">
+    <xsl:if test="@position='anchor'">
+      <xsl:apply-templates select="." mode="display"/>
+    </xsl:if>
+  </xsl:template>
 
   <xsl:template match="
       caption | table-wrap/table | table-wrap-foot | fn | bold | italic | underline | preformat | monospace | styled-content |
-      sub | sup | sc | sec/title | boxed-text | boxed-text/label | boxed-text/caption/title | ext-link | app/title | disp-formula |
+      sub | sup | sc | sec/title | boxed-text/label | boxed-text/caption/title | ext-link | app/title | disp-formula |
       inline-formula | list | list-item | hr | disp-quote | code | verse-group | def-list | inline-graphic" mode="testing">
     <xsl:apply-templates select="."/>
   </xsl:template>
@@ -3591,6 +3588,7 @@
   <xsl:template match="abstract/title"/>
   <xsl:template match="boxed-text/caption/title | boxed-text/label"/>
   <xsl:template match="fig/graphic | fig/label | fig/caption"/>
+  <xsl:template match="fig-group"/>
   <xsl:template match="ack/title"/>
   <xsl:template match="ref-list/title"/>
   <xsl:template match="

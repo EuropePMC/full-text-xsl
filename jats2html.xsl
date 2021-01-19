@@ -817,7 +817,7 @@
       </xsl:if>
       <xsl:choose>
         <xsl:when test="parent::sub-article/@article-type='peer-review' and custom-meta-group/custom-meta[meta-name='recommendation']">
-          <h1 class="sub-article-title">
+          <h1 class="article-title sub-article">
             <xsl:apply-templates
               select="custom-meta-group/custom-meta[meta-name='recommendation']/meta-value"
               mode="review-map"

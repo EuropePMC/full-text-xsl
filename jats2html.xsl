@@ -1732,8 +1732,9 @@
           <xsl:value-of select="@style"/>
           <xsl:if test="contains(@style, 'vertical-rl')">
             <xsl:text>inline-size: max-content; block-size: max-content; min-width:</xsl:text>
-            <xsl:value-of select="count(break) + 1"/>
-            <xsl:text>.7em;</xsl:text>
+            <xsl:variable name="multiplier" select="count(break) + 1"/>
+            <xsl:value-of select="$multiplier + ($multiplier * .65)"/>
+            <xsl:text>em;</xsl:text>
           </xsl:if>
         </xsl:attribute>
       </xsl:if>

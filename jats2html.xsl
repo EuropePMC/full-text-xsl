@@ -1731,11 +1731,12 @@
           </xsl:if>
           <xsl:value-of select="@style"/>
           <xsl:if test="contains(@style, 'vertical-rl')">
-            <xsl:text>inline-size: max-content; block-size: max-content; min-width: 1.65em;</xsl:text>
+            <xsl:text>inline-size: max-content; block-size: max-content; min-width:</xsl:text>
+            <xsl:value-of select="count(break) + 1"/>
+            <xsl:text>.7em;</xsl:text>
           </xsl:if>
         </xsl:attribute>
       </xsl:if>
-
       <xsl:apply-templates/>
     </xsl:element>
   </xsl:template>

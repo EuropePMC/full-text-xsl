@@ -2007,7 +2007,7 @@
         <xsl:for-each select="//floats-group/* | //sec[@sec-type = 'floats-group']/*">
           <xsl:variable name="rid" select="@id"/>
           <xsl:if test="not(//body//xref[@rid = $rid])">
-            <xsl:apply-templates select="." mode="testing"/>
+            <xsl:apply-templates select="." mode="display"/>
           </xsl:if>
         </xsl:for-each>
         <xsl:call-template name="appendices-main-text"/>

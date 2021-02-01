@@ -3271,7 +3271,7 @@
           <xsl:attribute name="id">
             <xsl:value-of select="@id"/>
           </xsl:attribute>
-          <xsl:apply-templates/>
+          <xsl:apply-templates mode="testing"/>
         </xsl:when>
         <xsl:when test="count(child::node()) = 1 and child::node()[self::p]">
           <xsl:if test="child::p/@id">
@@ -3279,10 +3279,10 @@
               <xsl:value-of select="child::p/@id"/>
             </xsl:attribute>
           </xsl:if>
-          <xsl:apply-templates select="child::p/child::node()"/>
+          <xsl:apply-templates select="child::p/child::node()" mode="testing"/>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:apply-templates/>
+          <xsl:apply-templates mode="testing"/>
         </xsl:otherwise>
       </xsl:choose>
     </li>

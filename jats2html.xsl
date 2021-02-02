@@ -1551,7 +1551,7 @@
             <xsl:text>: </xsl:text>
           </span>
         </xsl:if>
-        <xsl:apply-templates/>
+        <xsl:apply-templates mode="testing"/>
       </p>
     </xsl:if>
     <xsl:if test="supplementary-material">
@@ -1562,6 +1562,31 @@
       </xsl:if>
       <xsl:apply-templates/>
     </xsl:if>
+    <xsl:if test="not(ancestor::list-item)">
+      <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group'] or //*[@position = 'float']">
+        <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
+          <xsl:variable name="rid" select="@rid"/>
+          <xsl:if test="not(preceding::xref[@rid = $rid])">
+            <xsl:apply-templates select="//*[@id = $rid][@position = 'float']" mode="display"/>
+          </xsl:if>
+        </xsl:for-each>
+      </xsl:if>
+    </xsl:if>
+  </xsl:template>
+  
+  <xsl:template match="p" mode="list-single-p">
+    <xsl:if test="parent::list-item and preceding-sibling::*[1][self::label]">
+      <span class="list-label">
+        <xsl:apply-templates select="preceding-sibling::*[1][self::label]/node()"/>
+      </span>
+    </xsl:if>
+    <xsl:if test="not(parent::list-item) and preceding-sibling::*[1][self::label]">
+      <span class="p-label">
+        <xsl:apply-templates select="preceding-sibling::*[1][self::label]/node()"/>
+        <xsl:text>: </xsl:text>
+      </span>
+    </xsl:if>
+    <xsl:apply-templates mode="testing"/>
   </xsl:template>
 
   <xsl:template match="ext-link">
@@ -2041,42 +2066,6 @@
       </xsl:if>
       <xsl:apply-templates select="*[not(self::label)]" mode="testing"/>
     </div>
-  </xsl:template>
-
-  <xsl:template match="p" mode="testing">
-    <xsl:if test="not(supplementary-material)">
-      <p>
-        <xsl:if test="@id">
-          <xsl:attribute name="id">
-            <xsl:value-of select="@id"/>
-          </xsl:attribute>
-        </xsl:if>
-        <xsl:if test="ancestor::caption and (count(preceding-sibling::p) = 0) and (ancestor::boxed-text or ancestor::media)">
-          <xsl:attribute name="class">
-            <xsl:value-of select="'first-child'"/>
-          </xsl:attribute>
-        </xsl:if>
-        <xsl:apply-templates mode="testing"/>
-      </p>
-    </xsl:if>
-    <xsl:if test="supplementary-material">
-      <xsl:if test="ancestor::caption and (count(preceding-sibling::p) = 0) and (ancestor::boxed-text or ancestor::media)">
-        <xsl:attribute name="class">
-          <xsl:value-of select="'first-child'"/>
-        </xsl:attribute>
-      </xsl:if>
-      <xsl:apply-templates/>
-    </xsl:if>
-    <xsl:if test="not(ancestor::list-item)">
-      <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group'] or //*[@position = 'float']">
-        <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
-          <xsl:variable name="rid" select="@rid"/>
-          <xsl:if test="not(preceding::xref[@rid = $rid])">
-            <xsl:apply-templates select="//*[@id = $rid][@position = 'float']" mode="display"/>
-          </xsl:if>
-        </xsl:for-each>
-      </xsl:if>
-    </xsl:if>
   </xsl:template>
 
   <xsl:template match="xref" mode="testing">
@@ -3271,18 +3260,19 @@
           <xsl:attribute name="id">
             <xsl:value-of select="@id"/>
           </xsl:attribute>
-          <xsl:apply-templates mode="testing"/>
+          <xsl:apply-templates/>
         </xsl:when>
-        <xsl:when test="count(child::node()) = 1 and child::node()[self::p]">
+        <xsl:when test="(count(child::*) = 1 and child::*[self::p]) or
+          (count(child::*) = 2 and child::*[1][self::label] and child::*[2][self::p])">
           <xsl:if test="child::p/@id">
             <xsl:attribute name="id">
               <xsl:value-of select="child::p/@id"/>
             </xsl:attribute>
           </xsl:if>
-          <xsl:apply-templates select="child::p/child::node()" mode="testing"/>
+          <xsl:apply-templates select="child::p" mode="list-single-p"/>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:apply-templates mode="testing"/>
+          <xsl:apply-templates/>
         </xsl:otherwise>
       </xsl:choose>
     </li>
@@ -3571,7 +3561,7 @@
   <xsl:template match="
       caption | table-wrap/table | table-wrap-foot | fn | bold | italic | underline | preformat | monospace | styled-content |
       sub | sup | sc | sec/title | boxed-text/label | boxed-text/caption/title | ext-link | app/title | disp-formula |
-      inline-formula | list | list-item | hr | disp-quote | code | verse-group | def-list | inline-graphic" mode="testing">
+      inline-formula | list | list-item | hr | disp-quote | code | verse-group | def-list | inline-graphic | p" mode="testing">
     <xsl:apply-templates select="."/>
   </xsl:template>
 

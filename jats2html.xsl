@@ -3112,7 +3112,7 @@
     </div>
   </xsl:template>
 
-  <xsl:template match="inline-graphic|p/graphic">
+  <xsl:template match="inline-graphic|graphic[not(parent::fig)]">
     <xsl:variable name="filename">
       <xsl:call-template name="get-filename">
         <xsl:with-param name="string" select="@xlink:href"/>

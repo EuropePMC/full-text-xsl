@@ -1387,7 +1387,8 @@
             <xsl:value-of select="$id"/>
           </xsl:attribute>
           <h2 id="{concat($id,'title')}">
-            <xsl:value-of select="title"/>
+            <xsl:apply-templates select="label"/>
+            <xsl:apply-templates select="title/node()"/>
           </h2>
         </xsl:when>
         <xsl:otherwise>
@@ -1400,7 +1401,7 @@
           <h2 id="{concat($id,'title')}">Abstract</h2>
         </xsl:otherwise>
       </xsl:choose>
-      <xsl:apply-templates/>
+      <xsl:apply-templates select="node()[not(self::label or self:: title)]"/>
     </div>
     <xsl:apply-templates select="parent::article-meta/kwd-group"/>
   </xsl:template>
@@ -1520,7 +1521,7 @@
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="sec/label | ack/label | ref-list/label">
+  <xsl:template match="sec/label | ack/label | ref-list/label | abstract/label">
     <xsl:value-of select="."/>
     <xsl:text>. </xsl:text>
   </xsl:template>

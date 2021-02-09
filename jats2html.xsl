@@ -1639,11 +1639,10 @@
         </xsl:attribute>
       </xsl:if>
       <xsl:apply-templates select="label" mode="captionLabel"/>
-      <xsl:apply-templates mode="display"/>
+      <xsl:apply-templates select="caption"/>
+      <xsl:apply-templates select="node()[not(self::label or self::caption)]" mode="display"/>
     </div>
   </xsl:template>
-  
-  <xsl:template match="table-wrap-group/label" mode="display"/>
   
   <xsl:template match="table-wrap" mode="display">
     <div class="table-expansion table-overflow">

@@ -1348,18 +1348,6 @@
     </span>
   </xsl:template>
 
-  <xsl:template match="aff//bold">
-    <span class="bold">
-      <xsl:apply-templates/>
-    </span>
-  </xsl:template>
-
-  <xsl:template match="aff//italic">
-    <span class="italic">
-      <xsl:apply-templates/>
-    </span>
-  </xsl:template>
-
   <!-- ==== FRONT MATTER END ==== -->
 
   <xsl:template match="abstract">

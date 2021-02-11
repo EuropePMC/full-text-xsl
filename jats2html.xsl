@@ -1458,7 +1458,9 @@
         <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
           <xsl:variable name="rid" select="@rid"/>
           <xsl:if test="not(preceding::xref[@rid = $rid])">
-            <xsl:apply-templates select="//*[@id = $rid][@position = 'float']" mode="display"/>
+            <xsl:apply-templates select="//*[@id = $rid][@position = 'float']" mode="display">
+              <xsl:with-param name="heading-el" select="."/>
+            </xsl:apply-templates>
           </xsl:if>
         </xsl:for-each>
       </xsl:if>
@@ -1466,33 +1468,50 @@
   </xsl:template>
   
   <xsl:template match="boxed-text" mode="label-title">
-    <xsl:if test="node() != ''">
+    <xsl:param name="heading-el"/>
+    <xsl:variable name="level">
       <xsl:choose>
-        <xsl:when test="ancestor::app">
-          <xsl:element name="h{count(ancestor::sec) + 3}">
-            <xsl:apply-templates select="." mode="label-title"/>
-          </xsl:element>
+        <xsl:when test="$heading-el">
+          <xsl:choose>
+            <xsl:when test="ancestor::app">
+              <xsl:value-of select="count($heading-el/ancestor::sec) + 3"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of
+                select="count($heading-el/ancestor::sec)+count($heading-el/ancestor::abstract)+count($heading-el/ancestor::ack) + 2"/>
+            </xsl:otherwise>
+          </xsl:choose>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:element name="h{count(ancestor::sec)+count(ancestor::abstract)+count(ancestor::ack) + 2}">
-            <xsl:attribute name="id">
-              <xsl:choose>
-                <xsl:when test="parent::sec/@id">
-                  <xsl:value-of select="concat(parent::sec/@id, 'title')"/>
-                </xsl:when>
-                <xsl:otherwise>
-                  <xsl:value-of select="concat('sec', count(../preceding::sec), 'title')"/>
-                </xsl:otherwise>
-              </xsl:choose>
-            </xsl:attribute>
-            <xsl:value-of select="label"/>
-            <xsl:if test="label and caption/title">
-              <xsl:text>. </xsl:text>
-            </xsl:if>
-            <xsl:apply-templates select="caption/title/node()"/>
-          </xsl:element>
+          <xsl:choose>
+            <xsl:when test="ancestor::app">
+              <xsl:value-of select="count(ancestor::sec) + 3"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="count(ancestor::sec)+count(ancestor::abstract)+count(ancestor::ack) + 2"/>
+            </xsl:otherwise>
+          </xsl:choose>
         </xsl:otherwise>
       </xsl:choose>
+    </xsl:variable>
+    <xsl:if test="node() != ''">
+      <xsl:element name="h{$level}">
+        <xsl:attribute name="id">
+          <xsl:choose>
+            <xsl:when test="parent::sec/@id">
+              <xsl:value-of select="concat(parent::sec/@id, 'title')"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="concat('sec', count(../preceding::sec), 'title')"/>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:attribute>
+        <xsl:value-of select="label"/>
+        <xsl:if test="label and caption/title">
+          <xsl:text>. </xsl:text>
+        </xsl:if>
+        <xsl:apply-templates select="caption/title/node()"/>
+      </xsl:element>
     </xsl:if>
   </xsl:template>
 
@@ -1543,7 +1562,9 @@
         <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
           <xsl:variable name="rid" select="@rid"/>
           <xsl:if test="not(preceding::xref[@rid = $rid])">
-            <xsl:apply-templates select="//*[@id = $rid][@position = 'float']" mode="display"/>
+            <xsl:apply-templates select="//*[@id = $rid][@position = 'float']" mode="display">
+              <xsl:with-param name="heading-el" select="."/>
+            </xsl:apply-templates>
           </xsl:if>
         </xsl:for-each>
       </xsl:if>
@@ -3081,11 +3102,14 @@
 
   <!-- box text -->
   <xsl:template match="boxed-text" mode="display">
+    <xsl:param name="heading-el"/>
     <div class="boxed-text">
       <xsl:attribute name="id">
         <xsl:value-of select="@id"/>
       </xsl:attribute>
-      <xsl:apply-templates select="." mode="label-title"/>
+      <xsl:apply-templates select="." mode="label-title">
+        <xsl:with-param name="heading-el" select="$heading-el"/>
+      </xsl:apply-templates>
       <xsl:apply-templates mode="testing"/>
     </div>
   </xsl:template>
@@ -3206,7 +3230,9 @@
         <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
           <xsl:variable name="rid" select="@rid"/>
           <xsl:if test="not(preceding::xref[@rid = $rid])">
-            <xsl:apply-templates select="//*[@id = $rid][@position = 'float']" mode="display"/>
+            <xsl:apply-templates select="//*[@id = $rid][@position = 'float']" mode="display">
+              <xsl:with-param name="heading-el" select="."/>
+            </xsl:apply-templates>
           </xsl:if>
         </xsl:for-each>
       </xsl:if>

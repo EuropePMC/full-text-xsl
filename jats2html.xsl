@@ -2381,6 +2381,9 @@
     <xsl:choose>
       <xsl:when test="*[position()=1][self::bold] and (not(child::text()) or not(child::text()[normalize-space(.) != '']))">
         <h3>
+          <xsl:attribute name="id">
+            <xsl:value-of select="parent::fn/@id"/>
+          </xsl:attribute>
           <xsl:value-of select="bold"/>
         </h3>
         <xsl:apply-templates select="*[not(self::bold)]"></xsl:apply-templates>

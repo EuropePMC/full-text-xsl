@@ -1360,19 +1360,6 @@
     </span>
   </xsl:template>
 
-  <xsl:template match="aff/email">
-    <xsl:variable name="email">
-      <xsl:apply-templates/>
-    </xsl:variable>
-    <!-- if parent contains more than just email then it should have a space before email -->
-    <xsl:if test="string(..) != text() and not(contains(string(..), concat(' ', text())))">
-      <xsl:text> </xsl:text>
-    </xsl:if>
-    <a href="mailto:{$email}" class="email">
-      <xsl:copy-of select="$email"/>
-    </a>
-  </xsl:template>
-
   <!-- ==== FRONT MATTER END ==== -->
 
   <xsl:template match="abstract">
@@ -2530,7 +2517,7 @@
     </p>
   </xsl:template>
 
-  <xsl:template match="email[ancestor::corresp or ancestor::author-notes or ancestor::contrib]">
+  <xsl:template match="email">
     <xsl:variable name="email">
       <xsl:call-template name="reverse">
         <xsl:with-param name="rest" select="."/>

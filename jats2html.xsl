@@ -2,7 +2,8 @@
 <xsl:stylesheet version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-  exclude-result-prefixes="xsi xs xlink mml">
+  xmlns:ali="http://www.niso.org/schemas/ali/1.0/"
+  exclude-result-prefixes="xsi xs xlink mml ali">
 
   <xsl:output method="html" indent="no" encoding="utf-8" omit-xml-declaration="yes"/>
   <xsl:param name="filelist"/>
@@ -3570,6 +3571,7 @@
   </xsl:template>
 
   <!-- nodes to remove -->
+  <xsl:template match="ali:license_ref | ali:free_to_read"/>
   <xsl:template match="author-comment | article-version | subj-group"/>
   <xsl:template match="@xlink:href"/>
   <xsl:template match="sec[@sec-type = 'supplementary-material'] | sec[@sec-type = 'floats-group']"/>

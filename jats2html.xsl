@@ -1458,7 +1458,7 @@
       <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group'] or //*[@position = 'float']">
         <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
           <xsl:variable name="rid" select="@rid"/>
-          <xsl:if test="not(preceding::xref[@rid = $rid])">
+          <xsl:if test="not(preceding::xref[@rid = $rid] or ancestor-or-self::*[@id = $rid])">
             <xsl:apply-templates select="//*[@id = $rid][@position = 'float']" mode="display">
               <xsl:with-param name="heading-el" select="."/>
             </xsl:apply-templates>
@@ -1562,7 +1562,7 @@
       <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group'] or //*[@position = 'float']">
         <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
           <xsl:variable name="rid" select="@rid"/>
-          <xsl:if test="not(preceding::xref[@rid = $rid])">
+          <xsl:if test="not(preceding::xref[@rid = $rid] or ancestor-or-self::*[@id = $rid])">
             <xsl:apply-templates select="//*[@id = $rid][@position = 'float']" mode="display">
               <xsl:with-param name="heading-el" select="."/>
             </xsl:apply-templates>
@@ -3230,7 +3230,7 @@
       <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group'] or //*[@position = 'float']">
         <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
           <xsl:variable name="rid" select="@rid"/>
-          <xsl:if test="not(preceding::xref[@rid = $rid])">
+          <xsl:if test="not(preceding::xref[@rid = $rid] or ancestor-or-self::*[@id = $rid])">
             <xsl:apply-templates select="//*[@id = $rid][@position = 'float']" mode="display">
               <xsl:with-param name="heading-el" select="."/>
             </xsl:apply-templates>

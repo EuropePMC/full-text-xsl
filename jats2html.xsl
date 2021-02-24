@@ -3565,7 +3565,7 @@
 
   <xsl:template match="
       caption | table-wrap/table | table-wrap-foot | fn | bold | italic | underline | preformat | monospace | styled-content |
-      sub | sup | sc | sec/title | boxed-text/label | boxed-text/caption/title | ext-link | app/title | disp-formula |
+      sub | sup | sc | email | sec/title | boxed-text/label | boxed-text/caption/title | ext-link | app/title | disp-formula |
       inline-formula | list | list-item | hr | disp-quote | code | verse-group | def-list | inline-graphic | p" mode="testing">
     <xsl:apply-templates select="."/>
   </xsl:template>

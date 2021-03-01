@@ -11,6 +11,7 @@
   <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
   <xsl:variable name="smallcase" select="'abcdefghijklmnopqrstuvwxyz'"/>
   <xsl:variable name="allcase" select="concat($smallcase, $uppercase)"/>
+  <xsl:variable name="digit" select="'0123456789'"/>
   <xsl:template name="month">
     <xsl:param name="num"/>
     <xsl:choose>
@@ -1537,9 +1538,7 @@
           </xsl:attribute>
         </xsl:if>
         <xsl:if test="parent::list-item and preceding-sibling::*[1][self::label]">
-          <span class="list-label">
-            <xsl:apply-templates select="preceding-sibling::*[1][self::label]/node()"/>
-          </span>
+          <xsl:apply-templates select="preceding-sibling::*[1][self::label]" mode="list-label"/>         
         </xsl:if>
         <xsl:if test="not(parent::list-item) and preceding-sibling::*[1][self::label]">
           <span class="p-label">
@@ -1574,9 +1573,7 @@
   
   <xsl:template match="p" mode="list-single-p">
     <xsl:if test="parent::list-item and preceding-sibling::*[1][self::label]">
-      <span class="list-label">
-        <xsl:apply-templates select="preceding-sibling::*[1][self::label]/node()"/>
-      </span>
+      <xsl:apply-templates select="preceding-sibling::*[1][self::label]" mode="list-label"/>      
     </xsl:if>
     <xsl:if test="not(parent::list-item) and preceding-sibling::*[1][self::label]">
       <span class="p-label">
@@ -1585,6 +1582,18 @@
       </span>
     </xsl:if>
     <xsl:apply-templates mode="testing"/>
+  </xsl:template>
+  
+  <xsl:template match="label" mode="list-label">
+    <span class="list-label">
+      <xsl:apply-templates/>
+      <xsl:if test="not(child::*)">
+        <xsl:variable name="punc" select="translate(normalize-space(translate(., $allcase, '')), $digit, '')"/>
+        <xsl:if test="string-length($punc) = 0">
+          <xsl:text>.</xsl:text>
+        </xsl:if>
+      </xsl:if>
+    </span>
   </xsl:template>
 
   <xsl:template match="ext-link">
@@ -2737,9 +2746,7 @@
   </xsl:template>
   
   <xsl:template match="ref/label">
-    <span class="list-label">
-      <xsl:apply-templates/>
-    </span>
+    <xsl:apply-templates select="." mode="list-label"/>
   </xsl:template>
 
   <xsl:template match="ref//person-group|collab" mode="list-ref-people">

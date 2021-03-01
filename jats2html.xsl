@@ -2729,8 +2729,17 @@
 
   <xsl:template match="ref">
     <li class="elife-reflinks-reflink" id="{@id}">
+      <xsl:if test="label">
+        <xsl:attribute name="style">list-style-type: none</xsl:attribute>
+      </xsl:if>
       <xsl:apply-templates/>
     </li>
+  </xsl:template>
+  
+  <xsl:template match="ref/label">
+    <span class="list-label">
+      <xsl:apply-templates/>
+    </span>
   </xsl:template>
 
   <xsl:template match="ref//person-group|collab" mode="list-ref-people">
@@ -3591,8 +3600,7 @@
   <xsl:template match="fig-group"/>
   <xsl:template match="ack/title"/>
   <xsl:template match="ref-list/title"/>
-  <xsl:template match="
-      ref//label | ref//year | ref//article-title | ref//fpage | ref//volume | ref//issue | ref//source | ref//pub-id |
+  <xsl:template match="ref//year | ref//article-title | ref//fpage | ref//volume | ref//issue | ref//source | ref//pub-id |
       ref//lpage | ref//supplement | ref//person-group[@person-group-type = 'editor'] | ref//edition | ref//publisher-loc |
       ref//lpage | ref//supplement | ref//edition | ref//publisher-loc |
       ref//publisher-name | ref//issn | red//month | ref//day | ref//season"/>

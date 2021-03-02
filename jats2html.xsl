@@ -2741,7 +2741,16 @@
       <xsl:if test="label">
         <xsl:attribute name="style">list-style-type: none</xsl:attribute>
       </xsl:if>
-      <xsl:apply-templates/>
+      <xsl:choose>
+        <xsl:when test="count(descendant::element-citation) + count(descendant::mixed-citation) > 1">
+          <ol class="elife-reflinks-links">
+            <xsl:apply-templates/>
+          </ol>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:apply-templates/>
+        </xsl:otherwise>
+      </xsl:choose>      
     </li>
   </xsl:template>
   
@@ -2796,6 +2805,22 @@
   </xsl:template>
 
   <xsl:template match="ref//element-citation|ref//mixed-citation">
+    <xsl:choose>
+      <xsl:when test="ancestor::ref[count(descendant::element-citation) + count(descendant::mixed-citation) > 1]">
+        <li>
+          <xsl:if test="label">
+            <xsl:attribute name="style">list-style-type: none</xsl:attribute>
+          </xsl:if>
+          <xsl:apply-templates mode="display"/>
+        </li>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:apply-templates mode="display"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
+  <xsl:template match="ref//element-citation|ref//mixed-citation" mode="display">
     <xsl:variable name="title">
       <xsl:choose>
         <xsl:when test="child::article-title">
@@ -2816,11 +2841,10 @@
         </xsl:when>
       </xsl:choose>
     </xsl:variable>
-
-    <div class="reflink-main">
-      <xsl:if test="label">
-        <xsl:value-of select="concat(label, ' ')"/>
-      </xsl:if>
+    <xsl:if test="label">
+      <xsl:apply-templates select="label" mode="list-label"/>
+    </xsl:if>
+    <span class="reflink-main">
       <!-- call authors template -->
 
       <xsl:if test="person-group[@person-group-type = 'author'] | collab">
@@ -3008,7 +3032,7 @@
       <xsl:apply-templates select="pub-id[not(@pub-id-type = 'doi')]" mode="idlinks"/>
       <xsl:apply-templates select="date-in-citation"/>
       <xsl:apply-templates select="comment|annotation"/>
-    </div>
+    </span>
   </xsl:template>
   
   <xsl:template match="ref//date-in-citation">

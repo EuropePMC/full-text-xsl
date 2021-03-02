@@ -2743,8 +2743,9 @@
       </xsl:if>
       <xsl:choose>
         <xsl:when test="count(descendant::element-citation) + count(descendant::mixed-citation) > 1">
+          <xsl:apply-templates select="label"/>
           <ol class="elife-reflinks-links">
-            <xsl:apply-templates/>
+            <xsl:apply-templates select="node()[not(self::label)]"/>
           </ol>
         </xsl:when>
         <xsl:otherwise>
@@ -2811,11 +2812,11 @@
           <xsl:if test="label">
             <xsl:attribute name="style">list-style-type: none</xsl:attribute>
           </xsl:if>
-          <xsl:apply-templates mode="display"/>
+          <xsl:apply-templates select="." mode="display"/>
         </li>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:apply-templates mode="display"/>
+        <xsl:apply-templates select="." mode="display"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
@@ -2841,12 +2842,9 @@
         </xsl:when>
       </xsl:choose>
     </xsl:variable>
-    <xsl:if test="label">
-      <xsl:apply-templates select="label" mode="list-label"/>
-    </xsl:if>
+    <xsl:apply-templates select="label" mode="list-label"/>    
     <span class="reflink-main">
       <!-- call authors template -->
-
       <xsl:if test="person-group[@person-group-type = 'author'] | collab">
         <span class="authors">
           <xsl:apply-templates select="person-group[@person-group-type = 'author'] | collab" mode="list-ref-people"/>
@@ -2863,9 +2861,7 @@
           <xsl:text> </xsl:text>
         </span>
       </xsl:if>
-      <!-- move all other elements into details div
-                and comma separate
-            -->
+      <!-- move all other elements into details and comma separate -->
       <xsl:variable name="class">
         <xsl:if test="@publication-type = 'journal'">
           <xsl:value-of select="'reflink-details-journal'"/>

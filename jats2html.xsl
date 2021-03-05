@@ -401,7 +401,7 @@
       <xsl:when test="parent::*/contrib-group/on-behalf-of">
         <xsl:for-each select="parent::*/contrib-group[not(@content-type = 'collab-list' or parent::collab)]">
           <xsl:for-each select="contrib[@contrib-type = 'author']">
-            <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
+            <xsl:apply-templates select="*[self::name or self::collab][1]" mode="authorlist"/>
             <xsl:if test="position() != last()">
               <xsl:text>, </xsl:text>
             </xsl:if>
@@ -419,7 +419,7 @@
       </xsl:when>
       <xsl:otherwise>
         <xsl:for-each select="parent::*/contrib-group[not(@content-type = 'collab-list' or parent::collab)]/contrib[@contrib-type = 'author']">
-          <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
+          <xsl:apply-templates select="*[self::name or self::collab][1]" mode="authorlist"/>
           <xsl:if test="position() != last()">
             <xsl:text>, </xsl:text>
           </xsl:if>
@@ -2459,9 +2459,16 @@
       <ul class="equal-contrib-list">
         <xsl:for-each select="ancestor::contrib-group/contrib[@equal-contrib and @equal-contrib != 'no']">
           <li class="equal-contributor">
-            <xsl:value-of select="name/given-names"/>
-            <xsl:text> </xsl:text>
-            <xsl:value-of select="name/surname"/>
+            <xsl:choose>
+              <xsl:when test="name">
+                <xsl:value-of select="name/given-names"/>
+                <xsl:text> </xsl:text>
+                <xsl:value-of select="name/surname"/>
+              </xsl:when>
+              <xsl:when test="collab">
+                <xsl:value-of select="collab"/>
+              </xsl:when>
+            </xsl:choose>
           </li>
         </xsl:for-each>
       </ul>
@@ -2653,7 +2660,7 @@
       </h3>
       <div>
         <xsl:for-each select="contrib[@rid=$rid]">
-          <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
+          <xsl:apply-templates select="*[self::name or self::collab][1]" mode="authorlist"/>
           <xsl:if test="position() != last()">
             <xsl:text>, </xsl:text>
           </xsl:if>
@@ -2673,7 +2680,7 @@
       <xsl:apply-templates select="author-comment[following-sibling::contrib-group]/node()"/>
       <div>
         <xsl:for-each select="contrib-group/contrib">
-          <xsl:apply-templates select="*[position() = 1]" mode="authorlist"/>
+          <xsl:apply-templates select="name|collab" mode="authorlist"/>
           <xsl:if test="position() != last()">
             <xsl:text>, </xsl:text>
           </xsl:if>

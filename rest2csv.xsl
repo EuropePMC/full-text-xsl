@@ -19,7 +19,7 @@
 	<xsl:param name="maxAuthors"/>
 	<xsl:param name="journalMode" select="2"/>	<!-- 1 = Full title, 2 = Abbreviated title, 3 = ISSN -->
 	<xsl:param name="authorMode" select="2"/>	<!-- 1 = Surname, Initials, 2 = Surname, Firstnames (where available, if not initials) -->
-	<xsl:param name="formatMode" select="1"/>	<!-- 1 = TSV, 2 = CSV -->
+	<xsl:param name="formatMode" select="2"/>	<!-- 1 = TSV, 2 = CSV -->
 		
 	<xsl:variable name="newline" select="'&#13;&#10;'"/>
 	

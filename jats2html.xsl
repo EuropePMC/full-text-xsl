@@ -1585,7 +1585,7 @@
   </xsl:template>
   
   <xsl:template match="label" mode="list-label">
-    <span class="list-label">
+    <span class="list_label">
       <xsl:apply-templates/>
       <xsl:if test="not(child::*)">
         <xsl:variable name="punc" select="translate(normalize-space(translate(., $allcase, '')), $digit, '')"/>
@@ -2738,6 +2738,9 @@
         </xsl:choose>
       </h2>
       <ol class="elife-reflinks-links" id="reference-list">
+        <xsl:if test="ref/label">
+          <xsl:attribute name="style">list-style-type: none</xsl:attribute>
+        </xsl:if>
         <xsl:apply-templates select="*[not(self::label or self::title)]"/>
       </ol>
     </div>
@@ -2745,13 +2748,13 @@
 
   <xsl:template match="ref">
     <li class="elife-reflinks-reflink" id="{@id}">
-      <xsl:if test="label">
-        <xsl:attribute name="style">list-style-type: none</xsl:attribute>
-      </xsl:if>
       <xsl:choose>
         <xsl:when test="count(descendant::element-citation) + count(descendant::mixed-citation) > 1">
           <xsl:apply-templates select="label"/>
           <ol class="elife-reflinks-links">
+            <xsl:if test="descendant::element-citation/label or descendant::mixed-citation/label">
+              <xsl:attribute name="style">list-style-type: none</xsl:attribute>
+            </xsl:if>
             <xsl:apply-templates select="node()[not(self::label)]"/>
           </ol>
         </xsl:when>
@@ -2816,9 +2819,6 @@
     <xsl:choose>
       <xsl:when test="ancestor::ref[count(descendant::element-citation) + count(descendant::mixed-citation) > 1]">
         <li>
-          <xsl:if test="label">
-            <xsl:attribute name="style">list-style-type: none</xsl:attribute>
-          </xsl:if>
           <xsl:apply-templates select="." mode="display"/>
         </li>
       </xsl:when>

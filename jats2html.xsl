@@ -1537,9 +1537,6 @@
             <xsl:value-of select="'first-child'"/>
           </xsl:attribute>
         </xsl:if>
-        <xsl:if test="parent::list-item and preceding-sibling::*[1][self::label]">
-          <xsl:apply-templates select="preceding-sibling::*[1][self::label]" mode="list-label"/>         
-        </xsl:if>
         <xsl:if test="not(parent::list-item) and preceding-sibling::*[1][self::label]">
           <span class="p-label">
             <xsl:apply-templates select="preceding-sibling::*[1][self::label]/node()"/>
@@ -1572,16 +1569,17 @@
   </xsl:template>
   
   <xsl:template match="p" mode="list-single-p">
-    <xsl:if test="parent::list-item and preceding-sibling::*[1][self::label]">
+    <xsl:if test="preceding-sibling::*[1][self::label]">
       <xsl:apply-templates select="preceding-sibling::*[1][self::label]" mode="list-label"/>      
     </xsl:if>
-    <xsl:if test="not(parent::list-item) and preceding-sibling::*[1][self::label]">
-      <span class="p-label">
-        <xsl:apply-templates select="preceding-sibling::*[1][self::label]/node()"/>
-        <xsl:text>: </xsl:text>
-      </span>
-    </xsl:if>
-    <xsl:apply-templates mode="testing"/>
+    <span class="p-content">
+      <xsl:if test="@id">
+        <xsl:attribute name="id">
+          <xsl:value-of select="@id"/>
+        </xsl:attribute>
+      </xsl:if>
+      <xsl:apply-templates mode="testing"/>
+    </span>
   </xsl:template>
   
   <xsl:template match="label" mode="list-label">
@@ -1776,21 +1774,8 @@
   <!-- Handle Table FootNote -->
   <xsl:template match="table-wrap-foot">
     <div class="table-foot">
-      <ul class="table-footnotes" style="list-style-type:none;">
-        <xsl:apply-templates/>
-      </ul>
-    </div>
-  </xsl:template>
-
-  <xsl:template match="table-wrap-foot/fn">
-    <li class="fn">
-      <xsl:if test="@id">
-        <xsl:attribute name="id">
-          <xsl:value-of select="@id"/>
-        </xsl:attribute>
-      </xsl:if>
       <xsl:apply-templates/>
-    </li>
+    </div>
   </xsl:template>
 
   <xsl:template match="named-content">
@@ -2379,11 +2364,11 @@
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="back/fn-group/fn | author-notes/fn[@fn-type = 'con']">
+  <xsl:template match="back/fn-group/fn | author-notes/fn[@fn-type = 'con'] | table-wrap-foot/fn">
     <xsl:apply-templates/>
   </xsl:template>
 
-  <xsl:template match="back/fn-group/fn/p | author-notes/fn[@fn-type = 'con']/p">
+  <xsl:template match="back/fn-group/fn/p | author-notes/fn[@fn-type = 'con']/p | table-wrap-foot/fn/p">
     <xsl:choose>
       <xsl:when test="*[position()=1][self::bold] and (not(child::text()) or not(child::text()[normalize-space(.) != '']))">
         <h3>
@@ -2737,10 +2722,16 @@
           <xsl:otherwise>References</xsl:otherwise>
         </xsl:choose>
       </h2>
-      <ol class="elife-reflinks-links" id="reference-list">
-        <xsl:if test="ref/label">
-          <xsl:attribute name="style">list-style-type: none</xsl:attribute>
-        </xsl:if>
+      <ol id="reference-list">
+        <xsl:choose>
+          <xsl:when test="ref/label">
+            <xsl:attribute name="style">list-style-type: none</xsl:attribute>
+            <xsl:attribute name="class">list_with_labels elife-reflinks-links</xsl:attribute>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:attribute name="class">elife-reflinks-links</xsl:attribute>
+          </xsl:otherwise>
+        </xsl:choose>
         <xsl:apply-templates select="*[not(self::label or self::title)]"/>
       </ol>
     </div>
@@ -2751,10 +2742,16 @@
       <xsl:choose>
         <xsl:when test="count(descendant::element-citation) + count(descendant::mixed-citation) > 1">
           <xsl:apply-templates select="label"/>
-          <ol class="elife-reflinks-links">
-            <xsl:if test="descendant::element-citation/label or descendant::mixed-citation/label">
-              <xsl:attribute name="style">list-style-type: none</xsl:attribute>
-            </xsl:if>
+          <ol>
+            <xsl:choose>
+              <xsl:when test="descendant::element-citation/label or descendant::mixed-citation/label">
+                <xsl:attribute name="style">list-style-type: none</xsl:attribute>
+                <xsl:attribute name="class">list_with_labels elife-reflinks-links</xsl:attribute>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:attribute name="class">elife-reflinks-links</xsl:attribute>
+              </xsl:otherwise>
+            </xsl:choose>
             <xsl:apply-templates select="node()[not(self::label)]"/>
           </ol>
         </xsl:when>
@@ -3233,6 +3230,9 @@
               </xsl:when>
             </xsl:choose>
           </xsl:attribute>
+          <xsl:if test="@list-type = 'simple'">
+            <xsl:attribute name="class">list_with_labels</xsl:attribute>
+          </xsl:if>
           <xsl:apply-templates/>
         </ul>
       </xsl:when>
@@ -3303,24 +3303,21 @@
 
   <xsl:template match="list-item">
     <li>
+      <xsl:if test="@id">
+        <xsl:attribute name="id">
+          <xsl:value-of select="@id"/>
+        </xsl:attribute>
+      </xsl:if>
       <xsl:choose>
-        <xsl:when test="@id">
-          <xsl:attribute name="id">
-            <xsl:value-of select="@id"/>
-          </xsl:attribute>
-          <xsl:apply-templates/>
-        </xsl:when>
         <xsl:when test="(count(child::*) = 1 and child::*[self::p]) or
           (count(child::*) = 2 and child::*[1][self::label] and child::*[2][self::p])">
-          <xsl:if test="child::p/@id">
-            <xsl:attribute name="id">
-              <xsl:value-of select="child::p/@id"/>
-            </xsl:attribute>
-          </xsl:if>
           <xsl:apply-templates select="child::p" mode="list-single-p"/>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:apply-templates/>
+          <xsl:apply-templates select="label" mode="list-label"/>
+          <div>
+            <xsl:apply-templates/>
+          </div>
         </xsl:otherwise>
       </xsl:choose>
     </li>

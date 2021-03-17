@@ -1554,7 +1554,7 @@
       </xsl:if>
       <xsl:apply-templates/>
     </xsl:if>
-    <xsl:if test="not(ancestor::list-item)">
+    <xsl:if test="not(ancestor::list-item or ancestor::fig or ancestor::table or ancestor::boxed-text)">
       <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group'] or //*[@position = 'float']">
         <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
           <xsl:variable name="rid" select="@rid"/>

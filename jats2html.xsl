@@ -2521,7 +2521,7 @@
   </xsl:template>
 
   <xsl:template match="back/fn-group/fn | author-notes/fn[@fn-type = 'con']">
-    <xsl:apply-templates mode="testing"/>
+    <xsl:apply-templates select="p" mode="testing"/>
   </xsl:template>
   
   <xsl:template match="table-wrap-foot/fn">

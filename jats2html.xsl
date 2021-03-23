@@ -2937,7 +2937,9 @@
   </xsl:template>
   
   <xsl:template match="ref/note">
-    <xsl:apply-templates/>
+    <span class="reflink-note">
+      <xsl:apply-templates select="p/node()"/>
+    </span>
   </xsl:template>
 
   <xsl:template match="ref//person-group|collab" mode="list-ref-people">

@@ -2364,11 +2364,15 @@
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="back/fn-group/fn | author-notes/fn[@fn-type = 'con'] | table-wrap-foot/fn">
+  <xsl:template match="back/fn-group/fn | author-notes/fn[@fn-type = 'con']">
+    <xsl:apply-templates mode="testing"/>
+  </xsl:template>
+  
+  <xsl:template match="table-wrap-foot/fn">
     <xsl:apply-templates/>
   </xsl:template>
 
-  <xsl:template match="back/fn-group/fn/p | author-notes/fn[@fn-type = 'con']/p | table-wrap-foot/fn/p">
+  <xsl:template match="back/fn-group/fn/p | author-notes/fn[@fn-type = 'con']/p" mode="testing">
     <xsl:choose>
       <xsl:when test="*[position()=1][self::bold] and (not(child::text()) or not(child::text()[normalize-space(.) != '']))">
         <h3>
@@ -2380,22 +2384,26 @@
         <xsl:apply-templates select="*[not(self::bold)]"></xsl:apply-templates>
       </xsl:when>
       <xsl:otherwise>
-        <p>
-          <xsl:if test="count(preceding-sibling::*) = 0 or preceding-sibling::*[1][self::label]">
-            <xsl:attribute name="id">
-              <xsl:value-of select="parent::fn/@id"/>
-            </xsl:attribute>
-          </xsl:if>
-          <xsl:if test="preceding-sibling::*[1][self::label]">
-            <span class="fn-label">
-              <xsl:value-of select="preceding-sibling::label"/>
-            </span>
-            <xsl:text> </xsl:text>
-          </xsl:if>
-          <xsl:apply-templates/>
-        </p>
+        <xsl:apply-templates select="."/>
       </xsl:otherwise>
     </xsl:choose>
+  </xsl:template>
+  
+  <xsl:template match="back/fn-group/fn/p | author-notes/fn[@fn-type = 'con']/p | table-wrap-foot/fn/p">
+    <p>
+      <xsl:if test="count(preceding-sibling::*) = 0 or preceding-sibling::*[1][self::label]">
+        <xsl:attribute name="id">
+          <xsl:value-of select="parent::fn/@id"/>
+        </xsl:attribute>
+      </xsl:if>
+      <xsl:if test="preceding-sibling::*[1][self::label]">
+        <span class="fn-label">
+          <xsl:value-of select="preceding-sibling::label"/>
+        </span>
+        <xsl:text> </xsl:text>
+      </xsl:if>
+      <xsl:apply-templates/>
+    </p>
   </xsl:template>
 
   <xsl:template match="*" mode="list-emails">

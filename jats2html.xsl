@@ -2755,6 +2755,12 @@
             <xsl:apply-templates select="node()[not(self::label)]"/>
           </ol>
         </xsl:when>
+        <xsl:when test="note">
+          <xsl:apply-templates select="label"/>
+          <div class="reflink-with-note">
+            <xsl:apply-templates select="node()[not(self::label)]"/>
+          </div>
+        </xsl:when>
         <xsl:otherwise>
           <xsl:apply-templates/>
         </xsl:otherwise>
@@ -2764,6 +2770,10 @@
   
   <xsl:template match="ref/label">
     <xsl:apply-templates select="." mode="list-label"/>
+  </xsl:template>
+  
+  <xsl:template match="ref/note">
+    <xsl:apply-templates/>
   </xsl:template>
 
   <xsl:template match="ref//person-group|collab" mode="list-ref-people">
@@ -3101,10 +3111,6 @@
     </xsl:choose>
   </xsl:template>
   
-  <xsl:template match="ref/note">
-    <xsl:apply-templates select="p/node()"/>
-  </xsl:template>
-
   <!-- START video handling -->
 
   <xsl:template match="media">

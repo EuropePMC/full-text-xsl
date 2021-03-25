@@ -157,6 +157,7 @@
           <xsl:call-template name="peer-review-summary"/>
         </xsl:if>
         <xsl:apply-templates select="article-meta/abstract"/>
+        <xsl:apply-templates select="article-meta/kwd-group"/>
       </xsl:when>
       <xsl:otherwise>
         <div class="front-matter">
@@ -181,6 +182,7 @@
         </xsl:if>
         <xsl:if test="normalize-space($ctxid) = ''">
           <xsl:apply-templates select="article-meta/abstract"/>
+          <xsl:apply-templates select="article-meta/kwd-group"/>
         </xsl:if>               
       </xsl:otherwise>
     </xsl:choose>
@@ -867,6 +869,9 @@
       </xsl:if>
     </div>
     <xsl:apply-templates select="abstract"/>
+    <xsl:if test="abstract">
+      <xsl:apply-templates select="kwd-group"/>
+    </xsl:if>
   </xsl:template>
   
   <xsl:template match="front-stub/title-group">
@@ -1388,7 +1393,6 @@
       </xsl:choose>
       <xsl:apply-templates select="node()[not(self::label or self:: title)]"/>
     </div>
-    <xsl:apply-templates select="parent::article-meta/kwd-group"/>
   </xsl:template>
 
   <xsl:template match="kwd-group">

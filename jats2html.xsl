@@ -1391,7 +1391,7 @@
           <h2 id="{concat($id,'title')}">Abstract</h2>
         </xsl:otherwise>
       </xsl:choose>
-      <xsl:apply-templates select="node()[not(self::label or self:: title)]"/>
+      <xsl:apply-templates select="node()[not(self::label or self:: title)]" mode="testing"/>
     </div>
   </xsl:template>
 

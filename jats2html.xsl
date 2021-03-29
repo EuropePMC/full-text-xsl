@@ -365,42 +365,44 @@
           <div>
             <xsl:apply-templates select=".//contrib-group[not(@content-type = 'collab-list' or parent::collab)][1]" mode="authorlist"/>
           </div>
-          <div class="author-affiliations">
-            <h2 role="button" tabindex="0">
-              <xsl:choose>
-                <xsl:when test="self::article-meta">
-                  <xsl:attribute name="id">fulltext--author-affiliations-title</xsl:attribute>
-                </xsl:when>
-                <xsl:otherwise>
-                  <xsl:attribute name="id">
-                    <xsl:text>fulltext--sub</xsl:text>
-                    <xsl:value-of select="ancestor::sub-article/@id"/>
-                    <xsl:text>-author-affiliations-title</xsl:text>
-                  </xsl:attribute>
-                  <xsl:attribute name="class">pmctoggle</xsl:attribute>
-                </xsl:otherwise>
-              </xsl:choose>
-              <xsl:if test="not($msspreview)">
-                <xsl:attribute name="onclick">
-                  <xsl:text>this.classList.toggle('open'); this.blur()</xsl:text>
-                </xsl:attribute>
-              </xsl:if>
-              <xsl:text>Affiliations</xsl:text>
-            </h2>
-            <ol class="affiliations">
-              <xsl:attribute name="style">
+          <xsl:if test=".//aff[not(parent::contrib-group[@content-type='collab-list'] or ancestor::collab)][not(. = preceding::aff)]">
+            <div class="author-affiliations">
+              <h2 role="button" tabindex="0">
                 <xsl:choose>
-                  <xsl:when test="normalize-space($pprid) != ''">
-                    <xsl:text>list-style-type:none</xsl:text>
+                  <xsl:when test="self::article-meta">
+                    <xsl:attribute name="id">fulltext--author-affiliations-title</xsl:attribute>
                   </xsl:when>
                   <xsl:otherwise>
-                    <xsl:text>text-indent:0</xsl:text>
+                    <xsl:attribute name="id">
+                      <xsl:text>fulltext--sub</xsl:text>
+                      <xsl:value-of select="ancestor::sub-article/@id"/>
+                      <xsl:text>-author-affiliations-title</xsl:text>
+                    </xsl:attribute>
+                    <xsl:attribute name="class">pmctoggle</xsl:attribute>
                   </xsl:otherwise>
                 </xsl:choose>
-              </xsl:attribute>
-              <xsl:apply-templates select=".//aff[not(parent::contrib-group[@content-type='collab-list'] or ancestor::collab)][not(. = preceding::aff)]" mode="afflist"/>
-            </ol>
-          </div>
+                <xsl:if test="not($msspreview)">
+                  <xsl:attribute name="onclick">
+                    <xsl:text>this.classList.toggle('open'); this.blur()</xsl:text>
+                  </xsl:attribute>
+                </xsl:if>
+                <xsl:text>Affiliations</xsl:text>
+              </h2>
+              <ol class="affiliations">
+                <xsl:attribute name="style">
+                  <xsl:choose>
+                    <xsl:when test="normalize-space($pprid) != ''">
+                      <xsl:text>list-style-type:none</xsl:text>
+                    </xsl:when>
+                    <xsl:otherwise>
+                      <xsl:text>text-indent:0</xsl:text>
+                    </xsl:otherwise>
+                  </xsl:choose>
+                </xsl:attribute>
+                <xsl:apply-templates select=".//aff[not(parent::contrib-group[@content-type='collab-list'] or ancestor::collab)][not(. = preceding::aff)]" mode="afflist"/>
+              </ol>
+            </div>
+          </xsl:if>
         </xsl:otherwise>
       </xsl:choose>
     </div>
@@ -2780,29 +2782,31 @@
         </xsl:otherwise>
       </xsl:choose>
     </xsl:for-each>
-    <div class="collab-author-affiliations">
-      <h4 id="fulltext--collab-author-affiliations-title" class="pmctoggle" role="button" tabindex="0">
-        <xsl:if test="not($msspreview)">
-          <xsl:attribute name="onclick">
-            <xsl:text>this.classList.toggle('open'); this.blur()</xsl:text>
+    <xsl:if test="parent::*/contrib-group[@content-type='collab-list']//aff[not(. = preceding::aff)]">
+      <div class="collab-author-affiliations">
+        <h4 id="fulltext--collab-author-affiliations-title" class="pmctoggle" role="button" tabindex="0">
+          <xsl:if test="not($msspreview)">
+            <xsl:attribute name="onclick">
+              <xsl:text>this.classList.toggle('open'); this.blur()</xsl:text>
+            </xsl:attribute>
+          </xsl:if>
+          <xsl:text>Affiliations</xsl:text>
+        </h4>
+        <ol class="affiliations">
+          <xsl:attribute name="style">
+            <xsl:choose>
+              <xsl:when test="normalize-space($pprid) != ''">
+                <xsl:text>list-style-type:none</xsl:text>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:text>text-indent:0</xsl:text>
+              </xsl:otherwise>
+            </xsl:choose>
           </xsl:attribute>
-        </xsl:if>
-        <xsl:text>Affiliations</xsl:text>
-      </h4>
-      <ol class="affiliations">
-        <xsl:attribute name="style">
-          <xsl:choose>
-            <xsl:when test="normalize-space($pprid) != ''">
-              <xsl:text>list-style-type:none</xsl:text>
-            </xsl:when>
-            <xsl:otherwise>
-              <xsl:text>text-indent:0</xsl:text>
-            </xsl:otherwise>
-          </xsl:choose>
-        </xsl:attribute>
-        <xsl:apply-templates select="parent::*/contrib-group[@content-type='collab-list']//aff[not(. = preceding::aff)]" mode="afflist"/>
-      </ol>
-    </div>
+          <xsl:apply-templates select="parent::*/contrib-group[@content-type='collab-list']//aff[not(. = preceding::aff)]" mode="afflist"/>
+        </ol>
+      </div>
+    </xsl:if>
   </xsl:template>
   
   <xsl:template match="contrib-group" mode="make-collab-list">

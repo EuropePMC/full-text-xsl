@@ -3220,7 +3220,7 @@
   </xsl:template>
   
   <xsl:template match="ref//date-in-citation">
-    <xsl:text>[</xsl:text>
+    <xsl:text> [</xsl:text>
     <xsl:apply-templates/>
     <xsl:text>]</xsl:text>
   </xsl:template>

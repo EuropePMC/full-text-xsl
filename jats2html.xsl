@@ -157,7 +157,9 @@
           <xsl:call-template name="peer-review-summary"/>
         </xsl:if>
         <xsl:apply-templates select="article-meta/abstract"/>
-        <xsl:apply-templates select="article-meta/kwd-group"/>
+        <xsl:if test="article-meta/abstract">
+          <xsl:apply-templates select="article-meta/kwd-group"/>
+        </xsl:if>
       </xsl:when>
       <xsl:otherwise>
         <div class="front-matter">

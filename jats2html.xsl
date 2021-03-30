@@ -2896,6 +2896,7 @@
           <xsl:otherwise>References</xsl:otherwise>
         </xsl:choose>
       </h2>
+      <xsl:apply-templates select="*[not(self::label or self::title or self::ref)]"/>
       <ol id="reference-list">
         <xsl:choose>
           <xsl:when test="ref/label">
@@ -2906,7 +2907,7 @@
             <xsl:attribute name="class">elife-reflinks-links</xsl:attribute>
           </xsl:otherwise>
         </xsl:choose>
-        <xsl:apply-templates select="*[not(self::label or self::title)]"/>
+        <xsl:apply-templates select="ref"/>
       </ol>
     </div>
   </xsl:template>

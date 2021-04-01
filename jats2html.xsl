@@ -2329,7 +2329,7 @@
             <xsl:value-of select="@id"/>
           </xsl:when>
           <xsl:when test="descendant::*[local-name() = 'math']/@id">
-            <xsl:value-of select="descendant::*[local-name() = 'math']/@id"/>
+            <xsl:value-of select="concat(descendant::*[local-name() = 'math']/@id, '-inline')"/>
           </xsl:when>
         </xsl:choose>
       </xsl:attribute>
@@ -2356,7 +2356,7 @@
   <xsl:template match="*[local-name() = 'math']">
     <span class="f mathjax mml-math">
       <xsl:attribute name="id">
-        <xsl:value-of select="concat(@id, '-math')"/>
+        <xsl:value-of select="@id"/>
       </xsl:attribute>
       <xsl:choose>
         <xsl:when test="$msspreview">

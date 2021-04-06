@@ -2834,7 +2834,7 @@
   <xsl:template match="collab" mode="collab-list-container">
     <div class="fulltext--collab-author-information" id="{concat('collab', count(preceding::collab[contrib-group])+1)}">
       <h3>
-        <xsl:apply-templates select="node()[not(self::contrib-group) and not(self::author-comment)]"/>
+        <xsl:apply-templates select="node()[not(self::contrib-group or self::author-comment or self::aff)]"/>
       </h3>
       <xsl:apply-templates select="author-comment[following-sibling::contrib-group]/node()"/>
       <div>

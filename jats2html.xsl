@@ -475,7 +475,7 @@
         </xsl:when>
         <xsl:when test="self::collab">
           <xsl:variable name="collab-url">
-            <xsl:apply-templates select="node()[not(self::contrib-group)]" mode="make-url"/>
+            <xsl:apply-templates select="node()[not(self::contrib-group or self::author-comment or self::aff)]" mode="make-url"/>
           </xsl:variable>
           <xsl:value-of select="concat($siteUrl,'/search?query=AUTH:%22', $collab-url, '%22')"/>
         </xsl:when>
@@ -489,7 +489,7 @@
             <xsl:apply-templates select="suffix"/>
           </xsl:when>
           <xsl:when test="self::collab">
-            <xsl:apply-templates select="node()[not(self::contrib-group)]"/>
+            <xsl:apply-templates select="node()[not(self::contrib-group or self::author-comment or self::aff)]"/>
           </xsl:when>
         </xsl:choose>
       </span>

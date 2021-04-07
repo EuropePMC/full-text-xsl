@@ -3192,10 +3192,12 @@
         </span>
         <xsl:text>)</xsl:text>
       </xsl:if>
-      <xsl:if test="contains($includes, 'fpage|')">
-        <xsl:if test="not(starts-with($includes, 'fpage|'))">
+      <xsl:if test="contains($includes, 'fpage|') or contains($includes, 'elocation|')">
+        <xsl:if test="not(starts-with($includes, 'fpage|') or starts-with($includes, 'elocation|'))">
           <xsl:text>: </xsl:text>
         </xsl:if>
+      </xsl:if>
+      <xsl:if test="contains($includes, 'fpage|')">
         <span class="reflink-details-pages">
           <xsl:apply-templates select="child::fpage/node()"/>
           <xsl:if test="contains($includes, 'lpage|')">
@@ -3205,25 +3207,26 @@
         </span>
       </xsl:if>
       <xsl:if test="contains($includes, 'elocation|')">
-        <xsl:if test="not(starts-with($includes, 'elocation|'))">
-          <xsl:text>: </xsl:text>
+        <xsl:if test="contains($includes, 'fpage|')">
+          <xsl:text>, </xsl:text>
         </xsl:if>
         <span class="reflink-details-pages">
           <xsl:apply-templates select="child::elocation-id/node()"/>
         </span>
       </xsl:if>
       <xsl:if test="$includes != ''">
-        <xsl:text>.</xsl:text>
-      </xsl:if>      
-      <xsl:apply-templates select="pub-id[@pub-id-type = 'doi']" mode="idlinks"/>
-      <xsl:apply-templates select="pub-id[not(@pub-id-type = 'doi')]" mode="idlinks"/>
-      <xsl:apply-templates select="date-in-citation"/>
+        <xsl:text>. </xsl:text>
+      </xsl:if>
       <xsl:apply-templates select="comment|annotation"/>
+      <xsl:apply-templates select="date-in-citation"/>
+      <xsl:apply-templates select="pub-id[@pub-id-type = 'doi']" mode="idlinks"/>
+      <xsl:apply-templates select="pub-id[not(@pub-id-type = 'doi')]" mode="idlinks"/>     
     </span>
   </xsl:template>
   
   <xsl:template match="ref//date-in-citation">
-    <xsl:text> [</xsl:text>
+    <xsl:text> </xsl:text>
+    <xsl:text>[</xsl:text>
     <xsl:apply-templates/>
     <xsl:text>]</xsl:text>
   </xsl:template>
@@ -3611,9 +3614,8 @@
   <xsl:template match="ack/title"/>
   <xsl:template match="ref-list/title"/>
   <xsl:template match="ref//year | ref//article-title | ref//fpage | ref//volume | ref//issue | ref//source | ref//pub-id |
-      ref//lpage | ref//supplement | ref//person-group[@person-group-type = 'editor'] | ref//edition | ref//publisher-loc |
-      ref//lpage | ref//supplement | ref//edition | ref//publisher-loc |
-      ref//publisher-name | ref//issn | red//month | ref//day | ref//season"/>
+      ref//fpage | ref//supplement | ref//person-group[@person-group-type = 'editor'] | ref//edition | ref//publisher-loc |
+      ref//publisher-name | ref//elocation-id | ref//issn | red//month | ref//day | ref//season"/>
   <xsl:template match="person-group[@person-group-type = 'author'] | collab"/>
   <xsl:template match="media/label"/>
   <xsl:template match="object-id | table-wrap/label | table-wrap-group/label"/>

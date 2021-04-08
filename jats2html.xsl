@@ -3016,6 +3016,9 @@
         <xsl:when test="child::article-title">
           <xsl:apply-templates select="child::article-title/node()"/>
         </xsl:when>
+        <xsl:when test="child::chapter-title">
+          <xsl:apply-templates select="child::chapter-title/node()"/>
+        </xsl:when>
         <xsl:when test="child::source">
           <xsl:apply-templates select="child::source/node()"/>
         </xsl:when>
@@ -3023,7 +3026,7 @@
     </xsl:variable>
     <xsl:variable name="title-type">
       <xsl:choose>
-        <xsl:when test="child::article-title">
+        <xsl:when test="child::article-title or child::chapter-title">
           <xsl:value-of select="'article-title'"/>
         </xsl:when>
         <xsl:when test="child::source">
@@ -3057,7 +3060,7 @@
         </xsl:if>
       </xsl:variable>
       <xsl:variable name="includes">
-        <xsl:if test="child::article-title and child::source">
+        <xsl:if test="(child::article-title or child::chapter-title) and child::source">
           <xsl:value-of select="'source|'"/>
         </xsl:if>
         <xsl:if test="child::*[starts-with(name(), 'conf')]">

@@ -2978,11 +2978,12 @@
       </xsl:choose>
     </xsl:for-each>
     <xsl:choose>
-      <xsl:when test="@person-group-type = 'editor'">
+      <xsl:when test="@person-group-type = 'editor' or @person-group-type = 'translator'">
         <xsl:if test="etal">
           <xsl:text>, et al</xsl:text>
         </xsl:if>
-        <xsl:text>, editor</xsl:text>
+        <xsl:text>, </xsl:text>
+        <xsl:value-of select="@person-group-type"/>
         <xsl:if test="count(child::*[self::name | self::collab | self::etal]) > 1">
           <xsl:text>s</xsl:text>
         </xsl:if>
@@ -3097,12 +3098,6 @@
           <xsl:value-of select="'elocation|'"/>
         </xsl:if>
       </xsl:variable>
-      <xsl:if test="child::person-group[@person-group-type = 'editor'] and @publication-type='book'">
-        <span>
-          <xsl:text>In: </xsl:text>
-          <xsl:apply-templates select="person-group[@person-group-type = 'editor']" mode="list-ref-people"/>
-        </span>
-      </xsl:if>
       <xsl:if test="contains($includes, 'source|')">
         <span>
           <xsl:if test="$class != ''">
@@ -3110,9 +3105,22 @@
               <xsl:value-of select="$class"/>
             </xsl:attribute>
           </xsl:if>
+          <xsl:if test="@publication-type='book'">
+            <xsl:text>In: </xsl:text>
+          </xsl:if>
           <span class="nlm-source">
             <xsl:apply-templates select="child::source/node()"/>
           </span>
+        </span>
+      </xsl:if>
+      <xsl:if test="child::person-group[@person-group-type = 'editor'] and @publication-type='book'">
+        <span>
+          <xsl:apply-templates select="person-group[@person-group-type = 'editor']" mode="list-ref-people"/>
+        </span>
+      </xsl:if>
+      <xsl:if test="child::person-group[@person-group-type = 'translator'] and @publication-type='book'">
+        <span>
+          <xsl:apply-templates select="person-group[@person-group-type = 'translator']" mode="list-ref-people"/>
         </span>
       </xsl:if>
       <xsl:if test="contains($includes, 'conference|')">

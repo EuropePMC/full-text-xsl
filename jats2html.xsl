@@ -3128,7 +3128,6 @@
             <xsl:text>, </xsl:text>
           </xsl:if>
           <xsl:apply-templates select="child::conf-date/node()"/>
-          <xsl:text>.</xsl:text>
         </span>
       </xsl:if>
       <xsl:if test="contains($includes, 'publisher-name|')">

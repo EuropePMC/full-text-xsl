@@ -2960,14 +2960,12 @@
       </xsl:if>
       <xsl:choose>
         <xsl:when test="name() = 'name'">
-          <xsl:variable name="givenname" select="given-names"/>
-          <xsl:variable name="surname" select="surname"/>
-          <xsl:variable name="suffix" select="suffix"/>
-          <xsl:variable name="fullname">
-            <xsl:value-of select="concat($surname, ' ', $givenname)"/>
-          </xsl:variable>
           <span class="reflink-author">
-            <xsl:value-of select="$fullname"/>
+            <xsl:value-of select="concat(surname, ' ', given-names)"/>
+            <xsl:if test="suffix">
+              <xsl:text> </xsl:text>
+              <xsl:value-of select="suffix"/>
+            </xsl:if>
           </span>
         </xsl:when>
         <xsl:when test="name() = 'collab'">

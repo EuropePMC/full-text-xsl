@@ -3135,12 +3135,16 @@
           <xsl:apply-templates select="child::conf-name/node()"/>
           <xsl:if test="child::conf-name and child::conf-loc">
             <xsl:text>, </xsl:text>
+          </xsl:if>          
+          <xsl:apply-templates select="child::conf-date/node()"/>
+          <xsl:if test="(child::conf-name or child::conf-loc) and child::conf-date">
+            <xsl:text>; </xsl:text>
           </xsl:if>
           <xsl:apply-templates select="child::conf-loc/node()"/>
-          <xsl:if test="(child::conf-name or child::conf-loc) and child::conf-date">
-            <xsl:text>, </xsl:text>
+          <xsl:if test="not('.' = substring(conf-loc, string-length(conf-loc) - string-length('.') + 1))">
+            <xsl:text>.</xsl:text>
           </xsl:if>
-          <xsl:apply-templates select="child::conf-date/node()"/>
+          <xsl:text> </xsl:text>
         </span>
       </xsl:if>
       <xsl:if test="contains($includes, 'edition|')">
@@ -3167,7 +3171,9 @@
           <span class="nlm-publisher-name">
             <xsl:apply-templates select="child::publisher-name/node()"/>
           </span>
-          <xsl:text>; </xsl:text>
+          <xsl:if test="contains($includes, 'year|')">
+            <xsl:text>; </xsl:text>
+          </xsl:if>
         </span>
       </xsl:if>
       <xsl:if test="contains($includes, 'year|')">
@@ -3210,7 +3216,14 @@
       </xsl:if>
       <xsl:if test="contains($includes, 'fpage|') or contains($includes, 'elocation|')">
         <xsl:if test="not(starts-with($includes, 'fpage|') or starts-with($includes, 'elocation|'))">
-          <xsl:text>: </xsl:text>
+          <xsl:choose>
+            <xsl:when test="@publication-type='book'">
+              <xsl:text>. p. </xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:text>: </xsl:text>
+            </xsl:otherwise>
+          </xsl:choose>
         </xsl:if>
       </xsl:if>
       <xsl:if test="contains($includes, 'fpage|')">

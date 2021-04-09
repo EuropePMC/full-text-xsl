@@ -3048,21 +3048,28 @@
           <span class="nlm-{$title-type}">
             <xsl:copy-of select="$title"/>
           </span>
-          <xsl:if test="not('.' = substring($title, string-length($title) - string-length('.') + 1))">
+          <xsl:if test="not('.' = substring($title, string-length($title) - string-length('.') + 1)) and
+            not('?' = substring($title, string-length($title) - string-length('?') + 1))">
             <xsl:text>.</xsl:text>
           </xsl:if>
           <xsl:text> </xsl:text>
         </span>
       </xsl:if>
-      <!-- move all other elements into details and comma separate -->
+      <!-- move all other elements into details -->
       <xsl:variable name="class">
         <xsl:if test="@publication-type = 'journal'">
           <xsl:value-of select="'reflink-details-journal'"/>
         </xsl:if>
       </xsl:variable>
       <xsl:variable name="includes">
+        <xsl:if test="child::person-group[@person-group-type = 'editor' or @person-group-type = 'translator']">
+          <xsl:value-of select="'edlist|'"/>
+        </xsl:if>
         <xsl:if test="(child::article-title or child::chapter-title) and child::source">
           <xsl:value-of select="'source|'"/>
+        </xsl:if>
+        <xsl:if test="child::edition">
+          <xsl:value-of select="'edition|'"/>
         </xsl:if>
         <xsl:if test="child::*[starts-with(name(), 'conf')]">
           <xsl:value-of select="'conference|'"/>
@@ -3098,6 +3105,15 @@
           <xsl:value-of select="'elocation|'"/>
         </xsl:if>
       </xsl:variable>
+      <xsl:if test="contains($includes, 'edlist|') and @publication-type != 'journal'">        
+        <xsl:if test="contains($includes, 'source|')">
+          <xsl:text>In: </xsl:text>
+        </xsl:if>
+        <span>
+          <xsl:apply-templates select="person-group[@person-group-type = 'editor']" mode="list-ref-people"/>
+          <xsl:apply-templates select="person-group[@person-group-type = 'translator']" mode="list-ref-people"/>
+        </span>
+      </xsl:if>
       <xsl:if test="contains($includes, 'source|')">
         <span>
           <xsl:if test="$class != ''">
@@ -3105,28 +3121,16 @@
               <xsl:value-of select="$class"/>
             </xsl:attribute>
           </xsl:if>
-          <xsl:if test="@publication-type='book'">
-            <xsl:text>In: </xsl:text>
-          </xsl:if>
           <span class="nlm-source">
             <xsl:apply-templates select="child::source/node()"/>
           </span>
+          <xsl:if test="not('.' = substring(source, string-length(source) - string-length('.') + 1))">
+            <xsl:text>.</xsl:text>
+          </xsl:if>
+          <xsl:text> </xsl:text>
         </span>
-      </xsl:if>
-      <xsl:if test="child::person-group[@person-group-type = 'editor'] and @publication-type='book'">
-        <span>
-          <xsl:apply-templates select="person-group[@person-group-type = 'editor']" mode="list-ref-people"/>
-        </span>
-      </xsl:if>
-      <xsl:if test="child::person-group[@person-group-type = 'translator'] and @publication-type='book'">
-        <span>
-          <xsl:apply-templates select="person-group[@person-group-type = 'translator']" mode="list-ref-people"/>
-        </span>
-      </xsl:if>
+      </xsl:if>            
       <xsl:if test="contains($includes, 'conference|')">
-        <xsl:if test="not(starts-with($includes, 'conference|'))">
-          <xsl:text>, </xsl:text>
-        </xsl:if>
         <span class="reflink-details-conference">
           <xsl:apply-templates select="child::conf-name/node()"/>
           <xsl:if test="child::conf-name and child::conf-loc">
@@ -3139,30 +3143,34 @@
           <xsl:apply-templates select="child::conf-date/node()"/>
         </span>
       </xsl:if>
-      <xsl:if test="contains($includes, 'publisher-name|')">
-        <xsl:if test="not(starts-with($includes, 'publisher-name|'))">
-          <xsl:text>, </xsl:text>
-        </xsl:if>
-        <span class="reflink-details-pub-name">
-          <span class="nlm-publisher-name">
-            <xsl:apply-templates select="child::publisher-name/node()"/>
-          </span>
+      <xsl:if test="contains($includes, 'edition|')">
+        <span class="nlm-edition">
+          <xsl:apply-templates select="child::edition/node()"/>
+          <xsl:if test="not('.' = substring(edition, string-length(edition) - string-length('.') + 1))">
+            <xsl:text>.</xsl:text>
+          </xsl:if>
+          <xsl:text> </xsl:text>
         </span>
       </xsl:if>
       <xsl:if test="contains($includes, 'publisher-loc|')">
-        <xsl:if test="not(starts-with($includes, 'publisher-loc|'))">
-          <xsl:text>, </xsl:text>
-        </xsl:if>
         <span class="reflink-details-pub-loc">
           <span class="nlm-publisher-loc">
             <xsl:apply-templates select="child::publisher-loc/node()"/>
           </span>
+          <xsl:if test="contains($includes, 'publisher-name|')">
+            <xsl:text>: </xsl:text>
+          </xsl:if>
+        </span>
+      </xsl:if>
+      <xsl:if test="contains($includes, 'publisher-name|')">
+        <span class="reflink-details-pub-name">
+          <span class="nlm-publisher-name">
+            <xsl:apply-templates select="child::publisher-name/node()"/>
+          </span>
+          <xsl:text>; </xsl:text>
         </span>
       </xsl:if>
       <xsl:if test="contains($includes, 'year|')">
-        <xsl:if test="not(starts-with($includes, 'year|'))">
-          <xsl:text>, </xsl:text>
-        </xsl:if>
         <span class="reflink-details-year">
           <xsl:apply-templates select="child::year/node()"/>
         </span>

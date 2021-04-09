@@ -3176,26 +3176,23 @@
           <xsl:text> </xsl:text>
         </span>
       </xsl:if>
-      <xsl:if test="contains($includes, 'publisher-loc|')">
-        <span class="reflink-details-pub-loc">
-          <span class="nlm-publisher-loc">
-            <xsl:apply-templates select="child::publisher-loc/node()"/>
+      <xsl:choose>
+        <xsl:when test="contains($includes, 'publisher-loc|')">
+          <xsl:apply-templates select="child::publisher-loc" mode="publisher-pair">
+            <xsl:with-param name="includes"><xsl:value-of select="$includes"/></xsl:with-param>
+          </xsl:apply-templates>
+        </xsl:when>
+        <xsl:when test="contains($includes, 'publisher-name|')">
+          <span class="reflink-details-pub-name">
+            <span class="nlm-publisher-name">
+              <xsl:apply-templates select="child::publisher-name/node()"/>
+            </span>
+            <xsl:if test="contains($includes, 'year|')">
+              <xsl:text>; </xsl:text>
+            </xsl:if>
           </span>
-          <xsl:if test="contains($includes, 'publisher-name|')">
-            <xsl:text>: </xsl:text>
-          </xsl:if>
-        </span>
-      </xsl:if>
-      <xsl:if test="contains($includes, 'publisher-name|')">
-        <span class="reflink-details-pub-name">
-          <span class="nlm-publisher-name">
-            <xsl:apply-templates select="child::publisher-name/node()"/>
-          </span>
-          <xsl:if test="contains($includes, 'year|')">
-            <xsl:text>; </xsl:text>
-          </xsl:if>
-        </span>
-      </xsl:if>
+        </xsl:when>
+      </xsl:choose>
       <xsl:if test="contains($includes, 'year|')">
         <span class="reflink-details-year">
           <xsl:apply-templates select="child::year/node()"/>
@@ -3271,6 +3268,28 @@
       <xsl:apply-templates select="pub-id[@pub-id-type = 'doi']" mode="idlinks"/>
       <xsl:apply-templates select="pub-id[not(@pub-id-type = 'doi')]" mode="idlinks"/>     
     </span>
+  </xsl:template>
+  
+  <xsl:template match="publisher-loc" mode="publisher-pair">
+  <xsl:param name="includes"/>
+    <span class="reflink-details-pub-loc">
+      <span class="nlm-publisher-loc">
+        <xsl:apply-templates select="node()"/>
+      </span>
+      <xsl:if test="contains($includes, 'publisher-name|')">
+        <xsl:text>: </xsl:text>
+      </xsl:if>
+    </span>    
+    <xsl:if test="contains($includes, 'publisher-name|')">
+      <span class="reflink-details-pub-name">
+        <span class="nlm-publisher-name">
+          <xsl:apply-templates select="following-sibling::publisher-name[1]/node()"/>
+        </span>
+        <xsl:if test="contains($includes, 'year|') or following-sibling::publisher-loc">
+          <xsl:text>; </xsl:text>
+        </xsl:if>
+      </span>
+    </xsl:if>
   </xsl:template>
   
   <xsl:template match="ref//date-in-citation">

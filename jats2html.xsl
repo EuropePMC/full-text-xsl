@@ -1540,7 +1540,7 @@
     <xsl:param name="heading-el"/>
     <xsl:variable name="level">
       <xsl:choose>
-        <xsl:when test="$heading-el">
+        <xsl:when test="$heading-el and not(child::sec)">
           <xsl:choose>
             <xsl:when test="ancestor::app">
               <xsl:value-of select="count($heading-el/ancestor::sec) + 3"/>

@@ -1103,13 +1103,34 @@
         <xsl:text> by </xsl:text>
       </xsl:element>
       <xsl:element name="{substring-after(substring-after($level, '|'),'|')}">
-        <xsl:apply-templates select="node()"/>
+        <xsl:apply-templates select="." mode="edlist"/>
         <xsl:for-each select="following::contrib[@contrib-type=$type]">
           <xsl:text>, </xsl:text>
-          <xsl:apply-templates select="node()"/>
+          <xsl:apply-templates select="following::contrib[@contrib-type=$type]" mode="edlist"/>
         </xsl:for-each>
       </xsl:element>
     </xsl:element>
+  </xsl:template>
+  
+  <xsl:template match="contrib" mode="edlist">
+    <xsl:choose>
+      <xsl:when test="name">
+        <xsl:value-of select="name/given-names"/>
+        <xsl:text> </xsl:text>
+        <xsl:value-of select="name/surname"/>
+      </xsl:when>
+      <xsl:when test="collab">
+        <xsl:value-of select="collab"/>
+      </xsl:when>
+    </xsl:choose>
+    <xsl:if test="aff or parent::contrib-group/aff">
+      <xsl:text>(</xsl:text>
+      <xsl:for-each select="aff or parent::contrib-group/aff">
+        <xsl:value-of select="."/>
+        <xsl:if test="position() != last()">; </xsl:if>
+      </xsl:for-each>
+      <xsl:text>)</xsl:text>
+    </xsl:if> 
   </xsl:template>
 
   <xsl:template match="fn-group[@content-type = 'competing-interest']">
@@ -2595,9 +2616,16 @@
       <ul class="equal-contrib-list">
         <xsl:for-each select="../../contrib-group/contrib/xref[@rid = $contributeid]">
           <li class="equal-contributor">
-            <xsl:value-of select="../name/given-names"/>
-            <xsl:text> </xsl:text>
-            <xsl:value-of select="../name/surname"/>
+            <xsl:choose>
+              <xsl:when test="name">
+                <xsl:value-of select="name/given-names"/>
+                <xsl:text> </xsl:text>
+                <xsl:value-of select="name/surname"/>
+              </xsl:when>
+              <xsl:when test="collab">
+                <xsl:value-of select="collab"/>
+              </xsl:when>
+            </xsl:choose>
           </li>
         </xsl:for-each>
       </ul>

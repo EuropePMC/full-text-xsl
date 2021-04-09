@@ -1106,7 +1106,7 @@
         <xsl:apply-templates select="." mode="edlist"/>
         <xsl:for-each select="following::contrib[@contrib-type=$type]">
           <xsl:text>, </xsl:text>
-          <xsl:apply-templates select="following::contrib[@contrib-type=$type]" mode="edlist"/>
+          <xsl:apply-templates select="." mode="edlist"/>
         </xsl:for-each>
       </xsl:element>
     </xsl:element>
@@ -1123,14 +1123,6 @@
         <xsl:value-of select="collab"/>
       </xsl:when>
     </xsl:choose>
-    <xsl:if test="aff or parent::contrib-group/aff">
-      <xsl:text>(</xsl:text>
-      <xsl:for-each select="aff or parent::contrib-group/aff">
-        <xsl:value-of select="."/>
-        <xsl:if test="position() != last()">; </xsl:if>
-      </xsl:for-each>
-      <xsl:text>)</xsl:text>
-    </xsl:if> 
   </xsl:template>
 
   <xsl:template match="fn-group[@content-type = 'competing-interest']">

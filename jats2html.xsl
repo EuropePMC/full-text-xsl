@@ -2907,7 +2907,8 @@
       </xsl:if>
     </xsl:variable>
     <div id="{$id}">
-      <h2 id="{$id}title">
+      <xsl:element name="h{count(ancestor::ref-list)+2}">
+        <xsl:attribute name="id"><xsl:value-of select="concat($id,'title')"/></xsl:attribute>
         <xsl:apply-templates select="label"/>
         <xsl:choose>
           <xsl:when test="title">
@@ -2915,9 +2916,15 @@
           </xsl:when>
           <xsl:otherwise>References</xsl:otherwise>
         </xsl:choose>
-      </h2>
+      </xsl:element>
       <xsl:apply-templates select="*[not(self::label or self::title or self::ref)]"/>
-      <ol id="reference-list">
+      <ol>
+        <xsl:attribute name="id">
+          <xsl:text>reference-list</xsl:text>
+          <xsl:if test="preceding::ref-list">
+            <xsl:value-of select="count(preceding::ref-list)"/>
+          </xsl:if>
+        </xsl:attribute>
         <xsl:choose>
           <xsl:when test="ref/label">
             <xsl:attribute name="style">list-style-type: none</xsl:attribute>

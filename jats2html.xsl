@@ -2606,7 +2606,7 @@
     <div class="equal-contrib" id="{@id}">    
       <xsl:apply-templates/>
       <ul class="equal-contrib-list">
-        <xsl:for-each select="../../contrib-group/contrib/xref[@rid = $contributeid]">
+        <xsl:for-each select="../../contrib-group/contrib[xref[@rid = $contributeid]]">
           <li class="equal-contributor">
             <xsl:choose>
               <xsl:when test="name">

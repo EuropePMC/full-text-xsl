@@ -3002,6 +3002,11 @@
             </span>
           </span>
         </xsl:when>
+        <xsl:when test="name() = 'string-name'">
+          <span class="reflink-author">
+            <xsl:apply-templates/>
+          </span>
+        </xsl:when>
       </xsl:choose>
     </xsl:for-each>
     <xsl:choose>
@@ -3038,7 +3043,7 @@
     </xsl:choose>
   </xsl:template>
   
-  <xsl:template match="ref//element-citation|ref//mixed-citation" mode="display">
+  <xsl:template match="element-citation|mixed-citation" mode="display">
     <xsl:variable name="title">
       <xsl:choose>
         <xsl:when test="child::article-title">
@@ -3097,6 +3102,9 @@
         </xsl:if>
         <xsl:if test="child::edition">
           <xsl:value-of select="'edition|'"/>
+        </xsl:if>
+        <xsl:if test="child::version">
+          <xsl:value-of select="'version|'"/>
         </xsl:if>
         <xsl:if test="child::*[starts-with(name(), 'conf')]">
           <xsl:value-of select="'conference|'"/>
@@ -3178,6 +3186,15 @@
         <span class="nlm-edition">
           <xsl:apply-templates select="child::edition/node()"/>
           <xsl:if test="not('.' = substring(edition, string-length(edition) - string-length('.') + 1))">
+            <xsl:text>.</xsl:text>
+          </xsl:if>
+          <xsl:text> </xsl:text>
+        </span>
+      </xsl:if>
+      <xsl:if test="contains($includes, 'version|')">
+        <span class="nlm-version">
+          <xsl:apply-templates select="child::version/node()"/>
+          <xsl:if test="not('.' = substring(version, string-length(version) - string-length('.') + 1))">
             <xsl:text>.</xsl:text>
           </xsl:if>
           <xsl:text> </xsl:text>
@@ -3659,6 +3676,12 @@
       sub | sup | sc | email | sec/title | boxed-text/label | boxed-text/caption/title | ext-link | app/title | disp-formula |
       inline-formula | list | list-item | hr | disp-quote | code | verse-group | def-list | inline-graphic | p" mode="testing">
     <xsl:apply-templates select="."/>
+  </xsl:template>
+  
+  <xsl:template match="element-citation|mixed-citation">
+    <xsl:if test="not(ancestor::ref)">
+      <xsl:apply-templates select="." mode="display"/>
+    </xsl:if>
   </xsl:template>
   
   <xsl:template match="table-wrap | boxed-text | fig | fig-group | table-wrap-group" mode="testing">

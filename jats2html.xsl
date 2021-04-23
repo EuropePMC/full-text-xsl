@@ -3307,7 +3307,14 @@
     <xsl:if test="contains($includes, 'publisher-name|')">
       <span class="reflink-details-pub-name">
         <span class="nlm-publisher-name">
-          <xsl:apply-templates select="following-sibling::publisher-name[1]/node()"/>
+          <xsl:choose>
+            <xsl:when test="following-sibling::publisher-name">
+              <xsl:apply-templates select="following-sibling::publisher-name[1]/node()"/>
+            </xsl:when>
+            <xsl:when test="preceding-sibling::publisher-name">
+              <xsl:apply-templates select="preceding-sibling::publisher-name[1]/node()"/>
+            </xsl:when>
+          </xsl:choose>
         </span>
         <xsl:if test="contains($includes, 'year|') or following-sibling::publisher-loc">
           <xsl:text>; </xsl:text>

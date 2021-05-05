@@ -3180,6 +3180,10 @@
             <xsl:text>.</xsl:text>
           </xsl:if>
           <xsl:text> </xsl:text>
+          <xsl:apply-templates select="child::conf-sponsor/node()"/>
+          <xsl:if test="(child::conf-name or child::conf-loc) and child::conf-sponsor">
+            <xsl:text>. </xsl:text>
+          </xsl:if>
         </span>
       </xsl:if>
       <xsl:if test="contains($includes, 'edition|')">

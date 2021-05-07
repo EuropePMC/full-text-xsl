@@ -2951,6 +2951,7 @@
                 <xsl:attribute name="class">list_with_labels elife-reflinks-links</xsl:attribute>
               </xsl:when>
               <xsl:otherwise>
+                <xsl:attribute name="style">list-style-type: lower-alpha</xsl:attribute>
                 <xsl:attribute name="class">elife-reflinks-links</xsl:attribute>
               </xsl:otherwise>
             </xsl:choose>

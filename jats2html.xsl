@@ -3106,6 +3106,9 @@
         <xsl:if test="child::version">
           <xsl:value-of select="'version|'"/>
         </xsl:if>
+        <xsl:if test="child::series">
+          <xsl:value-of select="'series|'"/>
+        </xsl:if>
         <xsl:if test="child::*[starts-with(name(), 'conf')]">
           <xsl:value-of select="'conference|'"/>
         </xsl:if>
@@ -3199,6 +3202,15 @@
         <span class="nlm-version">
           <xsl:apply-templates select="child::version/node()"/>
           <xsl:if test="not('.' = substring(version, string-length(version) - string-length('.') + 1))">
+            <xsl:text>.</xsl:text>
+          </xsl:if>
+          <xsl:text> </xsl:text>
+        </span>
+      </xsl:if>
+      <xsl:if test="contains($includes, 'series|')">
+        <span class="nlm-version">
+          <xsl:apply-templates select="child::series/node()"/>
+          <xsl:if test="not('.' = substring(series, string-length(series) - string-length('.') + 1))">
             <xsl:text>.</xsl:text>
           </xsl:if>
           <xsl:text> </xsl:text>

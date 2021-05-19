@@ -3113,6 +3113,9 @@
         <xsl:if test="child::*[starts-with(name(), 'conf')]">
           <xsl:value-of select="'conference|'"/>
         </xsl:if>
+        <xsl:if test="child::patent">
+          <xsl:value-of select="'patent|'"/>
+        </xsl:if>
         <xsl:if test="child::publisher-name">
           <xsl:value-of select="'publisher-name|'"/>
         </xsl:if>
@@ -3163,6 +3166,12 @@
           <span class="nlm-source">
             <xsl:apply-templates select="child::source/node()"/>
           </span>
+          <xsl:if test="contains($includes, 'patent|')">
+            <xsl:text> </xsl:text>
+            <span class="reflink-details-patent">
+              <xsl:apply-templates select="child::patent/node()"/>
+            </span>
+          </xsl:if>
           <xsl:if test="not('.' = substring(source, string-length(source) - string-length('.') + 1))">
             <xsl:text>.</xsl:text>
           </xsl:if>

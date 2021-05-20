@@ -3313,7 +3313,7 @@
       <xsl:if test="$includes != ''">
         <xsl:text>. </xsl:text>
       </xsl:if>
-      <xsl:apply-templates select="comment|annotation"/>
+      <xsl:apply-templates select="comment|annotation|ext-link"/>
       <xsl:apply-templates select="date-in-citation"/>
       <xsl:apply-templates select="pub-id[@pub-id-type = 'doi']" mode="idlinks"/>
       <xsl:apply-templates select="pub-id[not(@pub-id-type = 'doi')]" mode="idlinks"/>     

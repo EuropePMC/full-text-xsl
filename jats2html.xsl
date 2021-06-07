@@ -3044,7 +3044,7 @@
     </xsl:choose>
   </xsl:template>
   
-  <xsl:template match="element-citation|mixed-citation" mode="display">
+  <xsl:template match="element-citation" mode="display">
     <xsl:variable name="title">
       <xsl:choose>
         <xsl:when test="child::article-title">
@@ -3320,7 +3320,76 @@
     </span>
   </xsl:template>
   
-  <xsl:template match="publisher-loc" mode="publisher-pair">
+  <xsl:template match="mixed-citation" mode="display">
+    <xsl:variable name="title">
+      <xsl:choose>
+        <xsl:when test="child::article-title">
+          <xsl:apply-templates select="child::article-title/node()"/>
+        </xsl:when>
+        <xsl:when test="child::chapter-title">
+          <xsl:apply-templates select="child::chapter-title/node()"/>
+        </xsl:when>
+        <xsl:when test="child::source">
+          <xsl:apply-templates select="child::source/node()"/>
+        </xsl:when>
+      </xsl:choose>
+    </xsl:variable>
+    <xsl:variable name="title-type">
+      <xsl:choose>
+        <xsl:when test="child::article-title or child::chapter-title">
+          <xsl:value-of select="'article-title'"/>
+        </xsl:when>
+        <xsl:when test="child::source">
+          <xsl:value-of select="'source'"/>
+        </xsl:when>
+      </xsl:choose>
+    </xsl:variable>
+    <xsl:apply-templates select="label" mode="list-label"/>    
+    <span class="reflink-main">
+      <xsl:apply-templates/>
+    </span>
+  </xsl:template>
+  
+  <xsl:template match="mixed-citation/person-group[@person-group-type = 'author'] | mixed-citation/collab">
+    <span class="authors">
+      <xsl:apply-templates/>
+    </span>
+  </xsl:template>
+  
+  <xsl:template match="mixed-citation//etal">
+    <xsl:text>et al</xsl:text>
+  </xsl:template>
+  
+  <xsl:template match="mixed-citation//article-title | mixed-citation//chapter-title">
+    <span class="elife-reflink-title">
+      <span class="nlm-article-title">
+        <xsl:apply-templates/>
+      </span>
+    </span>
+  </xsl:template>
+  
+  <xsl:template match="mixed-citation//source">
+    <xsl:choose>
+      <xsl:when test="not(ancestor::mixed-citation/article-title or ancestor::mixed-citation/chapter-title)">
+        <span class="elife-reflink-title">
+          <span class="nlm-source">
+            <xsl:apply-templates/>
+          </span>
+        </span>
+      </xsl:when>
+      <xsl:otherwise>
+        <span class="nlm-source"><xsl:apply-templates/></span>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
+  <xsl:template match="mixed-citation//pub-id">
+    <xsl:apply-templates select="." mode="idlinks"/>
+  </xsl:template>
+  
+  <xsl:template match="mixed-citation//*/@*"/>
+  
+  <xsl:template match="element-citation//publisher-loc" mode="publisher-pair">
   <xsl:param name="includes"/>
     <span class="reflink-details-pub-loc">
       <span class="nlm-publisher-loc">
@@ -3349,7 +3418,7 @@
     </xsl:if>
   </xsl:template>
   
-  <xsl:template match="ref//date-in-citation">
+  <xsl:template match="element-citation//date-in-citation">
     <xsl:text> </xsl:text>
     <xsl:text>[</xsl:text>
     <xsl:apply-templates/>
@@ -3744,9 +3813,11 @@
   <xsl:template match="fig-group"/>
   <xsl:template match="ack/title"/>
   <xsl:template match="ref-list/title"/>
-  <xsl:template match="ref//year | ref//article-title | ref//fpage | ref//volume | ref//issue | ref//source | ref//pub-id |
-      ref//fpage | ref//supplement | ref//person-group[@person-group-type = 'editor'] | ref//edition | ref//publisher-loc |
-      ref//publisher-name | ref//elocation-id | ref//issn | red//month | ref//day | ref//season"/>
+  <xsl:template match="element-citation//year | element-citation//article-title | element-citation//fpage | element-citation//volume 
+    | element-citation//issue | element-citation//source | element-citation//pub-id | element-citation//fpage |
+    element-citation//supplement | element-citation//person-group[@person-group-type = 'editor'] | element-citation//edition | 
+    element-citation//publisher-loc |  element-citation//publisher-name | element-citation//elocation-id | element-citation//issn |
+    element-citation//month | element-citation//day | element-citation//season"/>
   <xsl:template match="person-group[@person-group-type = 'author'] | collab"/>
   <xsl:template match="media/label"/>
   <xsl:template match="object-id | table-wrap/label | table-wrap-group/label"/>

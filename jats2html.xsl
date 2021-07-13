@@ -176,7 +176,6 @@
           </xsl:if>
           <xsl:if test="not(article-meta/abstract) or normalize-space($ctxid) != ''">
             <xsl:apply-templates select="article-meta/kwd-group"/>
-            <hr class="no_abstract"/>
           </xsl:if>
         </div>
         <xsl:if test="following-sibling::sub-article[@article-type='peer-review']">

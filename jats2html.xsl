@@ -182,7 +182,7 @@
         <xsl:if test="following-sibling::sub-article[@article-type='peer-review']">
           <xsl:call-template name="peer-review-summary"/>
         </xsl:if>
-        <xsl:if test="normalize-space($ctxid) = ''">
+        <xsl:if test="article-meta/abstract and normalize-space($ctxid) = ''">
           <xsl:apply-templates select="article-meta/abstract"/>
           <xsl:apply-templates select="article-meta/kwd-group"/>
         </xsl:if>               
@@ -2472,6 +2472,7 @@
         <xsl:apply-templates select="preceding-sibling::*" mode="list-emails"/>        
       </xsl:if>
       <xsl:apply-templates select="bio"/>
+      <xsl:apply-templates select="fn-group/fn[@fn-type = 'conflict']"/>
     </xsl:if>
     <xsl:apply-templates select="preceding-sibling::*//contrib-group[@content-type='collab-list']"/>
     <xsl:apply-templates select="preceding-sibling::*//contrib-group/parent::collab" mode="collab-list-container"/>
@@ -2521,15 +2522,15 @@
         <xsl:apply-templates select="fn[@fn-type = 'present-address'][1]"/>
       </div>
     </xsl:if>
-    <xsl:if test="fn[not(@fn-type)] | fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]">
+    <xsl:if test="fn[not(@fn-type)] | fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')] | ancestor::*[starts-with(name(), 'front')]/following-sibling::back/fn-group/fn[@fn-type = 'conflict']">
       <div id="author-info-other-footnotes">
-        <xsl:apply-templates select="fn[not(@fn-type)] | fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]"/>
+        <xsl:apply-templates select="fn[not(@fn-type)] | fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')] | ancestor::*[starts-with(name(), 'front')]/following-sibling::back/fn-group/fn[@fn-type = 'conflict']"/>
       </div>
     </xsl:if>
   </xsl:template>
 
   <xsl:template match="back/fn-group">
-    <xsl:if test="fn[not(@fn-type = 'con')]">
+    <xsl:if test="fn[not(@fn-type = 'con' or @fn-type = 'conflict')]">
       <div id="notes">
         <h2 id="notestitle">
           <xsl:choose>
@@ -2539,12 +2540,12 @@
             <xsl:otherwise>Notes</xsl:otherwise>
           </xsl:choose>
         </h2>
-        <xsl:apply-templates select="fn[not(@fn-type = 'con')]"/>
+        <xsl:apply-templates select="fn[not(@fn-type = 'con' or @fn-type = 'conflict')]"/>
       </div>
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="back/fn-group/fn | author-notes/fn[@fn-type = 'con']">
+  <xsl:template match="back/fn-group/fn | author-notes/fn[@fn-type = 'con' or @fn-type = 'conflict']">
     <xsl:apply-templates select="p" mode="testing"/>
   </xsl:template>
   
@@ -2552,7 +2553,7 @@
     <xsl:apply-templates/>
   </xsl:template>
 
-  <xsl:template match="back/fn-group/fn/p | author-notes/fn[@fn-type = 'con']/p" mode="testing">
+  <xsl:template match="back/fn-group/fn/p | author-notes/fn[@fn-type = 'con' or @fn-type = 'conflict']/p" mode="testing">
     <xsl:choose>
       <xsl:when test="*[position()=1][self::bold] and (not(child::text()) or not(child::text()[normalize-space(.) != '']))">
         <h3>
@@ -2569,7 +2570,7 @@
     </xsl:choose>
   </xsl:template>
   
-  <xsl:template match="back/fn-group/fn/p | author-notes/fn[@fn-type = 'con']/p | table-wrap-foot/fn/p">
+  <xsl:template match="back/fn-group/fn/p | author-notes/fn[@fn-type = 'con' or @fn-type = 'conflict']/p | table-wrap-foot/fn/p">
     <p>
       <xsl:if test="count(preceding-sibling::*) = 0 or preceding-sibling::*[1][self::label]">
         <xsl:attribute name="id">
@@ -2671,7 +2672,7 @@
     <xsl:apply-templates/>
   </xsl:template>
 
-  <xsl:template match="author-notes/fn[not(@fn-type)] | author-notes/fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address')]">
+  <xsl:template match="author-notes/fn[not(@fn-type)] | author-notes/fn[(@fn-type != 'con' and @fn-type != 'equal' and @fn-type != 'present-address' and @fn-type != 'conflict')]">
     <div class="foot-note" id="{@id}">
       <xsl:apply-templates/>
     </div>

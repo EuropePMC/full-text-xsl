@@ -3184,11 +3184,13 @@
       <xsl:if test="contains($includes, 'conference|')">
         <span class="reflink-details-conference">
           <xsl:apply-templates select="child::conf-name/node()"/>
-          <xsl:if test="child::conf-name and child::conf-loc">
-            <xsl:text>, </xsl:text>
+          <xsl:if test="child::conf-name and (child::conf-date)">
+            <xsl:if test="not('.' = substring(conf-name, string-length(conf-name) - string-length('.') + 1))">
+              <xsl:text>; </xsl:text>
+            </xsl:if>
           </xsl:if>          
           <xsl:apply-templates select="child::conf-date/node()"/>
-          <xsl:if test="(child::conf-name or child::conf-loc) and child::conf-date">
+          <xsl:if test="(child::conf-name or child::conf-date) and child::conf-loc">
             <xsl:text>; </xsl:text>
           </xsl:if>
           <xsl:apply-templates select="child::conf-loc/node()"/>

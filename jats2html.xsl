@@ -3454,9 +3454,19 @@
           </span>
         </span>
       </xsl:when>
-      <xsl:when test="@pub-id-type = 'pmcid'">
+      <xsl:when test="@pub-id-type = 'pmcid' or @pub-id-type = 'pmc'">
+        <xsl:variable name="pmcid">
+          <xsl:choose>
+            <xsl:when test="starts-with(translate(., $uppercase, $smallcase), 'pmc')">
+              <xsl:value-of select="."/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="concat('PMC', .)"/>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:variable>
         <xsl:text> </xsl:text>
-        <a href="{$siteUrl}/articles/{.}">
+        <a href="{$siteUrl}/articles/{$pmcid}">
           <xsl:if test="$msspreview">
             <xsl:attribute name="target">
               <xsl:text>_blank</xsl:text>

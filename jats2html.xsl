@@ -432,7 +432,7 @@
       </xsl:when>
       <xsl:otherwise>
         <xsl:for-each select="parent::*/contrib-group[not(@content-type = 'collab-list' or parent::collab)]/contrib[@contrib-type = 'author']">
-          <xsl:apply-templates select="*[self::name or self::collab][1]" mode="authorlist"/>
+          <xsl:apply-templates select="*[self::name or self::name-alternatives or self::collab][1]" mode="authorlist"/>
           <xsl:if test="position() != last()">
             <xsl:text>, </xsl:text>
           </xsl:if>
@@ -458,6 +458,15 @@
         </xsl:with-param>
       </xsl:call-template>
     </xsl:if>
+  </xsl:template>
+  
+  <xsl:template match="name-alternatives" mode="authorlist">
+    <xsl:apply-templates select="name[1]" mode="authorlist"/>
+    <xsl:for-each select="name[position() > 1]|string-name">
+      <xsl:text> (</xsl:text>
+      <xsl:apply-templates select="."/>
+      <xsl:text>)</xsl:text>
+    </xsl:for-each>
   </xsl:template>
 
   <xsl:template match="name|collab" mode="authorlist">
@@ -928,10 +937,10 @@
   </xsl:template>
 
   <xsl:template match="contrib[@contrib-type='author'][not(@id)]">
-    <xsl:apply-templates select="collab"/>
+    <xsl:apply-templates select="collab" mode="contrib-collab"/>
   </xsl:template>
 
-  <xsl:template match="contrib//collab">
+  <xsl:template match="contrib//collab" mode="contrib-collab">
     <h4 class="equal-contrib-label">
       <xsl:apply-templates/>
     </h4>
@@ -1015,6 +1024,10 @@
     <span class="nlm-surname">
       <xsl:value-of select="surname"/>
     </span>
+  </xsl:template>
+  
+  <xsl:template match="string-name | collab">
+    <xsl:value-of select="."/>
   </xsl:template>
 
   <xsl:template match="front" mode="article-info-history">
@@ -1112,16 +1125,7 @@
   </xsl:template>
   
   <xsl:template match="contrib" mode="edlist">
-    <xsl:choose>
-      <xsl:when test="name">
-        <xsl:value-of select="name/given-names"/>
-        <xsl:text> </xsl:text>
-        <xsl:value-of select="name/surname"/>
-      </xsl:when>
-      <xsl:when test="collab">
-        <xsl:value-of select="collab"/>
-      </xsl:when>
-    </xsl:choose>
+    <xsl:apply-templates select="descendant::name[1]|string-name|collab"/>
   </xsl:template>
 
   <xsl:template match="fn-group[@content-type = 'competing-interest']">
@@ -2611,16 +2615,7 @@
       <ul class="equal-contrib-list">
         <xsl:for-each select="../../contrib-group/contrib[xref[@rid = $contributeid]]">
           <li class="equal-contributor">
-            <xsl:choose>
-              <xsl:when test="name">
-                <xsl:value-of select="name/given-names"/>
-                <xsl:text> </xsl:text>
-                <xsl:value-of select="name/surname"/>
-              </xsl:when>
-              <xsl:when test="collab">
-                <xsl:value-of select="collab"/>
-              </xsl:when>
-            </xsl:choose>
+            <xsl:apply-templates select="descendant::name[1]|string-name|collab"/>
           </li>
         </xsl:for-each>
       </ul>
@@ -2639,16 +2634,7 @@
       <ul class="equal-contrib-list">
         <xsl:for-each select="ancestor::contrib-group/contrib[@equal-contrib and @equal-contrib != 'no']">
           <li class="equal-contributor">
-            <xsl:choose>
-              <xsl:when test="name">
-                <xsl:value-of select="name/given-names"/>
-                <xsl:text> </xsl:text>
-                <xsl:value-of select="name/surname"/>
-              </xsl:when>
-              <xsl:when test="collab">
-                <xsl:value-of select="collab"/>
-              </xsl:when>
-            </xsl:choose>
+            <xsl:apply-templates select="descendant::name[1]|string-name|collab"/>
           </li>
         </xsl:for-each>
       </ul>

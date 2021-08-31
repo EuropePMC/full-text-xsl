@@ -2916,11 +2916,10 @@
         </xsl:attribute>
         <xsl:choose>
           <xsl:when test="ref/label">
-            <xsl:attribute name="style">list-style-type: none</xsl:attribute>
             <xsl:attribute name="class">list_with_labels elife-reflinks-links</xsl:attribute>
           </xsl:when>
           <xsl:otherwise>
-            <xsl:attribute name="class">elife-reflinks-links</xsl:attribute>
+            <xsl:attribute name="class">hanging_indent_list elife-reflinks-links</xsl:attribute>
           </xsl:otherwise>
         </xsl:choose>
         <xsl:apply-templates select="ref"/>

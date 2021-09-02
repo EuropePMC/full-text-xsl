@@ -2907,7 +2907,7 @@
         </xsl:choose>
       </xsl:element>
       <xsl:apply-templates select="*[not(self::label or self::title or self::ref)]"/>
-      <ol>
+      <ol style="list-style-type: none">
         <xsl:attribute name="id">
           <xsl:text>reference-list</xsl:text>
           <xsl:if test="preceding::ref-list">
@@ -2969,7 +2969,7 @@
     </span>
   </xsl:template>
 
-  <xsl:template match="ref//person-group|collab" mode="list-ref-people">
+  <xsl:template match="element-citation/person-group | element-citation/collab" mode="list-ref-people">
     <xsl:for-each select="name | collab | self::collab">
       <xsl:if test="position() != 1">
         <xsl:text>, </xsl:text>
@@ -3344,6 +3344,10 @@
     <span class="authors">
       <xsl:apply-templates/>
     </span>
+  </xsl:template>
+  
+  <xsl:template match="mixed-citation//name">
+    <xsl:apply-templates/>
   </xsl:template>
   
   <xsl:template match="mixed-citation//etal">
@@ -3814,11 +3818,10 @@
   <xsl:template match="ack/title"/>
   <xsl:template match="ref-list/title"/>
   <xsl:template match="element-citation//year | element-citation//article-title | element-citation//fpage | element-citation//volume 
-    | element-citation//issue | element-citation//source | element-citation//pub-id | element-citation//fpage |
-    element-citation//supplement | element-citation//person-group[@person-group-type = 'editor'] | element-citation//edition | 
-    element-citation//publisher-loc |  element-citation//publisher-name | element-citation//elocation-id | element-citation//issn |
-    element-citation//month | element-citation//day | element-citation//season"/>
-  <xsl:template match="person-group[@person-group-type = 'author'] | collab"/>
+    | element-citation//issue | element-citation//source | element-citation//pub-id | element-citation//fpage 
+    | element-citation//supplement | element-citation//person-group[@person-group-type = 'editor'] | element-citation//collab 
+    | element-citation//edition | element-citation//publisher-loc |  element-citation//publisher-name | element-citation//elocation-id
+    | element-citation//issn | element-citation//month | element-citation//day | element-citation//season"/>
   <xsl:template match="media/label"/>
   <xsl:template match="object-id | table-wrap/label | table-wrap-group/label"/>
   <xsl:template match="funding-group//institution-wrap/institution-id"/>

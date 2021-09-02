@@ -3347,7 +3347,17 @@
   </xsl:template>
   
   <xsl:template match="mixed-citation//name">
-    <xsl:apply-templates/>
+    <span class="reflink-author">
+      <xsl:value-of select="concat(surname, ' ', given-names)"/>
+      <xsl:if test="suffix">
+        <xsl:text> </xsl:text>
+        <xsl:value-of select="suffix"/>
+      </xsl:if>
+    </span>
+  </xsl:template>
+  
+  <xsl:template match="mixed-citation//string-name">
+    <span class="reflink-author"><xsl:apply-templates/></span>
   </xsl:template>
   
   <xsl:template match="mixed-citation//etal">
@@ -3766,13 +3776,9 @@
     </span>
   </xsl:template>
   
-  <xsl:template match="*">
-    <xsl:apply-templates select="@* | node()"/>
-  </xsl:template>
+  <xsl:template match="*"><xsl:apply-templates select="@* | node()"/></xsl:template>
 
-  <xsl:template match="@* | text()">
-    <xsl:copy/>
-  </xsl:template>
+  <xsl:template match="@* | text()"><xsl:copy/></xsl:template>
   
   <!-- END - general format -->
   

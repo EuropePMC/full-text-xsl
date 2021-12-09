@@ -1464,6 +1464,7 @@
           <xsl:apply-templates select="descendant::sec[@sec-type='supplementary-material'][1]/label"/>
           <xsl:apply-templates select="descendant::sec[@sec-type='supplementary-material'][1]/title/node()"/>
         </h2>
+        <xsl:apply-templates select="descendant::sec[@sec-type='supplementary-material']/*[not(self::supplementary-material or self::label or self::title)]"/>
         <ul class="supplementary-material">
           <xsl:for-each select="descendant::supplementary-material[not(object-id)]">
             <li id="{@id}">

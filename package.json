@@ -1,6 +1,6 @@
 {
-  "name": "full-text-xsl",
-  "version": "1.0.0",
+  "name": "epmc-article-xsl",
+  "version": "2.0.0",
   "description": "XSL for article citations to various formats and for article full text to HTML",
   "repository": {
     "type": "git",

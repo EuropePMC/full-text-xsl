@@ -1,4 +1,6 @@
-# XSL (EXtensible Stylesheet) files used by EBI Literature Services/Europe PMC.
+# epmc-article-xsl
+
+XSL (EXtensible Stylesheet) files used by EBI Literature Services/Europe PMC.
 
 ## JATS 
 

@@ -149,7 +149,7 @@
           <xsl:apply-templates select="article-meta/title-group"/>
           <xsl:apply-templates select="article-meta" mode="authors"/>
           <xsl:apply-templates select="article-meta"/>
-          <xsl:if test="not(article-meta/abstract)">
+          <xsl:if test="not(article-meta/abstract or article-meta/trans-abstract)">
             <xsl:apply-templates select="article-meta/kwd-group"/>
           </xsl:if>
         </div>
@@ -158,7 +158,11 @@
         </xsl:if>
         <xsl:apply-templates select="article-meta/abstract"/>
         <xsl:if test="article-meta/abstract">
-          <xsl:apply-templates select="article-meta/kwd-group"/>
+          <xsl:apply-templates select="article-meta/kwd-group[not(@xml:lang) or @xml:lang=preceding-sibling::abstract/@xml:lang]"/>
+        </xsl:if>
+        <xsl:apply-templates select="article-meta/trans-abstract"/>
+        <xsl:if test="article-meta/trans-abstract">
+          <xsl:apply-templates select="article-meta/kwd-group[@xml:lang=preceding-sibling::trans-abstract/@xml:lang]"/>
         </xsl:if>
       </xsl:when>
       <xsl:otherwise>
@@ -174,7 +178,7 @@
             <xsl:apply-templates select="article-meta/contrib-group[@content-type='collab-list']"/>
             <xsl:apply-templates select="article-meta//collab[contrib-group]" mode="collab-list-container"/>
           </xsl:if>
-          <xsl:if test="not(article-meta/abstract) or normalize-space($ctxid) != ''">
+          <xsl:if test="not(article-meta/abstract or article-meta/trans-abstract) or normalize-space($ctxid) != ''">
             <xsl:apply-templates select="article-meta/kwd-group"/>
           </xsl:if>
         </div>
@@ -183,7 +187,9 @@
         </xsl:if>
         <xsl:if test="article-meta/abstract and normalize-space($ctxid) = ''">
           <xsl:apply-templates select="article-meta/abstract"/>
-          <xsl:apply-templates select="article-meta/kwd-group"/>
+          <xsl:apply-templates select="article-meta/kwd-group[not(@xml:lang) or @xml:lang=preceding-sibling::abstract/@xml:lang]"/>
+          <xsl:apply-templates select="article-meta/trans-abstract"/>
+          <xsl:apply-templates select="article-meta/kwd-group[@xml:lang=preceding-sibling::trans-abstract/@xml:lang]"/>
         </xsl:if>               
       </xsl:otherwise>
     </xsl:choose>
@@ -1385,7 +1391,7 @@
   
   <!-- ==== ABSTRACT ==== -->
 
-  <xsl:template match="abstract">
+  <xsl:template match="abstract|trans-abstract">
     <xsl:variable name="data-doi" select="child::object-id[@pub-id-type = 'doi']/text()"/>
     <div data-doi="{$data-doi}">
       <xsl:choose>

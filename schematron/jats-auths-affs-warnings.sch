@@ -32,7 +32,8 @@
   </rule>
   
   <rule context="contrib[@contrib-type='author']/xref[@ref-type='aff' and (* or normalize-space(.)!='')]" role="warning">
-    <let name="aff" value="id(./@rid)"/>
+    <let name="rid" value="@rid"/>
+    <let name="aff" value="//*[@id=$rid]"/>
     <assert test="$aff/label" role="warning">
       &lt;xref> which contains content, but the &lt;aff> that it points to does not have a label.
     </assert>

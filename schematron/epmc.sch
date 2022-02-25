@@ -110,14 +110,16 @@ SOFTWARE.
   <pattern id="xref-correspondence-warnings">
     <rule context="xref[@ref-type='fig' or @ref-type='table']">
       <let name="ridnum" value="translate(@rid, translate(@rid, '0123456789', ''), '')"/>
-      <assert test="matches(., concat('\D', $ridnum, '($|\D)'))" role="warning">The number value in the &lt;xref&gt; @rid: <value-of select="@rid"/> , does not match the text: <value-of select="."/></assert>
+      <assert test="matches(., concat('(^|\D)', $ridnum, '($|\D)'))" role="warning">The number value in the &lt;xref&gt; @rid: <value-of select="@rid"/> , does not match the text: <value-of select="."/></assert>
       <report test="matches(., '[sS][\d]') or matches(., '[sS]up')" role="warning">The &lt;xref&gt; links to a table or figure but the text indicates it should link to a supplemental file: <value-of select="."/></report>
     </rule>
+    
     <rule context="xref[@ref-type='aff' or @ref-type='fn' or @ref-type='table-fn']">
       <let name="rid" value="@rid"/>
       <let name="point" value="//*[@id=$rid]"/>
       <report test="$point/label and .!=$point/label" role="warning">The label of the element pointed to: <value-of select="$point/label"/> , does not match the &lt;xref&gt; content: <value-of select="."/></report>
     </rule>
+    
     <rule context="xref[@ref-type='bibr']">
       <let name="rid" value="@rid"/>
       <let name="point" value="//*[@id=$rid]"/>
@@ -137,6 +139,7 @@ SOFTWARE.
     <rule context="inline-formula|disp-formula">
       <report test="mml:math and normalize-space(text())" role="error">Formula has untagged text content. Check for typos or missing math tags.</report>
     </rule>
+    
     <rule context="mml:math">
       <report test="normalize-space(text())" role="error">Math element has untagged text content. Check for typos or missing math tags.</report>
       <report test="mml:mfenced" role="error">MathMl 'mfenced' element has been deprecated. Please use &lt;mml:mrow&gt; and &lt;mo&gt; elements instead.</report>
@@ -147,12 +150,15 @@ SOFTWARE.
     <rule context="floats-group/*[not(self::title)]">
       <assert test="@position and @position='float'" role="error">Children of &lt;floats-group&gt; should have @position="float"</assert>
     </rule>
+    
     <rule context="boxed-text|fig-group|table-wrap-group">
       <assert test="parent::floats-group or @position='anchor'" role="error">Floatable element outside &lt;floats-group&gt; must have @position="anchor"</assert>
     </rule>
+    
     <rule context="fig">
       <assert test="parent::fig-group or parent::floats-group or @position='anchor'" role="error">Fig outside &lt;floats-group&gt; must have @position="anchor"</assert>
     </rule>
+    
     <rule context="table-wrap">
       <assert test="parent::table-wrap-group or parent::floats-group or @position='anchor'" role="error">Table outside &lt;floats-group&gt; must have @position="anchor"</assert>
     </rule>

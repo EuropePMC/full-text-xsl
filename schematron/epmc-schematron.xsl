@@ -222,6 +222,28 @@ SOFTWARE.
       </xsl:otherwise>
     </xsl:choose>
 
+    <!--ASSERT error-->
+    <xsl:choose>
+      <xsl:when test="processing-instruction('origin') and processing-instruction('origin') = 'ukpmcpa'"/>
+      <xsl:otherwise>
+        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+          <xsl:text>Error:</xsl:text>
+          <xsl:text> The &lt;?origin ukpmcpa?&gt; processing instruction should be included. </xsl:text>
+        </xsl:message>
+      </xsl:otherwise>
+    </xsl:choose>
+
+    <!--ASSERT error-->
+    <xsl:choose>
+      <xsl:when test="not(starts-with(@article-type, 'preprint')) and processing-instruction('properties')"/>
+      <xsl:otherwise>
+        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+          <xsl:text>Error:</xsl:text>
+          <xsl:text> Author manuscripts should contain the &lt;?properties manuscript?&gt; processing instruction. </xsl:text>
+        </xsl:message>
+      </xsl:otherwise>
+    </xsl:choose>
+
     <!--REPORT error-->
     <xsl:if test="@article-type = 'preprint' and processing-instruction('properties')">
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">

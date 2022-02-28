@@ -55,6 +55,12 @@ SOFTWARE.
       <assert test="@article-type='article-commentary' or @article-type='correction' or @article-type='reply' or @article-type='research-article' or @article-type='retraction' or @article-type='preprint' or @article-type='preprint-removal' or @article-type='preprint-withdrawal'" role="error">
         The @article-type "<value-of select="@article-type"/>" is invalid. The @article-type should be "preprint" for preprints or "research-article" for author manuscripts.
       </assert>
+      <assert test="processing-instruction('origin') and processing-instruction('origin')='ukpmcpa'" role="error">
+        The &lt;?origin ukpmcpa?&gt; processing instruction should be included.
+      </assert>
+      <assert test="not(starts-with(@article-type, 'preprint')) and processing-instruction('properties')" role="error">
+        Author manuscripts should contain the &lt;?properties manuscript?&gt; processing instruction.
+      </assert>
       <report test="@article-type='preprint' and processing-instruction('properties')" role="error">
         Preprints should not contain the &lt;?properties manuscript?&gt; processing instruction. Please delete it.
       </report>

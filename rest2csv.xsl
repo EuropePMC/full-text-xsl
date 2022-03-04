@@ -80,6 +80,8 @@ SOFTWARE.-->
 			<xsl:call-template name="outputdelimiter"/>
 			<xsl:text>PAGE_INFO</xsl:text>
 			<xsl:call-template name="outputdelimiter"/>
+			<xsl:text>PUBLISHER</xsl:text>
+			<xsl:call-template name="outputdelimiter"/>
 			<xsl:text>TIMES_CITED</xsl:text>
 			<xsl:call-template name="outputdelimiter"/>
 			<xsl:text>GRANTS</xsl:text>
@@ -292,6 +294,8 @@ SOFTWARE.-->
 			</xsl:choose>
 			<xsl:text>&quot;</xsl:text>
 			
+			<xsl:call-template name="outputdelimiter"/>
+			<xsl:apply-templates select="bookOrReportDetails/publisher"/>
 			<xsl:call-template name="outputdelimiter"/>
 			<xsl:apply-templates select="citedByCount"/>
 			<xsl:call-template name="outputdelimiter"/>

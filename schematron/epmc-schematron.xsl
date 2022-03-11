@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 -->
 <xsl:stylesheet xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:saxon="http://saxon.sf.net/" xmlns:ali="http://www.niso.org/schemas/ali/1.0" xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" version="2.0">
-  
+
   <!-- ************************************************ -->
   <!-- XSL version of epmc.sch, transformed with Oxygen -->
   <!-- ************************************************ -->
@@ -115,6 +115,7 @@ SOFTWARE.
   <!--MODE: SCHEMATRON-FULL-PATH-2-->
   <!--This mode can be used to generate prefixed XPath for humans-->
   <xsl:template match="node() | @*" mode="schematron-get-full-path-2">
+    <xsl:text> (</xsl:text>
     <xsl:for-each select="ancestor-or-self::*">
       <xsl:text>/</xsl:text>
       <xsl:value-of select="name(.)"/>
@@ -127,6 +128,7 @@ SOFTWARE.
     <xsl:if test="not(self::*)">
       <xsl:text/>/@<xsl:value-of select="name(.)"/>
     </xsl:if>
+    <xsl:text>)</xsl:text>
   </xsl:template>
 
   <!--MODE: GENERATE-ID-FROM-PATH -->
@@ -218,6 +220,7 @@ SOFTWARE.
           <xsl:text> The @article-type "</xsl:text>
           <xsl:value-of select="@article-type"/>
           <xsl:text>" is invalid. The @article-type should be "preprint" for preprints or "research-article" for author manuscripts. </xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -229,6 +232,7 @@ SOFTWARE.
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Error:</xsl:text>
           <xsl:text> The &lt;?origin ukpmcpa?&gt; processing instruction should be included. </xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -240,6 +244,7 @@ SOFTWARE.
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Error:</xsl:text>
           <xsl:text> Author manuscripts should contain the &lt;?properties manuscript?&gt; processing instruction. </xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -249,6 +254,7 @@ SOFTWARE.
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Error:</xsl:text>
         <xsl:text> Preprints should not contain the &lt;?properties manuscript?&gt; processing instruction. Please delete it. </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -258,6 +264,7 @@ SOFTWARE.
         <xsl:text> The document has a preprint ID but the @article-type is "</xsl:text>
         <xsl:value-of select="@article-type"/>
         <xsl:text>". Preprints should have @article-type="preprint". </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -267,6 +274,7 @@ SOFTWARE.
         <xsl:text> The @article-type is "</xsl:text>
         <xsl:value-of select="@article-type"/>
         <xsl:text>", but there is no preprint ID. Author manuscripts should have @article-type="research-article". </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M7"/>
@@ -299,6 +307,7 @@ SOFTWARE.
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Warning:</xsl:text>
           <xsl:text>A &lt;corresp&gt; element is present, but no author is marked as @corresp="yes"</xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -330,6 +339,7 @@ SOFTWARE.
         <xsl:text> URL contains invalid URL escaping: </xsl:text>
         <xsl:value-of select="@xlink:href"/>
         <xsl:text> </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -339,6 +349,7 @@ SOFTWARE.
         <xsl:text>URL should not end in a dot: </xsl:text>
         <xsl:value-of select="@xlink:href"/>
         <xsl:text> </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
     <xsl:variable name="scheme" select="substring-before(@xlink:href, '://')"/>
@@ -378,6 +389,7 @@ SOFTWARE.
           <xsl:text>URL scheme is not valid: </xsl:text>
           <xsl:value-of select="@xlink:href"/>
           <xsl:text> </xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -391,6 +403,7 @@ SOFTWARE.
           <xsl:text>URL authority is not valid: </xsl:text>
           <xsl:value-of select="@xlink:href"/>
           <xsl:text> </xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -402,6 +415,7 @@ SOFTWARE.
         <xsl:text>URL path is not valid: </xsl:text>
         <xsl:value-of select="@xlink:href"/>
         <xsl:text> </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -412,6 +426,7 @@ SOFTWARE.
         <xsl:text>URL fragment is not valid: </xsl:text>
         <xsl:value-of select="@xlink:href"/>
         <xsl:text> </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M9"/>
@@ -428,6 +443,7 @@ SOFTWARE.
           <xsl:text>Emails without @ are invalid: </xsl:text>
           <xsl:value-of select="."/>
           <xsl:text> </xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -438,6 +454,7 @@ SOFTWARE.
         <xsl:text>Ending dot should be moved outside the &lt;email&gt; element: </xsl:text>
         <xsl:value-of select="."/>
         <xsl:text> </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M9"/>
@@ -451,6 +468,7 @@ SOFTWARE.
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Warning:</xsl:text>
         <xsl:text>All email addresses should be inside an &lt;email&gt; element.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
   </xsl:template>
@@ -486,6 +504,7 @@ SOFTWARE.
           <xsl:text> , does not match the text: </xsl:text>
           <xsl:value-of select="."/>
           <xsl:text> </xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -497,6 +516,7 @@ SOFTWARE.
         <xsl:text>The &lt;xref&gt; links to a table or figure but the text indicates it should link to a supplemental file: </xsl:text>
         <xsl:value-of select="."/>
         <xsl:text> </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M10"/>
@@ -516,6 +536,7 @@ SOFTWARE.
         <xsl:text> , does not match the &lt;xref&gt; content: </xsl:text>
         <xsl:value-of select="."/>
         <xsl:text> </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M10"/>
@@ -544,6 +565,7 @@ SOFTWARE.
           <xsl:text> , does not match the &lt;xref&gt; content: </xsl:text>
           <xsl:value-of select="."/>
           <xsl:text> </xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -576,6 +598,7 @@ SOFTWARE.
         <xsl:text>@</xsl:text>
         <xsl:value-of select="name(.)"/>
         <xsl:text> attribute should not contain whitespace.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
   </xsl:template>
@@ -604,6 +627,7 @@ SOFTWARE.
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Error:</xsl:text>
         <xsl:text>Formula has untagged text content. Check for typos or missing math tags.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M12"/>
@@ -617,6 +641,7 @@ SOFTWARE.
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Error:</xsl:text>
         <xsl:text>Math element has untagged text content. Check for typos or missing math tags.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -625,6 +650,7 @@ SOFTWARE.
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Error:</xsl:text>
         <xsl:text>MathMl 'mfenced' element has been deprecated. Please use &lt;mml:mrow&gt; and &lt;mo&gt; elements instead.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M12"/>
@@ -656,6 +682,7 @@ SOFTWARE.
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Error:</xsl:text>
           <xsl:text>Children of &lt;floats-group&gt; should have @position="float"</xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -672,6 +699,7 @@ SOFTWARE.
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Error:</xsl:text>
           <xsl:text>Floatable element outside &lt;floats-group&gt; must have @position="anchor"</xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -688,6 +716,7 @@ SOFTWARE.
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Error:</xsl:text>
           <xsl:text>Fig outside &lt;floats-group&gt; must have @position="anchor"</xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -704,6 +733,7 @@ SOFTWARE.
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Error:</xsl:text>
           <xsl:text>Table outside &lt;floats-group&gt; must have @position="anchor"</xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -734,6 +764,7 @@ SOFTWARE.
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Error:</xsl:text>
         <xsl:text>Back footnotes should be directly inside the &lt;back&gt; element, not inside child &lt;sec&gt;.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M14"/>
@@ -765,6 +796,7 @@ SOFTWARE.
         <xsl:text>surname starts with a space, which cannot be correct - '</xsl:text>
         <xsl:value-of select="."/>
         <xsl:text>'.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -775,6 +807,7 @@ SOFTWARE.
         <xsl:text>surname ends with a space, which cannot be correct - '</xsl:text>
         <xsl:value-of select="."/>
         <xsl:text>'.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M15"/>
@@ -790,6 +823,7 @@ SOFTWARE.
         <xsl:text>given-names contains initialised full stop(s) which is incorrect - </xsl:text>
         <xsl:value-of select="."/>
         <xsl:text> </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -800,6 +834,7 @@ SOFTWARE.
         <xsl:text>given-names starts with a space, which cannot be correct - '</xsl:text>
         <xsl:value-of select="."/>
         <xsl:text>'.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -810,6 +845,7 @@ SOFTWARE.
         <xsl:text>given-names ends with a space, which cannot be correct - '</xsl:text>
         <xsl:value-of select="."/>
         <xsl:text>'.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M15"/>
@@ -825,6 +861,7 @@ SOFTWARE.
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Error:</xsl:text>
           <xsl:text>suffix can only have one of these values - 'Jr', 'Jnr', 'Sr', 'Snr', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'.</xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -859,6 +896,7 @@ SOFTWARE.
           <xsl:text>surname should usually only contain letters, spaces, or hyphens. </xsl:text>
           <xsl:value-of select="."/>
           <xsl:text> contains other characters.</xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -870,6 +908,7 @@ SOFTWARE.
         <xsl:text>surname doesn't begin with a capital letter - </xsl:text>
         <xsl:value-of select="."/>
         <xsl:text>. Is this correct?</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -882,6 +921,7 @@ SOFTWARE.
         <xsl:text>'. Should '</xsl:text>
         <xsl:value-of select="substring-before(., ' ')"/>
         <xsl:text>' be placed in the given-names field?</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -892,6 +932,7 @@ SOFTWARE.
         <xsl:text>surname contains brackets - '</xsl:text>
         <xsl:value-of select="."/>
         <xsl:text>'. Should the bracketed text be placed in the given-names field instead?</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -902,6 +943,7 @@ SOFTWARE.
         <xsl:text>surname ends with what might be roman numerals - '</xsl:text>
         <xsl:value-of select="."/>
         <xsl:text>'. Should these be placed in a suffix element instead?</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M16"/>
@@ -919,6 +961,7 @@ SOFTWARE.
           <xsl:text>given-names should usually only contain letters, spaces, or hyphens. </xsl:text>
           <xsl:value-of select="."/>
           <xsl:text> contains other characters.</xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -932,6 +975,7 @@ SOFTWARE.
           <xsl:text>given-names doesn't begin with a capital letter - '</xsl:text>
           <xsl:value-of select="."/>
           <xsl:text>'. Is this correct?</xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -943,6 +987,7 @@ SOFTWARE.
         <xsl:text>given-names ends with de, der, or den - should this be captured as the beginning of the surname instead? - '</xsl:text>
         <xsl:value-of select="."/>
         <xsl:text>'.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -953,6 +998,7 @@ SOFTWARE.
         <xsl:text>given-names ends with ' van' - should this be captured as the beginning of the surname instead? - '</xsl:text>
         <xsl:value-of select="."/>
         <xsl:text>'.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -963,6 +1009,7 @@ SOFTWARE.
         <xsl:text>given-names ends with ' von' - should this be captured as the beginning of the surname instead? - '</xsl:text>
         <xsl:value-of select="."/>
         <xsl:text>'.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -973,6 +1020,7 @@ SOFTWARE.
         <xsl:text>given-names ends with ' el' - should this be captured as the beginning of the surname instead? - '</xsl:text>
         <xsl:value-of select="."/>
         <xsl:text>'.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -983,6 +1031,7 @@ SOFTWARE.
         <xsl:text>given-names ends with te, ter, or ten - should this be captured as the beginning of the surname instead? - '</xsl:text>
         <xsl:value-of select="."/>
         <xsl:text>'.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -993,6 +1042,7 @@ SOFTWARE.
         <xsl:text>given-names contains initials with spaces. Ensure that the space(s) is removed between initials - '</xsl:text>
         <xsl:value-of select="."/>
         <xsl:text>'.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M16"/>
@@ -1022,6 +1072,7 @@ SOFTWARE.
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Error:</xsl:text>
         <xsl:text> If there are multiple abstracts then each abstract, other than the main abstract, must have at least one of the following attributes: abstract-type, xml:lang, or specific-use. </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M17"/>
@@ -1037,6 +1088,7 @@ SOFTWARE.
         <xsl:text> &lt;</xsl:text>
         <xsl:value-of select="name()"/>
         <xsl:text>&gt; has no child &lt;p&gt; elements, but it has only 1 &lt;sec&gt; element. </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -1047,6 +1099,7 @@ SOFTWARE.
         <xsl:text> &lt;</xsl:text>
         <xsl:value-of select="name()"/>
         <xsl:text> abstract-type="graphical"&gt; has no descendant &lt;fig&gt; elements. </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -1057,6 +1110,7 @@ SOFTWARE.
         <xsl:text> &lt;</xsl:text>
         <xsl:value-of select="name()"/>
         <xsl:text>&gt; has descendant &lt;media&gt; element(s), but it does not have an abstract-type attribute with a value of either "video" or "audio". </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -1067,6 +1121,7 @@ SOFTWARE.
         <xsl:text> &lt;</xsl:text>
         <xsl:value-of select="name()"/>
         <xsl:text> abstract-type="video"&gt; has no descendant &lt;fig&gt; elements containing &lt;media mimetype="video"&gt;. </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -1077,6 +1132,7 @@ SOFTWARE.
         <xsl:text> &lt;</xsl:text>
         <xsl:value-of select="name()"/>
         <xsl:text> abstract-type="audio"&gt; has no descendant &lt;fig&gt; elements containing &lt;media mimetype="audio"&gt;. </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
 
@@ -1085,6 +1141,7 @@ SOFTWARE.
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Error:</xsl:text>
         <xsl:text> Missing xml:lang attribute. &lt;trans-abstract&gt; must have an xml:lang attribute, whose value indicates the language. This one does not. </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M17"/>
@@ -1100,6 +1157,7 @@ SOFTWARE.
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Error:</xsl:text>
           <xsl:text> Missing &lt;title&gt;. Every &lt;sec&gt; within &lt;abstract&gt; must have a &lt;title&gt;, this one does not. </xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -1116,6 +1174,7 @@ SOFTWARE.
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Error:</xsl:text>
           <xsl:text> &lt;graphic&gt; within &lt;abstract&gt; must be a child of &lt;fig&gt; or a child of &lt;alternatives&gt;, which in turn is a child of &lt;fig&gt;. This one is not. </xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -1132,6 +1191,7 @@ SOFTWARE.
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Error:</xsl:text>
           <xsl:text> &lt;media&gt; within &lt;abstract&gt; must be a child of &lt;fig&gt; or a child of &lt;alternatives&gt;, which in turn is a child of &lt;fig&gt;. This one is not. </xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -1165,6 +1225,7 @@ SOFTWARE.
         <xsl:text> &lt;</xsl:text>
         <xsl:value-of select="name()"/>
         <xsl:text>&gt; does not have the attribute abstract-type="graphical" but it has a descendant &lt;fig&gt; with a graphic. </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M18"/>
@@ -1194,6 +1255,7 @@ SOFTWARE.
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Warning:</xsl:text>
         <xsl:text> Articles should have authors included as &lt;contrib contrib-type="author"&gt;. </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M19"/>
@@ -1211,6 +1273,7 @@ SOFTWARE.
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Warning:</xsl:text>
           <xsl:text> &lt;xref&gt; which contains content, but the &lt;aff&gt; that it points to does not have a label. </xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
@@ -1227,6 +1290,7 @@ SOFTWARE.
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Warning:</xsl:text>
           <xsl:text> &lt;xref&gt; which contains content, but the &lt;aff&gt; that it points to does not have a label. </xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>

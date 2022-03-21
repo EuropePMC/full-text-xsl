@@ -146,11 +146,13 @@ SOFTWARE.
   
   <pattern id="formula-content-errors">
     <rule context="inline-formula|disp-formula">
-      <report test="mml:math and normalize-space(text())" role="error">Formula has untagged text content. Check for typos or missing math tags.</report>
+      <let name="text" value="string-join(text(), ' ')"/>
+      <report test="mml:math and normalize-space($text)" role="error">Formula has untagged text content. Check for typos or missing math tags.</report>
     </rule>
     
     <rule context="mml:math">
-      <report test="normalize-space(text())" role="error">Math element has untagged text content. Check for typos or missing math tags.</report>
+      <let name="text" value="string-join(text(), ' ')"/>
+      <report test="normalize-space($text)" role="error">Math element has untagged text content. Check for typos or missing math tags.</report>
       <report test="mml:mfenced" role="error">MathMl 'mfenced' element has been deprecated. Please use &lt;mml:mrow&gt; and &lt;mo&gt; elements instead.</report>
     </rule>
   </pattern>

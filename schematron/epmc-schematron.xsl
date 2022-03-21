@@ -640,9 +640,10 @@ SOFTWARE.
 
   <!--RULE -->
   <xsl:template match="inline-formula | disp-formula" priority="102" mode="M13">
+    <xsl:variable name="text" select="string-join(text(), ' ')"/>
 
     <!--REPORT error-->
-    <xsl:if test="mml:math and normalize-space(text())">
+    <xsl:if test="mml:math and normalize-space($text)">
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Error:</xsl:text>
         <xsl:text>Formula has untagged text content. Check for typos or missing math tags.</xsl:text>
@@ -654,9 +655,10 @@ SOFTWARE.
 
   <!--RULE -->
   <xsl:template match="mml:math" priority="101" mode="M13">
+    <xsl:variable name="text" select="string-join(text(), ' ')"/>
 
     <!--REPORT error-->
-    <xsl:if test="normalize-space(text())">
+    <xsl:if test="normalize-space($text)">
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Error:</xsl:text>
         <xsl:text>Math element has untagged text content. Check for typos or missing math tags.</xsl:text>

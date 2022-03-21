@@ -200,6 +200,7 @@ SOFTWARE.
     <xsl:apply-templates select="/" mode="M17"/>
     <xsl:apply-templates select="/" mode="M18"/>
     <xsl:apply-templates select="/" mode="M19"/>
+    <xsl:apply-templates select="/" mode="M20"/>
   </xsl:template>
 
   <!--SCHEMATRON PATTERNS-->
@@ -237,17 +238,13 @@ SOFTWARE.
       </xsl:otherwise>
     </xsl:choose>
 
-    <!--ASSERT error-->
-    <xsl:choose>
-      <xsl:when test="not(starts-with(@article-type, 'preprint')) and processing-instruction('properties')"/>
-      <xsl:otherwise>
-        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-          <xsl:text>Error:</xsl:text>
-          <xsl:text> Author manuscripts should contain the &lt;?properties manuscript?&gt; processing instruction. </xsl:text>
-          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-        </xsl:message>
-      </xsl:otherwise>
-    </xsl:choose>
+    <!--REPORT error-->
+    <xsl:if test="not(starts-with(@article-type, 'preprint')) and not(processing-instruction('properties'))">
+      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
+        <xsl:text> Author manuscripts should contain the &lt;?properties manuscript?&gt; processing instruction. </xsl:text>
+      </xsl:message>
+    </xsl:if>
 
     <!--REPORT error-->
     <xsl:if test="@article-type = 'preprint' and processing-instruction('properties')">
@@ -331,11 +328,12 @@ SOFTWARE.
 
 
   <!--RULE -->
-  <xsl:template match="ext-link" priority="103" mode="M9">
+  <xsl:template match="ext-link" priority="102" mode="M9">
 
-    <!--REPORT -->
+    <!--REPORT error-->
     <xsl:if test="matches(@xlink:href, '%[\D][\D]')">
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
         <xsl:text> URL contains invalid URL escaping: </xsl:text>
         <xsl:value-of select="@xlink:href"/>
         <xsl:text> </xsl:text>
@@ -343,9 +341,10 @@ SOFTWARE.
       </xsl:message>
     </xsl:if>
 
-    <!--REPORT -->
+    <!--REPORT error-->
     <xsl:if test="ends-with(@xlink:href, '.')">
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
         <xsl:text>URL should not end in a dot: </xsl:text>
         <xsl:value-of select="@xlink:href"/>
         <xsl:text> </xsl:text>
@@ -433,13 +432,14 @@ SOFTWARE.
   </xsl:template>
 
   <!--RULE -->
-  <xsl:template match="email" priority="102" mode="M9">
+  <xsl:template match="email" priority="101" mode="M9">
 
-    <!--ASSERT -->
+    <!--ASSERT error-->
     <xsl:choose>
       <xsl:when test="contains(., '@')"/>
       <xsl:otherwise>
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+          <xsl:text>Error:</xsl:text>
           <xsl:text>Emails without @ are invalid: </xsl:text>
           <xsl:value-of select="."/>
           <xsl:text> </xsl:text>
@@ -448,9 +448,10 @@ SOFTWARE.
       </xsl:otherwise>
     </xsl:choose>
 
-    <!--REPORT -->
+    <!--REPORT error-->
     <xsl:if test="ends-with(., '.')">
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
         <xsl:text>Ending dot should be moved outside the &lt;email&gt; element: </xsl:text>
         <xsl:value-of select="."/>
         <xsl:text> </xsl:text>
@@ -458,19 +459,6 @@ SOFTWARE.
       </xsl:message>
     </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M9"/>
-  </xsl:template>
-
-  <!--RULE -->
-  <xsl:template match="text()[matches(., '(\W|^)[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}(\W|$)')]" priority="101" mode="M9">
-
-    <!--REPORT warning-->
-    <xsl:if test="not(parent::email)">
-      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Warning:</xsl:text>
-        <xsl:text>All email addresses should be inside an &lt;email&gt; element.</xsl:text>
-        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-      </xsl:message>
-    </xsl:if>
   </xsl:template>
   <xsl:template match="text()" priority="-1" mode="M9"/>
   <xsl:template match="@* | node()" priority="-2" mode="M9">
@@ -486,11 +474,40 @@ SOFTWARE.
     </xsl:choose>
   </xsl:template>
 
+  <!--PATTERN email-warning-->
+
+
+  <!--RULE -->
+  <xsl:template match="text()[matches(., '(\W|^)[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}(\W|$)')]" priority="101" mode="M10">
+
+    <!--REPORT warning-->
+    <xsl:if test="not(parent::email)">
+      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Warning:</xsl:text>
+        <xsl:text>All email addresses should be inside an &lt;email&gt; element.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+      </xsl:message>
+    </xsl:if>
+  </xsl:template>
+  <xsl:template match="text()" priority="-1" mode="M10"/>
+  <xsl:template match="@* | node()" priority="-2" mode="M10">
+    <xsl:choose>
+      <!--Housekeeping: SAXON warns if attempting to find the attribute
+                           of an attribute-->
+      <xsl:when test="not(@*)">
+        <xsl:apply-templates select="node()" mode="M10"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:apply-templates select="@* | node()" mode="M10"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
   <!--PATTERN xref-correspondence-warnings-->
 
 
   <!--RULE -->
-  <xsl:template match="xref[@ref-type = 'fig' or @ref-type = 'table']" priority="103" mode="M10">
+  <xsl:template match="xref[@ref-type = 'fig' or @ref-type = 'table']" priority="103" mode="M11">
     <xsl:variable name="ridnum" select="translate(@rid, translate(@rid, '0123456789', ''), '')"/>
 
     <!--ASSERT warning-->
@@ -519,11 +536,11 @@ SOFTWARE.
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M10"/>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M11"/>
   </xsl:template>
 
   <!--RULE -->
-  <xsl:template match="xref[@ref-type = 'aff' or @ref-type = 'fn' or @ref-type = 'table-fn']" priority="102" mode="M10">
+  <xsl:template match="xref[@ref-type = 'aff' or @ref-type = 'fn' or @ref-type = 'table-fn']" priority="102" mode="M11">
     <xsl:variable name="rid" select="@rid"/>
     <xsl:variable name="point" select="//*[@id = $rid]"/>
 
@@ -539,11 +556,11 @@ SOFTWARE.
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M10"/>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M11"/>
   </xsl:template>
 
   <!--RULE -->
-  <xsl:template match="xref[@ref-type = 'bibr']" priority="101" mode="M10">
+  <xsl:template match="xref[@ref-type = 'bibr']" priority="101" mode="M11">
     <xsl:variable name="rid" select="@rid"/>
     <xsl:variable name="point" select="//*[@id = $rid]"/>
     <xsl:variable name="collabmatch" select="matches($point//collab, normalize-space(replace(., '[\W-[\s]]|\d', ''))) or matches(replace($point//collab, '[^A-Z]', ''), replace(., '[^A-Z]', ''))"/>
@@ -569,38 +586,7 @@ SOFTWARE.
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M10"/>
-  </xsl:template>
-  <xsl:template match="text()" priority="-1" mode="M10"/>
-  <xsl:template match="@* | node()" priority="-2" mode="M10">
-    <xsl:choose>
-      <!--Housekeeping: SAXON warns if attempting to find the attribute
-                           of an attribute-->
-      <xsl:when test="not(@*)">
-        <xsl:apply-templates select="node()" mode="M10"/>
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:apply-templates select="@* | node()" mode="M10"/>
-      </xsl:otherwise>
-    </xsl:choose>
-  </xsl:template>
-
-  <!--PATTERN attribute-space-errors-->
-
-
-  <!--RULE -->
-  <xsl:template match="@id | @rid | @ref-type | @fn-type | @pub-id-type | @pub-type | @date-type" priority="101" mode="M11">
-
-    <!--REPORT error-->
-    <xsl:if test="matches(., '\s')">
-      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Error:</xsl:text>
-        <xsl:text>@</xsl:text>
-        <xsl:value-of select="name(.)"/>
-        <xsl:text> attribute should not contain whitespace.</xsl:text>
-        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-      </xsl:message>
-    </xsl:if>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M11"/>
   </xsl:template>
   <xsl:template match="text()" priority="-1" mode="M11"/>
   <xsl:template match="@* | node()" priority="-2" mode="M11">
@@ -616,11 +602,42 @@ SOFTWARE.
     </xsl:choose>
   </xsl:template>
 
+  <!--PATTERN attribute-space-errors-->
+
+
+  <!--RULE -->
+  <xsl:template match="@id | @rid | @ref-type | @fn-type | @pub-id-type | @pub-type | @date-type" priority="101" mode="M12">
+
+    <!--REPORT error-->
+    <xsl:if test="matches(., '\s')">
+      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
+        <xsl:text>@</xsl:text>
+        <xsl:value-of select="name(.)"/>
+        <xsl:text> attribute should not contain whitespace.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+      </xsl:message>
+    </xsl:if>
+  </xsl:template>
+  <xsl:template match="text()" priority="-1" mode="M12"/>
+  <xsl:template match="@* | node()" priority="-2" mode="M12">
+    <xsl:choose>
+      <!--Housekeeping: SAXON warns if attempting to find the attribute
+                           of an attribute-->
+      <xsl:when test="not(@*)">
+        <xsl:apply-templates select="node()" mode="M12"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:apply-templates select="@* | node()" mode="M12"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
   <!--PATTERN formula-content-errors-->
 
 
   <!--RULE -->
-  <xsl:template match="inline-formula | disp-formula" priority="102" mode="M12">
+  <xsl:template match="inline-formula | disp-formula" priority="102" mode="M13">
 
     <!--REPORT error-->
     <xsl:if test="mml:math and normalize-space(text())">
@@ -630,11 +647,11 @@ SOFTWARE.
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M12"/>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M13"/>
   </xsl:template>
 
   <!--RULE -->
-  <xsl:template match="mml:math" priority="101" mode="M12">
+  <xsl:template match="mml:math" priority="101" mode="M13">
 
     <!--REPORT error-->
     <xsl:if test="normalize-space(text())">
@@ -653,90 +670,6 @@ SOFTWARE.
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M12"/>
-  </xsl:template>
-  <xsl:template match="text()" priority="-1" mode="M12"/>
-  <xsl:template match="@* | node()" priority="-2" mode="M12">
-    <xsl:choose>
-      <!--Housekeeping: SAXON warns if attempting to find the attribute
-                           of an attribute-->
-      <xsl:when test="not(@*)">
-        <xsl:apply-templates select="node()" mode="M12"/>
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:apply-templates select="@* | node()" mode="M12"/>
-      </xsl:otherwise>
-    </xsl:choose>
-  </xsl:template>
-
-  <!--PATTERN position-errors-->
-
-
-  <!--RULE -->
-  <xsl:template match="floats-group/*[not(self::title)]" priority="104" mode="M13">
-
-    <!--ASSERT error-->
-    <xsl:choose>
-      <xsl:when test="@position and @position = 'float'"/>
-      <xsl:otherwise>
-        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-          <xsl:text>Error:</xsl:text>
-          <xsl:text>Children of &lt;floats-group&gt; should have @position="float"</xsl:text>
-          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-        </xsl:message>
-      </xsl:otherwise>
-    </xsl:choose>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M13"/>
-  </xsl:template>
-
-  <!--RULE -->
-  <xsl:template match="boxed-text | fig-group | table-wrap-group" priority="103" mode="M13">
-
-    <!--ASSERT error-->
-    <xsl:choose>
-      <xsl:when test="parent::floats-group or @position = 'anchor'"/>
-      <xsl:otherwise>
-        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-          <xsl:text>Error:</xsl:text>
-          <xsl:text>Floatable element outside &lt;floats-group&gt; must have @position="anchor"</xsl:text>
-          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-        </xsl:message>
-      </xsl:otherwise>
-    </xsl:choose>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M13"/>
-  </xsl:template>
-
-  <!--RULE -->
-  <xsl:template match="fig" priority="102" mode="M13">
-
-    <!--ASSERT error-->
-    <xsl:choose>
-      <xsl:when test="parent::fig-group or parent::floats-group or @position = 'anchor'"/>
-      <xsl:otherwise>
-        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-          <xsl:text>Error:</xsl:text>
-          <xsl:text>Fig outside &lt;floats-group&gt; must have @position="anchor"</xsl:text>
-          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-        </xsl:message>
-      </xsl:otherwise>
-    </xsl:choose>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M13"/>
-  </xsl:template>
-
-  <!--RULE -->
-  <xsl:template match="table-wrap" priority="101" mode="M13">
-
-    <!--ASSERT error-->
-    <xsl:choose>
-      <xsl:when test="parent::table-wrap-group or parent::floats-group or @position = 'anchor'"/>
-      <xsl:otherwise>
-        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-          <xsl:text>Error:</xsl:text>
-          <xsl:text>Table outside &lt;floats-group&gt; must have @position="anchor"</xsl:text>
-          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-        </xsl:message>
-      </xsl:otherwise>
-    </xsl:choose>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M13"/>
   </xsl:template>
   <xsl:template match="text()" priority="-1" mode="M13"/>
@@ -753,20 +686,74 @@ SOFTWARE.
     </xsl:choose>
   </xsl:template>
 
-  <!--PATTERN fn-group-error-->
+  <!--PATTERN position-errors-->
 
 
   <!--RULE -->
-  <xsl:template match="back//fn-group" priority="101" mode="M14">
+  <xsl:template match="floats-group/*[not(self::title)]" priority="104" mode="M14">
 
-    <!--REPORT error-->
-    <xsl:if test="parent::sec">
-      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Error:</xsl:text>
-        <xsl:text>Back footnotes should be directly inside the &lt;back&gt; element, not inside child &lt;sec&gt;.</xsl:text>
-        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-      </xsl:message>
-    </xsl:if>
+    <!--ASSERT error-->
+    <xsl:choose>
+      <xsl:when test="@position and @position = 'float'"/>
+      <xsl:otherwise>
+        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+          <xsl:text>Error:</xsl:text>
+          <xsl:text>Children of &lt;floats-group&gt; should have @position="float"</xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+        </xsl:message>
+      </xsl:otherwise>
+    </xsl:choose>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M14"/>
+  </xsl:template>
+
+  <!--RULE -->
+  <xsl:template match="boxed-text | fig-group | table-wrap-group" priority="103" mode="M14">
+
+    <!--ASSERT error-->
+    <xsl:choose>
+      <xsl:when test="parent::floats-group or @position = 'anchor'"/>
+      <xsl:otherwise>
+        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+          <xsl:text>Error:</xsl:text>
+          <xsl:text>Floatable element outside &lt;floats-group&gt; must have @position="anchor"</xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+        </xsl:message>
+      </xsl:otherwise>
+    </xsl:choose>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M14"/>
+  </xsl:template>
+
+  <!--RULE -->
+  <xsl:template match="fig" priority="102" mode="M14">
+
+    <!--ASSERT error-->
+    <xsl:choose>
+      <xsl:when test="parent::fig-group or parent::floats-group or @position = 'anchor'"/>
+      <xsl:otherwise>
+        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+          <xsl:text>Error:</xsl:text>
+          <xsl:text>Fig outside &lt;floats-group&gt; must have @position="anchor"</xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+        </xsl:message>
+      </xsl:otherwise>
+    </xsl:choose>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M14"/>
+  </xsl:template>
+
+  <!--RULE -->
+  <xsl:template match="table-wrap" priority="101" mode="M14">
+
+    <!--ASSERT error-->
+    <xsl:choose>
+      <xsl:when test="parent::table-wrap-group or parent::floats-group or @position = 'anchor'"/>
+      <xsl:otherwise>
+        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+          <xsl:text>Error:</xsl:text>
+          <xsl:text>Table outside &lt;floats-group&gt; must have @position="anchor"</xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+        </xsl:message>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M14"/>
   </xsl:template>
   <xsl:template match="text()" priority="-1" mode="M14"/>
@@ -783,11 +770,41 @@ SOFTWARE.
     </xsl:choose>
   </xsl:template>
 
+  <!--PATTERN fn-group-error-->
+
+
+  <!--RULE -->
+  <xsl:template match="back//fn-group" priority="101" mode="M15">
+
+    <!--REPORT error-->
+    <xsl:if test="parent::sec">
+      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
+        <xsl:text>Back footnotes should be directly inside the &lt;back&gt; element, not inside child &lt;sec&gt;.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+      </xsl:message>
+    </xsl:if>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M15"/>
+  </xsl:template>
+  <xsl:template match="text()" priority="-1" mode="M15"/>
+  <xsl:template match="@* | node()" priority="-2" mode="M15">
+    <xsl:choose>
+      <!--Housekeeping: SAXON warns if attempting to find the attribute
+                           of an attribute-->
+      <xsl:when test="not(@*)">
+        <xsl:apply-templates select="node()" mode="M15"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:apply-templates select="@* | node()" mode="M15"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
   <!--PATTERN name-errors-->
 
 
   <!--RULE surname-errors-->
-  <xsl:template match="name/surname" priority="103" mode="M15">
+  <xsl:template match="name/surname" priority="103" mode="M16">
 
     <!--REPORT error-->
     <xsl:if test="matches(., '^\p{Zs}')">
@@ -810,11 +827,11 @@ SOFTWARE.
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M15"/>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M16"/>
   </xsl:template>
 
   <!--RULE given-names-errors-->
-  <xsl:template match="name/given-names" priority="102" mode="M15">
+  <xsl:template match="name/given-names" priority="102" mode="M16">
 
     <!--REPORT error-->
     <xsl:if test="matches(., '^[\p{L}]{1}\.$|^[\p{L}]{1}\.\p{Zs}?[\p{L}]{1}\.\p{Zs}?$')">
@@ -848,11 +865,11 @@ SOFTWARE.
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M15"/>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M16"/>
   </xsl:template>
 
   <!--RULE suffix-tests-->
-  <xsl:template match="name/suffix" priority="101" mode="M15">
+  <xsl:template match="name/suffix" priority="101" mode="M16">
 
     <!--ASSERT error-->
     <xsl:choose>
@@ -865,18 +882,18 @@ SOFTWARE.
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M15"/>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M16"/>
   </xsl:template>
-  <xsl:template match="text()" priority="-1" mode="M15"/>
-  <xsl:template match="@* | node()" priority="-2" mode="M15">
+  <xsl:template match="text()" priority="-1" mode="M16"/>
+  <xsl:template match="@* | node()" priority="-2" mode="M16">
     <xsl:choose>
       <!--Housekeeping: SAXON warns if attempting to find the attribute
                            of an attribute-->
       <xsl:when test="not(@*)">
-        <xsl:apply-templates select="node()" mode="M15"/>
+        <xsl:apply-templates select="node()" mode="M16"/>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:apply-templates select="@* | node()" mode="M15"/>
+        <xsl:apply-templates select="@* | node()" mode="M16"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
@@ -885,7 +902,7 @@ SOFTWARE.
 
 
   <!--RULE surname-warnings-->
-  <xsl:template match="name/surname" priority="102" mode="M16">
+  <xsl:template match="name/surname" priority="102" mode="M17">
 
     <!--ASSERT warning-->
     <xsl:choose>
@@ -946,11 +963,11 @@ SOFTWARE.
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M16"/>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M17"/>
   </xsl:template>
 
   <!--RULE given-names-warnings-->
-  <xsl:template match="name/given-names" priority="101" mode="M16">
+  <xsl:template match="name/given-names" priority="101" mode="M17">
 
     <!--ASSERT warning-->
     <xsl:choose>
@@ -1045,18 +1062,18 @@ SOFTWARE.
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M16"/>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M17"/>
   </xsl:template>
-  <xsl:template match="text()" priority="-1" mode="M16"/>
-  <xsl:template match="@* | node()" priority="-2" mode="M16">
+  <xsl:template match="text()" priority="-1" mode="M17"/>
+  <xsl:template match="@* | node()" priority="-2" mode="M17">
     <xsl:choose>
       <!--Housekeeping: SAXON warns if attempting to find the attribute
                            of an attribute-->
       <xsl:when test="not(@*)">
-        <xsl:apply-templates select="node()" mode="M16"/>
+        <xsl:apply-templates select="node()" mode="M17"/>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:apply-templates select="@* | node()" mode="M16"/>
+        <xsl:apply-templates select="@* | node()" mode="M17"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
@@ -1065,7 +1082,7 @@ SOFTWARE.
 
 
   <!--RULE -->
-  <xsl:template match="article-meta" priority="105" mode="M17">
+  <xsl:template match="article-meta" priority="105" mode="M18">
 
     <!--REPORT error-->
     <xsl:if test="count(abstract[not(@abstract-type or @xml:lang or @specific-use)]) gt 1">
@@ -1075,11 +1092,11 @@ SOFTWARE.
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M17"/>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M18"/>
   </xsl:template>
 
   <!--RULE -->
-  <xsl:template match="abstract | trans-abstract" priority="104" mode="M17">
+  <xsl:template match="abstract | trans-abstract" priority="104" mode="M18">
 
     <!--REPORT error-->
     <xsl:if test="not(p) and count(sec) = 1">
@@ -1144,11 +1161,11 @@ SOFTWARE.
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M17"/>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M18"/>
   </xsl:template>
 
   <!--RULE -->
-  <xsl:template match="abstract//sec" priority="103" mode="M17">
+  <xsl:template match="abstract//sec" priority="103" mode="M18">
 
     <!--ASSERT error-->
     <xsl:choose>
@@ -1161,11 +1178,11 @@ SOFTWARE.
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M17"/>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M18"/>
   </xsl:template>
 
   <!--RULE -->
-  <xsl:template match="graphic[ancestor::abstract or ancestor::trans-abstract]" priority="102" mode="M17">
+  <xsl:template match="graphic[ancestor::abstract or ancestor::trans-abstract]" priority="102" mode="M18">
 
     <!--ASSERT error-->
     <xsl:choose>
@@ -1178,11 +1195,11 @@ SOFTWARE.
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M17"/>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M18"/>
   </xsl:template>
 
   <!--RULE -->
-  <xsl:template match="media[ancestor::abstract or ancestor::trans-abstract]" priority="101" mode="M17">
+  <xsl:template match="media[ancestor::abstract or ancestor::trans-abstract]" priority="101" mode="M18">
 
     <!--ASSERT error-->
     <xsl:choose>
@@ -1195,39 +1212,6 @@ SOFTWARE.
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M17"/>
-  </xsl:template>
-  <xsl:template match="text()" priority="-1" mode="M17"/>
-  <xsl:template match="@* | node()" priority="-2" mode="M17">
-    <xsl:choose>
-      <!--Housekeeping: SAXON warns if attempting to find the attribute
-                           of an attribute-->
-      <xsl:when test="not(@*)">
-        <xsl:apply-templates select="node()" mode="M17"/>
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:apply-templates select="@* | node()" mode="M17"/>
-      </xsl:otherwise>
-    </xsl:choose>
-  </xsl:template>
-
-  <!--PATTERN abstract-warnings-1-->
-
-
-  <!--RULE -->
-  <xsl:template match="abstract | trans-abstract" priority="101" mode="M18">
-    <xsl:variable name="recommended-values" select="('teaser', 'extract', 'editor-summary', 'executive-summary', 'interpretive-summary', 'summary', 'plain-language-summary', 'graphical', 'simple', 'structured', 'video', 'audio')"/>
-
-    <!--REPORT warning-->
-    <xsl:if test="(not(@abstract-type) or @abstract-type != 'graphical') and descendant::fig[descendant::graphic]">
-      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Warning:</xsl:text>
-        <xsl:text> &lt;</xsl:text>
-        <xsl:value-of select="name()"/>
-        <xsl:text>&gt; does not have the attribute abstract-type="graphical" but it has a descendant &lt;fig&gt; with a graphic. </xsl:text>
-        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-      </xsl:message>
-    </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M18"/>
   </xsl:template>
   <xsl:template match="text()" priority="-1" mode="M18"/>
@@ -1244,11 +1228,44 @@ SOFTWARE.
     </xsl:choose>
   </xsl:template>
 
+  <!--PATTERN abstract-warnings-1-->
+
+
+  <!--RULE -->
+  <xsl:template match="abstract | trans-abstract" priority="101" mode="M19">
+    <xsl:variable name="recommended-values" select="('teaser', 'extract', 'editor-summary', 'executive-summary', 'interpretive-summary', 'summary', 'plain-language-summary', 'graphical', 'simple', 'structured', 'video', 'audio')"/>
+
+    <!--REPORT warning-->
+    <xsl:if test="(not(@abstract-type) or @abstract-type != 'graphical') and descendant::fig[descendant::graphic]">
+      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Warning:</xsl:text>
+        <xsl:text> &lt;</xsl:text>
+        <xsl:value-of select="name()"/>
+        <xsl:text>&gt; does not have the attribute abstract-type="graphical" but it has a descendant &lt;fig&gt; with a graphic. </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+      </xsl:message>
+    </xsl:if>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M19"/>
+  </xsl:template>
+  <xsl:template match="text()" priority="-1" mode="M19"/>
+  <xsl:template match="@* | node()" priority="-2" mode="M19">
+    <xsl:choose>
+      <!--Housekeeping: SAXON warns if attempting to find the attribute
+                           of an attribute-->
+      <xsl:when test="not(@*)">
+        <xsl:apply-templates select="node()" mode="M19"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:apply-templates select="@* | node()" mode="M19"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
   <!--PATTERN auths-aff-warnings-->
 
 
   <!--RULE -->
-  <xsl:template match="/article/front/article-meta[descendant::contrib]" priority="103" mode="M19">
+  <xsl:template match="/article/front/article-meta[descendant::contrib]" priority="103" mode="M20">
 
     <!--REPORT warning-->
     <xsl:if test="not(descendant::contrib[@contrib-type = 'author'])">
@@ -1258,11 +1275,11 @@ SOFTWARE.
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M19"/>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M20"/>
   </xsl:template>
 
   <!--RULE -->
-  <xsl:template match="contrib[@contrib-type = 'author']/xref[@ref-type = 'aff' and (* or normalize-space(.) != '')]" priority="102" mode="M19">
+  <xsl:template match="contrib[@contrib-type = 'author']/xref[@ref-type = 'aff' and (* or normalize-space(.) != '')]" priority="102" mode="M20">
     <xsl:variable name="rid" select="@rid"/>
     <xsl:variable name="aff" select="//*[@id = $rid]"/>
 
@@ -1277,11 +1294,11 @@ SOFTWARE.
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M19"/>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M20"/>
   </xsl:template>
 
   <!--RULE -->
-  <xsl:template match="contrib[@initials]" priority="101" mode="M19">
+  <xsl:template match="contrib[@initials]" priority="101" mode="M20">
 
     <!--ASSERT warning-->
     <xsl:choose>
@@ -1294,18 +1311,18 @@ SOFTWARE.
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M19"/>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M20"/>
   </xsl:template>
-  <xsl:template match="text()" priority="-1" mode="M19"/>
-  <xsl:template match="@* | node()" priority="-2" mode="M19">
+  <xsl:template match="text()" priority="-1" mode="M20"/>
+  <xsl:template match="@* | node()" priority="-2" mode="M20">
     <xsl:choose>
       <!--Housekeeping: SAXON warns if attempting to find the attribute
                            of an attribute-->
       <xsl:when test="not(@*)">
-        <xsl:apply-templates select="node()" mode="M19"/>
+        <xsl:apply-templates select="node()" mode="M20"/>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:apply-templates select="@* | node()" mode="M19"/>
+        <xsl:apply-templates select="@* | node()" mode="M20"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>

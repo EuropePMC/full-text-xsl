@@ -46,6 +46,7 @@ SOFTWARE.
     <active pattern="corresp-author-warning"/>
     <active pattern="auths-aff-warnings"/>
     <active pattern="abstract-warnings-1"/>
+    <active pattern="email-warning"/>
     <active pattern="name-warnings"/>
     <active pattern="xref-correspondence-warnings"/>
   </phase>
@@ -58,9 +59,9 @@ SOFTWARE.
       <assert test="processing-instruction('origin') and processing-instruction('origin')='ukpmcpa'" role="error">
         The &lt;?origin ukpmcpa?&gt; processing instruction should be included.
       </assert>
-      <assert test="not(starts-with(@article-type, 'preprint')) and processing-instruction('properties')" role="error">
+      <report test="not(starts-with(@article-type, 'preprint')) and not(processing-instruction('properties'))" role="error">
         Author manuscripts should contain the &lt;?properties manuscript?&gt; processing instruction.
-      </assert>
+      </report>
       <report test="@article-type='preprint' and processing-instruction('properties')" role="error">
         Preprints should not contain the &lt;?properties manuscript?&gt; processing instruction. Please delete it.
       </report>
@@ -83,8 +84,8 @@ SOFTWARE.
   <pattern id="url-errors">
     <rule context="ext-link">
       <!-- Full URL tests -->
-      <report test="matches(@xlink:href, '%[\D][\D]')"> URL contains invalid URL escaping: <value-of select="@xlink:href"/></report>
-      <report test="ends-with(@xlink:href, '.')">URL should not end in a dot: <value-of select="@xlink:href"/></report>
+      <report test="matches(@xlink:href, '%[\D][\D]')" role="error"> URL contains invalid URL escaping: <value-of select="@xlink:href"/></report>
+      <report test="ends-with(@xlink:href, '.')" role="error">URL should not end in a dot: <value-of select="@xlink:href"/></report>
       
       <!-- Pull apart scheme, authority, path, query, and fragment -->
       <let name="scheme" value="substring-before(@xlink:href, '://')"/>
@@ -104,12 +105,14 @@ SOFTWARE.
     </rule>
     
     <rule context="email">
-      <assert test="contains(., '@')">Emails without @ are invalid: <value-of select="."/></assert>
-      <report test="ends-with(., '.')">Ending dot should be moved outside the &lt;email&gt; element: <value-of select="."/></report>
+      <assert test="contains(., '@')" role="error">Emails without @ are invalid: <value-of select="."/></assert>
+      <report test="ends-with(., '.')" role="error">Ending dot should be moved outside the &lt;email&gt; element: <value-of select="."/></report>
     </rule>
-    
+  </pattern>
+  
+  <pattern id="email-warning">
     <rule context="text()[matches(., '(\W|^)[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}(\W|$)')]">
-      <report test="not(parent::email)" role="warning">All email addresses should be inside an &lt;email&gt; element.</report>
+      <report test="not(parent::email)" role="warning">All email addresses should be inside an &lt;email&gt; element</report>
     </rule>
   </pattern>
   

@@ -84,7 +84,7 @@ SOFTWARE.
   <pattern id="url-errors">
     <rule context="ext-link">
       <!-- Full URL tests -->
-      <report test="matches(@xlink:href, '%[\D][\D]')" role="error"> URL contains invalid URL escaping: <value-of select="@xlink:href"/></report>
+      <report test="matches(@xlink:href, '%[\D][\D]')" role="error">URL contains invalid URL escaping: <value-of select="@xlink:href"/></report>
       <report test="ends-with(@xlink:href, '.')" role="error">URL should not end in a dot: <value-of select="@xlink:href"/></report>
       
       <!-- Pull apart scheme, authority, path, query, and fragment -->
@@ -106,7 +106,7 @@ SOFTWARE.
     
     <rule context="email">
       <assert test="contains(., '@')" role="error">Emails without @ are invalid: <value-of select="."/></assert>
-      <report test="ends-with(., '.')" role="error">Ending dot should be moved outside the &lt;email&gt; element: <value-of select="."/></report>
+      <report test="matches(., '[\W]$')" role="error">The &lt;email&gt; element contains end punctuation: <value-of select="."/></report>
     </rule>
   </pattern>
   

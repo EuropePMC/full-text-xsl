@@ -336,7 +336,7 @@ SOFTWARE.
     <xsl:if test="matches(@xlink:href, '%[\D][\D]')">
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Error:</xsl:text>
-        <xsl:text> URL contains invalid URL escaping: </xsl:text>
+        <xsl:text>URL contains invalid URL escaping: </xsl:text>
         <xsl:value-of select="@xlink:href"/>
         <xsl:text> </xsl:text>
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
@@ -451,10 +451,10 @@ SOFTWARE.
     </xsl:choose>
 
     <!--REPORT error-->
-    <xsl:if test="ends-with(., '.')">
+    <xsl:if test="matches(., '[\W]$')">
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Error:</xsl:text>
-        <xsl:text>Ending dot should be moved outside the &lt;email&gt; element: </xsl:text>
+        <xsl:text>The &lt;email&gt; element contains end punctuation: </xsl:text>
         <xsl:value-of select="."/>
         <xsl:text> </xsl:text>
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>

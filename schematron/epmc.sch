@@ -65,10 +65,10 @@ SOFTWARE.
       <report test="@article-type='preprint' and processing-instruction('properties')" role="error">
         Preprints should not contain the &lt;?properties manuscript?&gt; processing instruction. Please delete it.
       </report>
-      <report test="not(starts-with(@article-type, 'preprint')) and front/article-meta/article-id/@pub-id-type='archive'">
+      <report test="not(starts-with(@article-type, 'preprint')) and front/article-meta/article-id/@pub-id-type='archive'" role="error">
         The document has a preprint ID but the @article-type is "<value-of select="@article-type"/>". Preprints should have @article-type="preprint".
       </report>
-      <report test="starts-with(@article-type, 'preprint') and not(front/article-meta/article-id/@pub-id-type='archive')">
+      <report test="starts-with(@article-type, 'preprint') and not(front/article-meta/article-id/@pub-id-type='archive')" role="error">
         The @article-type is "<value-of select="@article-type"/>", but there is no preprint ID. Author manuscripts should have @article-type="research-article".
       </report>
     </rule>

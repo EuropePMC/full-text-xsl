@@ -255,9 +255,10 @@ SOFTWARE.
       </xsl:message>
     </xsl:if>
 
-    <!--REPORT -->
+    <!--REPORT error-->
     <xsl:if test="not(starts-with(@article-type, 'preprint')) and front/article-meta/article-id/@pub-id-type = 'archive'">
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
         <xsl:text> The document has a preprint ID but the @article-type is "</xsl:text>
         <xsl:value-of select="@article-type"/>
         <xsl:text>". Preprints should have @article-type="preprint". </xsl:text>
@@ -265,9 +266,10 @@ SOFTWARE.
       </xsl:message>
     </xsl:if>
 
-    <!--REPORT -->
+    <!--REPORT error-->
     <xsl:if test="starts-with(@article-type, 'preprint') and not(front/article-meta/article-id/@pub-id-type = 'archive')">
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
         <xsl:text> The @article-type is "</xsl:text>
         <xsl:value-of select="@article-type"/>
         <xsl:text>", but there is no preprint ID. Author manuscripts should have @article-type="research-article". </xsl:text>

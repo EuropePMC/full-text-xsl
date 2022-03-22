@@ -134,7 +134,7 @@ SOFTWARE.
       <let name="point" value="//*[@id=$rid]"/>
       <let name="collabmatch" value="matches($point//collab, normalize-space(replace(., '[\W-[\s]]|\d', ''))) or 
         matches(replace($point//collab, '[^A-Z]',''), replace(., '[^A-Z]',''))"/>
-      <assert test=".=$point/label or ($point//person-group/name and contains(., $point//person-group/name[1]/surname)) or ($point//collab and $collabmatch)" role="warning">The reference pointed to: <value-of select="$point/label"/> <value-of select="if ($point//collab) then $point//collab else $point/*/person-group/name[1]/surname"/> , does not match the &lt;xref&gt; content: <value-of select="."/></assert>
+      <assert test=".=$point/label or ($point//person-group[1]/name and contains(., $point//person-group[1]/name[1]/surname)) or ($point//collab and $collabmatch)" role="warning">The reference pointed to: <value-of select="$point/label"/> <value-of select="if ($point//collab) then $point//collab else $point/*/person-group[1]/name[1]/surname"/> , does not match the &lt;xref&gt; content: <value-of select="."/></assert>
     </rule>
   </pattern>
   

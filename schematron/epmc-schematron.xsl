@@ -569,7 +569,7 @@ SOFTWARE.
 
     <!--ASSERT warning-->
     <xsl:choose>
-      <xsl:when test=". = $point/label or ($point//person-group/name and contains(., $point//person-group/name[1]/surname)) or ($point//collab and $collabmatch)"/>
+      <xsl:when test=". = $point/label or ($point//person-group[1]/name and contains(., $point//person-group[1]/name[1]/surname)) or ($point//collab and $collabmatch)"/>
       <xsl:otherwise>
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Warning:</xsl:text>
@@ -580,7 +580,7 @@ SOFTWARE.
               if ($point//collab) then
                 $point//collab
               else
-                $point/*/person-group/name[1]/surname"/>
+                $point/*/person-group[1]/name[1]/surname"/>
           <xsl:text> , does not match the &lt;xref&gt; content: </xsl:text>
           <xsl:value-of select="."/>
           <xsl:text> </xsl:text>

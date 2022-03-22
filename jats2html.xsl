@@ -2483,9 +2483,6 @@ SOFTWARE.
   <!-- ==== BACK ==== -->
   
   <xsl:template match="back">
-    <xsl:if test="descendant::fn-group[parent::sec]">
-      <xsl:message terminate="yes">Error: Footnotes are not directly inside back section</xsl:message>
-    </xsl:if>
     <xsl:apply-templates select="ack"/>
     <xsl:apply-templates select="preceding-sibling::*//author-notes"/>
     <xsl:if test="not(preceding-sibling::*//author-notes) and (fn-group/fn[@fn-type = 'con'] | preceding-sibling::*//contrib[@equal-contrib = 'yes'] | preceding-sibling::*//contrib/email | bio | fn-group/fn[@fn-type = 'conflict'] | preceding-sibling::*//contrib-group[@content-type='collab-list'] | preceding-sibling::*//contrib-group/parent::collab)">

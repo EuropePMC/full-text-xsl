@@ -565,11 +565,17 @@ SOFTWARE.
   <xsl:template match="xref[@ref-type = 'bibr']" priority="101" mode="M11">
     <xsl:variable name="rid" select="@rid"/>
     <xsl:variable name="point" select="//*[@id = $rid]"/>
+    <xsl:variable name="labelmatch" select=". = $point/label or matches($point/label, concat('(^|\W)', ., '($|\W)'))"/>
     <xsl:variable name="collabmatch" select="matches($point//collab, normalize-space(replace(., '[\W-[\s]]|\d', ''))) or matches(replace($point//collab, '[^A-Z]', ''), replace(., '[^A-Z]', ''))"/>
+    <xsl:variable name="namematch" select="($point//person-group[1]/name and contains(., $point//person-group[1]/name[1]/surname)) or ($point//collab and $collabmatch)"/>
 
     <!--ASSERT warning-->
     <xsl:choose>
-      <xsl:when test=". = $point/label or ($point//person-group[1]/name and contains(., $point//person-group[1]/name[1]/surname)) or ($point//collab and $collabmatch)"/>
+      <xsl:when test="
+          if (matches(., '[\D]+')) then
+            $namematch or $labelmatch
+          else
+            $labelmatch"/>
       <xsl:otherwise>
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Warning:</xsl:text>

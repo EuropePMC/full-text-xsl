@@ -925,12 +925,12 @@ SOFTWARE.
     </xsl:if>
 
     <!--REPORT warning-->
-    <xsl:if test="matches(., '[\(\)\[\]]')">
+    <xsl:if test="ancestor::person-group and matches(., '[\(\)\[\]]')">
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Warning:</xsl:text>
         <xsl:text>surname contains brackets - '</xsl:text>
         <xsl:value-of select="."/>
-        <xsl:text>'. Should the bracketed text be placed in the given-names field instead?</xsl:text>
+        <xsl:text>'. Should the bracketed text be placed in the citation label field instead?</xsl:text>
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
@@ -953,7 +953,7 @@ SOFTWARE.
 
     <!--ASSERT warning-->
     <xsl:choose>
-      <xsl:when test="matches(., &#34;^[\p{L}\p{M}\(\)\s'’-]*$&#34;)"/>
+      <xsl:when test="if (ancestor::person-group) then matches(., &#34;^[\p{L}\p{M}\s'’-]*$&#34;) else matches(., &#34;^[\p{L}\p{M}\s.'’-]*$&#34;)"/>
       <xsl:otherwise>
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Warning:</xsl:text>

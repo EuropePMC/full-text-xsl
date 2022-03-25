@@ -33,13 +33,13 @@
     
     <report test="matches(., '^[A-Z]{1,2}\p{Zs}') and (string-length(.) gt 3)" role="warning" id="surname-test-8">surname looks to start with initial - '<value-of select="."/>'. Should '<value-of select="substring-before(., ' ')"/>' be placed in the given-names field?</report>
     
-    <report test="matches(., '[\(\)\[\]]')" role="warning" id="surname-test-9">surname contains brackets - '<value-of select="."/>'. Should the bracketed text be placed in the given-names field instead?</report>
+    <report test="ancestor::person-group and matches(., '[\(\)\[\]]')" role="warning" id="surname-test-9">surname contains brackets - '<value-of select="."/>'. Should the bracketed text be placed in the citation label field instead?</report>
     
     <report test="matches(., '\p{Zs}(III?|I?V)$')" role="warning" id="surname-test-10">surname ends with what might be roman numerals - '<value-of select="."/>'. Should these be placed in a suffix element instead?</report>
   </rule>
   
   <rule context="name/given-names" id="given-names-warnings">
-    <assert test="matches(., &quot;^[\p{L}\p{M}\(\)\s'’-]*$&quot;)" role="warning" id="given-names-test-5">given-names should usually only contain letters, spaces, or hyphens. <value-of select="."/> contains other characters.</assert>
+    <assert test="if (ancestor::person-group) then matches(., &quot;^[\p{L}\p{M}\s'’-]*$&quot;) else matches(., &quot;^[\p{L}\p{M}\s.'’-]*$&quot;)" role="warning" id="given-names-test-5">given-names should usually only contain letters, spaces, or hyphens. <value-of select="."/> contains other characters.</assert>
     
     <assert test="matches(., '^\p{Lu}')" role="warning" id="given-names-test-6">given-names doesn't begin with a capital letter - '<value-of select="."/>'. Is this correct?</assert>    
     

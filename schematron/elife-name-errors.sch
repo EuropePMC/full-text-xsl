@@ -32,16 +32,10 @@
     <report test="matches(., '\p{Zs}$')" role="error" id="surname-test-7">surname ends with a space, which cannot be correct - '<value-of select="."/>'.</report>
   </rule>
   
-  <rule context="name/given-names" id="given-names-errors">
-    <report test="matches(., '^[\p{L}]{1}\.$|^[\p{L}]{1}\.\p{Zs}?[\p{L}]{1}\.\p{Zs}?$')" role="error" id="given-names-test-7">given-names contains initialised full stop(s) which is incorrect - <value-of select="."/></report>
-    
+  <rule context="name/given-names" id="given-names-errors">    
     <report test="matches(., '^\p{Zs}')" role="error" id="given-names-test-8">given-names starts with a space, which cannot be correct - '<value-of select="."/>'.</report>
     
     <report test="matches(., '\p{Zs}$')" role="error" id="given-names-test-9">given-names ends with a space, which cannot be correct - '<value-of select="."/>'.</report>
-  </rule>
-  
-  <rule context="name/suffix" id="suffix-tests">
-    <assert test=". = ('Jr', 'Jnr', 'Sr', 'Snr', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X')" role="error" id="suffix-assert">suffix can only have one of these values - 'Jr', 'Jnr', 'Sr', 'Snr', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'.</assert>
   </rule>
 </pattern>
   

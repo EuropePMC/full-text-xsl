@@ -814,7 +814,7 @@ SOFTWARE.
 
 
   <!--RULE surname-errors-->
-  <xsl:template match="name/surname" priority="103" mode="M16">
+  <xsl:template match="name/surname" priority="102" mode="M16">
 
     <!--REPORT error-->
     <xsl:if test="matches(., '^\p{Zs}')">
@@ -841,18 +841,7 @@ SOFTWARE.
   </xsl:template>
 
   <!--RULE given-names-errors-->
-  <xsl:template match="name/given-names" priority="102" mode="M16">
-
-    <!--REPORT error-->
-    <xsl:if test="matches(., '^[\p{L}]{1}\.$|^[\p{L}]{1}\.\p{Zs}?[\p{L}]{1}\.\p{Zs}?$')">
-      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Error:</xsl:text>
-        <xsl:text>given-names contains initialised full stop(s) which is incorrect - </xsl:text>
-        <xsl:value-of select="."/>
-        <xsl:text> </xsl:text>
-        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-      </xsl:message>
-    </xsl:if>
+  <xsl:template match="name/given-names" priority="101" mode="M16">
 
     <!--REPORT error-->
     <xsl:if test="matches(., '^\p{Zs}')">
@@ -875,23 +864,6 @@ SOFTWARE.
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M16"/>
-  </xsl:template>
-
-  <!--RULE suffix-tests-->
-  <xsl:template match="name/suffix" priority="101" mode="M16">
-
-    <!--ASSERT error-->
-    <xsl:choose>
-      <xsl:when test=". = ('Jr', 'Jnr', 'Sr', 'Snr', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X')"/>
-      <xsl:otherwise>
-        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-          <xsl:text>Error:</xsl:text>
-          <xsl:text>suffix can only have one of these values - 'Jr', 'Jnr', 'Sr', 'Snr', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'.</xsl:text>
-          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-        </xsl:message>
-      </xsl:otherwise>
-    </xsl:choose>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M16"/>
   </xsl:template>
   <xsl:template match="text()" priority="-1" mode="M16"/>

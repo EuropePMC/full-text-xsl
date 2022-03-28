@@ -472,7 +472,12 @@ SOFTWARE.
   </xsl:template>
   
   <xsl:template match="node()" mode="make-url">
-    <xsl:value-of select="translate(., ' &#xA;', '+')"/>
+    <xsl:choose>
+      <xsl:when test="self::contrib-group or preceding-sibling::contrib-group or parent::contrib-group"/>
+      <xsl:when test="following-sibling::contrib-group">
+        <xsl:value-of select="translate(., ' &#xA;', '+')"/>
+      </xsl:when>
+    </xsl:choose>
   </xsl:template>
   
   <xsl:template name="get-initials">
@@ -510,7 +515,7 @@ SOFTWARE.
         </xsl:when>
         <xsl:when test="self::collab">
           <xsl:variable name="collab-url">
-            <xsl:apply-templates select="node()[not(self::contrib-group or self::author-comment or self::aff)]" mode="make-url"/>
+            <xsl:apply-templates select="child::node()" mode="make-url"/>
           </xsl:variable>
           <xsl:value-of select="concat($siteUrl,'/search?query=AUTH:%22', $collab-url, '%22')"/>
         </xsl:when>

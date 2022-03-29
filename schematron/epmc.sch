@@ -132,7 +132,7 @@ SOFTWARE.
     <rule context="xref[@ref-type='bibr']">
       <let name="rid" value="@rid"/>
       <let name="point" value="//*[@id=$rid]"/>
-      <let name="labelmatch" value=".=$point/label or matches($point/label, concat('(^|\W)', ., '($|\W)'))"/>
+      <let name="labelmatch" value=".=$point/label or matches($point/label, concat('(^|\W)', replace(., '([\.\(\)\[\]\?])',''), '($|\W)'))"/>
       <let name="collabmatch" value="matches($point//collab, normalize-space(replace(., '[\W-[\s]]|\d', ''))) or 
         matches(replace($point//collab, '[^A-Z]',''), replace(., '[^A-Z]',''))"/>
       <let name="namematch" value="($point//person-group[1]/name and contains(., $point//person-group[1]/name[1]/surname)) or ($point//collab and $collabmatch)"/>

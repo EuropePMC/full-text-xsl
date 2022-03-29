@@ -2505,10 +2505,10 @@ SOFTWARE.
           <xsl:apply-templates select="preceding-sibling::*//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
         </div>
       </xsl:if>
+      <xsl:apply-templates select="preceding-sibling::*//contrib-group[@content-type='collab-list']"/>
+      <xsl:apply-templates select="preceding-sibling::*//contrib-group/parent::collab" mode="collab-list-container"/>
       <xsl:apply-templates select="fn-group/fn[@fn-type = 'conflict']"/>
     </xsl:if>
-    <xsl:apply-templates select="preceding-sibling::*//contrib-group[@content-type='collab-list']"/>
-    <xsl:apply-templates select="preceding-sibling::*//contrib-group/parent::collab" mode="collab-list-container"/>
     <xsl:apply-templates select="*[not(self::ack) and not(self::bio)]"/>
   </xsl:template>
   
@@ -2550,6 +2550,8 @@ SOFTWARE.
         <xsl:apply-templates select="parent::*//contrib[@equal-contrib = 'yes'][1]" mode="equal"/>
       </div>
     </xsl:if>
+    <xsl:apply-templates select="preceding-sibling::*//contrib-group[@content-type='collab-list']"/>
+    <xsl:apply-templates select="preceding-sibling::*//contrib-group/parent::collab" mode="collab-list-container"/>
     <xsl:if test="fn[@fn-type = 'present-address']">
       <div id="author-info-additional-address">
         <xsl:apply-templates select="fn[@fn-type = 'present-address'][1]"/>

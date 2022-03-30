@@ -83,8 +83,6 @@ SOFTWARE.
   
   <pattern id="url-errors">
     <rule context="ext-link">
-      <!-- Full URL tests -->
-      <report test="matches(@xlink:href, '%[\D][\D]')" role="error">URL contains invalid URL escaping: <value-of select="@xlink:href"/></report>
       <report test="ends-with(@xlink:href, '.')" role="error">URL should not end in a dot: <value-of select="@xlink:href"/></report>
       
       <!-- Pull apart scheme, authority, path, query, and fragment -->
@@ -133,10 +131,10 @@ SOFTWARE.
       <let name="rid" value="@rid"/>
       <let name="point" value="//*[@id=$rid]"/>
       <let name="labelmatch" value=".=$point/label or matches($point/label, concat('(^|\W)', replace(., '([\.\(\)\[\]\?])',''), '($|\W)'))"/>
-      <let name="collabmatch" value="matches($point//collab, normalize-space(replace(., '[\W-[\s]]|\d', ''))) or 
-        matches(replace($point//collab, '[^A-Z]',''), replace(., '[^A-Z]',''))"/>
+      <let name="collabmatch" value="matches($point//collab[1], normalize-space(replace(., '[\W-[\s]]|\d', ''))) or 
+        matches(replace($point//collab[1], '[^A-Z]',''), replace(., '[^A-Z]',''))"/>
       <let name="namematch" value="($point//person-group[1]/name and contains(., $point//person-group[1]/name[1]/surname)) or ($point//collab and $collabmatch)"/>
-      <assert test="if (matches(., '[\D]+')) then $namematch or $labelmatch else $labelmatch" role="warning">The reference pointed to: <value-of select="$point/label"/> <value-of select="if ($point//collab) then $point//collab else $point/*/person-group[1]/name[1]/surname"/> , does not match the &lt;xref&gt; content: <value-of select="."/></assert>
+      <assert test="if (matches(., '[\D]+')) then $namematch or $labelmatch else $labelmatch" role="warning">The reference pointed to: <value-of select="$point/label"/> <value-of select="if ($point/*/person-group[1]/name) then $point/*/person-group[1]/name[1]/surname else $point//collab"/> , does not match the &lt;xref&gt; content: <value-of select="."/></assert>
     </rule>
   </pattern>
   

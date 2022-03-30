@@ -333,17 +333,6 @@ SOFTWARE.
   <xsl:template match="ext-link" priority="102" mode="M9">
 
     <!--REPORT error-->
-    <xsl:if test="matches(@xlink:href, '%[\D][\D]')">
-      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Error:</xsl:text>
-        <xsl:text>URL contains invalid URL escaping: </xsl:text>
-        <xsl:value-of select="@xlink:href"/>
-        <xsl:text> </xsl:text>
-        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-      </xsl:message>
-    </xsl:if>
-
-    <!--REPORT error-->
     <xsl:if test="ends-with(@xlink:href, '.')">
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Error:</xsl:text>
@@ -566,7 +555,7 @@ SOFTWARE.
     <xsl:variable name="rid" select="@rid"/>
     <xsl:variable name="point" select="//*[@id = $rid]"/>
     <xsl:variable name="labelmatch" select=". = $point/label or matches($point/label, concat('(^|\W)', replace(., '([\.\(\)\[\]\?])', ''), '($|\W)'))"/>
-    <xsl:variable name="collabmatch" select="matches($point//collab, normalize-space(replace(., '[\W-[\s]]|\d', ''))) or matches(replace($point//collab, '[^A-Z]', ''), replace(., '[^A-Z]', ''))"/>
+    <xsl:variable name="collabmatch" select="matches($point//collab[1], normalize-space(replace(., '[\W-[\s]]|\d', ''))) or matches(replace($point//collab[1], '[^A-Z]', ''), replace(., '[^A-Z]', ''))"/>
     <xsl:variable name="namematch" select="($point//person-group[1]/name and contains(., $point//person-group[1]/name[1]/surname)) or ($point//collab and $collabmatch)"/>
 
     <!--ASSERT warning-->
@@ -583,10 +572,10 @@ SOFTWARE.
           <xsl:value-of select="$point/label"/>
           <xsl:text> </xsl:text>
           <xsl:value-of select="
-              if ($point//collab) then
-                $point//collab
+              if ($point/*/person-group[1]/name) then
+                $point/*/person-group[1]/name[1]/surname
               else
-                $point/*/person-group[1]/name[1]/surname"/>
+                $point//collab"/>
           <xsl:text> , does not match the &lt;xref&gt; content: </xsl:text>
           <xsl:value-of select="."/>
           <xsl:text> </xsl:text>

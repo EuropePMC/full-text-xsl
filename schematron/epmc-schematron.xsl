@@ -410,7 +410,7 @@ SOFTWARE.
     </xsl:choose>
 
     <!--REPORT error-->
-    <xsl:if test="$path and (not(starts-with($path, '/')) or matches($path, '//|&lt;|&gt;|\{|\}|`|\^|\[|\]'))">
+    <xsl:if test="$path and (not(starts-with($path, '/')) or matches($path, '&lt;|&gt;|\{|\}|`|\^|\[|\]'))">
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Error:</xsl:text>
         <xsl:text>URL path is not valid: </xsl:text>

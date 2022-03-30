@@ -100,7 +100,7 @@ SOFTWARE.
       <!-- Test validity of scheme, authority, path, and fragment -->
       <assert test="not($scheme) or matches($scheme, '([a-z][a-z0-9+\-.]*)')" role="error">URL scheme is not valid: <value-of select="@xlink:href"/></assert>
       <assert test="not($authority) or matches($authority, '([a-z0-9]{1})((\.[a-z0-9-])|([a-z0-9-]))*\.([a-z]{2,4})')" role="error">URL authority is not valid: <value-of select="@xlink:href"/></assert>
-      <report test="$path and (not(starts-with($path, '/')) or matches($path, '//|&lt;|&gt;|\{|\}|`|\^|\[|\]'))" role="error">URL path is not valid: <value-of select="@xlink:href"/></report>
+      <report test="$path and (not(starts-with($path, '/')) or matches($path, '&lt;|&gt;|\{|\}|`|\^|\[|\]'))" role="error">URL path is not valid: <value-of select="@xlink:href"/></report>
       <report test="$fragment and contains($fragment, '#')" role="error">URL fragment is not valid: <value-of select="@xlink:href"/></report>      
     </rule>
     

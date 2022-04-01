@@ -2997,8 +2997,15 @@ SOFTWARE.
   
   <xsl:template match="ref/note">
     <span class="reflink-note">
-      <xsl:apply-templates select="p/node()"/>
+      <xsl:apply-templates select="p"/>
     </span>
+  </xsl:template>
+  
+  <xsl:template match="ref/note/p">
+    <xsl:apply-templates mode="testing"/>
+    <xsl:if test="not(ancestor::list-item or ancestor::fig or ancestor::table or ancestor::boxed-text)">
+      <xsl:apply-templates select="." mode="add-floats"/>
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="element-citation/person-group | element-citation/collab" mode="list-ref-people">

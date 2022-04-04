@@ -2618,7 +2618,7 @@ SOFTWARE.
         </span>
         <xsl:text> </xsl:text>
       </xsl:if>
-      <xsl:apply-templates/>
+      <xsl:apply-templates mode="testing"/>
     </p>
   </xsl:template>
 

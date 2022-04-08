@@ -2891,7 +2891,7 @@ SOFTWARE.
       </div>
     </div>
     <xsl:apply-templates select="author-comment[preceding-sibling::contrib-group]/node()"/>
-    <xsl:if test="descendant::aff">
+    <xsl:if test="contrib-group/aff or contrib-group/contrib/aff">
       <div class="collab-author-affiliations">
         <h4 id="fulltext--collab-author-affiliations-title" class="pmctoggle" role="button" tabindex="0">
           <xsl:if test="not($msspreview)">

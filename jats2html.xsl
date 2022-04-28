@@ -260,10 +260,16 @@ SOFTWARE.
                 </xsl:otherwise>
               </xsl:choose>              
               <xsl:text> preprint</xsl:text>
-              <xsl:if test="article-meta/article-version">
-                <xsl:text>, version </xsl:text>
-                <xsl:value-of select="article-meta/article-version"/>
-              </xsl:if>
+              <xsl:choose>
+                <xsl:when test="article-meta/article-version">
+                  <xsl:text>, version </xsl:text>
+                  <xsl:value-of select="article-meta/article-version"/>
+                </xsl:when>
+                <xsl:when test="article-meta/article-version-alternatives">
+                  <xsl:text>, version </xsl:text>
+                  <xsl:value-of select="article-meta/article-version-alternatives/article-version[@article-version-type='number']"/>
+                </xsl:when>
+              </xsl:choose>
               <xsl:if test="article-meta/pub-date[@pub-type='preprint']">
                 <xsl:text>,</xsl:text>
                 <xsl:text> posted </xsl:text>

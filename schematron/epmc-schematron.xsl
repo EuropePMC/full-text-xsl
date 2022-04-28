@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!-- 
-Copyright (c) 2022 EMBL-EBL/Europe PMC (https://europepmc.org/)
+Copyright (c) 2022 EMBL-EBI/Europe PMC (https://europepmc.org/)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

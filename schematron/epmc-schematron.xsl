@@ -554,9 +554,9 @@ SOFTWARE.
   <xsl:template match="xref[@ref-type = 'bibr']" priority="101" mode="M11">
     <xsl:variable name="rid" select="@rid"/>
     <xsl:variable name="point" select="//*[@id = $rid]"/>
-    <xsl:variable name="labelmatch" select=". = $point/label or matches($point/label, concat('(^|\W)', replace(., '([\.\(\)\[\]\?])', ''), '($|\W)'))"/>
-    <xsl:variable name="collabmatch" select="matches($point//collab[1], normalize-space(replace(., '[\W-[\s]]|\d', ''))) or matches(replace($point//collab[1], '[^A-Z]', ''), replace(., '[^A-Z]', ''))"/>
-    <xsl:variable name="namematch" select="($point//person-group[1]/name and contains(., $point//person-group[1]/name[1]/surname)) or ($point//collab and $collabmatch)"/>
+    <xsl:variable name="labelmatch" select=". = $point/label or matches($point/label[1], concat('(^|\W)', replace(., '([\.\(\)\[\]\?])', ''), '($|\W)'))"/>
+    <xsl:variable name="collabmatch" select="matches($point/descendant::collab[1], normalize-space(replace(., '[\W-[\s]]|\d', ''))) or matches(replace($point/descendant::collab[1], '[^A-Z]', ''), replace(., '[^A-Z]', ''))"/>
+    <xsl:variable name="namematch" select="($point/descendant::person-group[1]/name and contains(., $point/descendant::person-group[1]/name[1]/surname)) or ($point/descendant::collab and $collabmatch)"/>
 
     <!--ASSERT warning-->
     <xsl:choose>

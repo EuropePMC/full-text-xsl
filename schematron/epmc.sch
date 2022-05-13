@@ -130,11 +130,11 @@ SOFTWARE.
     <rule context="xref[@ref-type='bibr']">
       <let name="rid" value="@rid"/>
       <let name="point" value="//*[@id=$rid]"/>
-      <let name="labelmatch" value=".=$point/label or matches($point/label, concat('(^|\W)', replace(., '([\.\(\)\[\]\?])',''), '($|\W)'))"/>
-      <let name="collabmatch" value="matches($point//collab[1], normalize-space(replace(., '[\W-[\s]]|\d', ''))) or 
-        matches(replace($point//collab[1], '[^A-Z]',''), replace(., '[^A-Z]',''))"/>
-      <let name="namematch" value="($point//person-group[1]/name and contains(., $point//person-group[1]/name[1]/surname)) or ($point//collab and $collabmatch)"/>
-      <assert test="if (matches(., '[\D]+')) then $namematch or $labelmatch else $labelmatch" role="warning">The reference pointed to: <value-of select="$point/label"/> <value-of select="if ($point/*/person-group[1]/name) then $point/*/person-group[1]/name[1]/surname else $point//collab"/> , does not match the &lt;xref&gt; content: <value-of select="."/></assert>
+      <let name="labelmatch" value=".=$point/label or matches($point/label[1], concat('(^|\W)', replace(., '([\.\(\)\[\]\?])',''), '($|\W)'))"/>
+      <let name="collabmatch" value="matches($point/descendant::collab[1], normalize-space(replace(., '[\W-[\s]]|\d', ''))) or 
+        matches(replace($point/descendant::collab[1], '[^A-Z]',''), replace(., '[^A-Z]',''))"/>
+      <let name="namematch" value="($point/descendant::person-group[1]/name and contains(., $point/descendant::person-group[1]/name[1]/surname)) or ($point/descendant::collab and $collabmatch)"/>
+      <assert test="if (matches(., '[\D]+')) then $namematch or $labelmatch else $labelmatch" role="warning">The reference pointed to: <value-of select="$point/label"/> <value-of select="if ($point/descendant::person-group[1]/name) then $point/descendant::person-group[1]/name[1]/surname else $point//collab"/> , does not match the &lt;xref&gt; content: <value-of select="."/></assert>
     </rule>
   </pattern>
   

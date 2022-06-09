@@ -2967,6 +2967,9 @@ SOFTWARE.
 
   <xsl:template match="ref">
     <li class="elife-reflinks-reflink" id="{@id}">
+      <xsl:if test="not(label) and parent::ref-list/ref/label">
+        <span class="list_label"/>
+      </xsl:if>
       <xsl:choose>
         <xsl:when test="count(descendant::element-citation) + count(descendant::mixed-citation) > 1">
           <xsl:apply-templates select="label"/>

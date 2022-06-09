@@ -206,76 +206,74 @@ SOFTWARE.
   <!--SCHEMATRON PATTERNS-->
 
 
-  <!--PATTERN article-type-errors-->
+  <!--PATTERN position-errors-->
 
 
   <!--RULE -->
-  <xsl:template match="article" priority="101" mode="M7">
+  <xsl:template match="floats-group/*[not(self::title)]" priority="104" mode="M7">
 
     <!--ASSERT error-->
     <xsl:choose>
-      <xsl:when test="@article-type = 'article-commentary' or @article-type = 'correction' or @article-type = 'reply' or @article-type = 'research-article' or @article-type = 'retraction' or @article-type = 'preprint' or @article-type = 'preprint-removal' or @article-type = 'preprint-withdrawal'"/>
+      <xsl:when test="@position and @position = 'float'"/>
       <xsl:otherwise>
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Error:</xsl:text>
-          <xsl:text> The @article-type "</xsl:text>
-          <xsl:value-of select="@article-type"/>
-          <xsl:text>" is invalid. The @article-type should be "preprint" for preprints or "research-article" for author manuscripts. </xsl:text>
+          <xsl:text>Children of &lt;floats-group&gt; should have @position="float"</xsl:text>
           <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M7"/>
+  </xsl:template>
+
+  <!--RULE -->
+  <xsl:template match="boxed-text | fig-group | table-wrap-group" priority="103" mode="M7">
 
     <!--ASSERT error-->
     <xsl:choose>
-      <xsl:when test="processing-instruction('origin') and processing-instruction('origin') = 'ukpmcpa'"/>
+      <xsl:when test="parent::floats-group or @position = 'anchor'"/>
       <xsl:otherwise>
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Error:</xsl:text>
-          <xsl:text> The &lt;?origin ukpmcpa?&gt; processing instruction should be included. </xsl:text>
+          <xsl:text>Floatable element outside &lt;floats-group&gt; must have @position="anchor"</xsl:text>
           <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M7"/>
+  </xsl:template>
 
-    <!--REPORT error-->
-    <xsl:if test="not(starts-with(@article-type, 'preprint')) and not(processing-instruction('properties'))">
-      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Error:</xsl:text>
-        <xsl:text> Author manuscripts should contain the &lt;?properties manuscript?&gt; processing instruction. </xsl:text>
-      </xsl:message>
-    </xsl:if>
+  <!--RULE -->
+  <xsl:template match="fig" priority="102" mode="M7">
 
-    <!--REPORT error-->
-    <xsl:if test="@article-type = 'preprint' and processing-instruction('properties')">
-      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Error:</xsl:text>
-        <xsl:text> Preprints should not contain the &lt;?properties manuscript?&gt; processing instruction. Please delete it. </xsl:text>
-        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-      </xsl:message>
-    </xsl:if>
+    <!--ASSERT error-->
+    <xsl:choose>
+      <xsl:when test="parent::fig-group or parent::floats-group or @position = 'anchor'"/>
+      <xsl:otherwise>
+        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+          <xsl:text>Error:</xsl:text>
+          <xsl:text>Fig outside &lt;floats-group&gt; must have @position="anchor"</xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+        </xsl:message>
+      </xsl:otherwise>
+    </xsl:choose>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M7"/>
+  </xsl:template>
 
-    <!--REPORT error-->
-    <xsl:if test="not(starts-with(@article-type, 'preprint')) and front/article-meta/article-id/@pub-id-type = 'archive'">
-      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Error:</xsl:text>
-        <xsl:text> The document has a preprint ID but the @article-type is "</xsl:text>
-        <xsl:value-of select="@article-type"/>
-        <xsl:text>". Preprints should have @article-type="preprint". </xsl:text>
-        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-      </xsl:message>
-    </xsl:if>
+  <!--RULE -->
+  <xsl:template match="table-wrap" priority="101" mode="M7">
 
-    <!--REPORT error-->
-    <xsl:if test="starts-with(@article-type, 'preprint') and not(front/article-meta/article-id/@pub-id-type = 'archive')">
-      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Error:</xsl:text>
-        <xsl:text> The @article-type is "</xsl:text>
-        <xsl:value-of select="@article-type"/>
-        <xsl:text>", but there is no preprint ID. Author manuscripts should have @article-type="research-article". </xsl:text>
-        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-      </xsl:message>
-    </xsl:if>
+    <!--ASSERT error-->
+    <xsl:choose>
+      <xsl:when test="parent::table-wrap-group or parent::floats-group or @position = 'anchor'"/>
+      <xsl:otherwise>
+        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+          <xsl:text>Error:</xsl:text>
+          <xsl:text>Table outside &lt;floats-group&gt; must have @position="anchor"</xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+        </xsl:message>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M7"/>
   </xsl:template>
   <xsl:template match="text()" priority="-1" mode="M7"/>
@@ -292,24 +290,45 @@ SOFTWARE.
     </xsl:choose>
   </xsl:template>
 
-  <!--PATTERN corresp-author-warning-->
+  <!--PATTERN formula-content-errors-->
 
 
   <!--RULE -->
-  <xsl:template match="corresp" priority="101" mode="M8">
-    <xsl:variable name="id" select="@id"/>
+  <xsl:template match="inline-formula | disp-formula" priority="102" mode="M8">
+    <xsl:variable name="text" select="string-join(text(), ' ')"/>
 
-    <!--ASSERT warning-->
-    <xsl:choose>
-      <xsl:when test="//xref[@rid = $id] or //contrib[@corresp = 'yes']"/>
-      <xsl:otherwise>
-        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-          <xsl:text>Warning:</xsl:text>
-          <xsl:text>A &lt;corresp&gt; element is present, but no author is marked as @corresp="yes"</xsl:text>
-          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-        </xsl:message>
-      </xsl:otherwise>
-    </xsl:choose>
+    <!--REPORT error-->
+    <xsl:if test="mml:math and normalize-space($text)">
+      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
+        <xsl:text>Formula has untagged text content. Check for typos or missing math tags.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+      </xsl:message>
+    </xsl:if>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M8"/>
+  </xsl:template>
+
+  <!--RULE -->
+  <xsl:template match="mml:math" priority="101" mode="M8">
+    <xsl:variable name="text" select="string-join(text(), ' ')"/>
+
+    <!--REPORT error-->
+    <xsl:if test="normalize-space($text)">
+      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
+        <xsl:text>Math element has untagged text content. Check for typos or missing math tags.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+      </xsl:message>
+    </xsl:if>
+
+    <!--REPORT error-->
+    <xsl:if test="mml:mfenced">
+      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
+        <xsl:text>MathMl 'mfenced' element has been deprecated. Please use &lt;mml:mrow&gt; and &lt;mo&gt; elements instead.</xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+      </xsl:message>
+    </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M8"/>
   </xsl:template>
   <xsl:template match="text()" priority="-1" mode="M8"/>
@@ -326,130 +345,22 @@ SOFTWARE.
     </xsl:choose>
   </xsl:template>
 
-  <!--PATTERN url-errors-->
+  <!--PATTERN attribute-space-errors-->
 
 
   <!--RULE -->
-  <xsl:template match="ext-link" priority="102" mode="M9">
+  <xsl:template match="@id | @rid | @ref-type | @fn-type | @pub-id-type | @pub-type | @date-type" priority="101" mode="M9">
 
     <!--REPORT error-->
-    <xsl:if test="ends-with(@xlink:href, '.')">
+    <xsl:if test="matches(., '\s')">
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Error:</xsl:text>
-        <xsl:text>URL should not end in a dot: </xsl:text>
-        <xsl:value-of select="@xlink:href"/>
-        <xsl:text> </xsl:text>
+        <xsl:text>@</xsl:text>
+        <xsl:value-of select="name(.)"/>
+        <xsl:text> attribute should not contain whitespace.</xsl:text>
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
-    <xsl:variable name="scheme" select="substring-before(@xlink:href, '://')"/>
-    <xsl:variable name="authstring" select="
-        if (contains(@xlink:href, '://')) then
-          substring-after(@xlink:href, '://')
-        else
-          @xlink:href"/>
-    <xsl:variable name="authority" select="
-        if (contains($authstring, '/')) then
-          substring-before($authstring, '/')
-        else
-          $authstring"/>
-    <xsl:variable name="pathstring" select="substring-after(@xlink:href, $authority)"/>
-    <xsl:variable name="path" select="
-        if (contains($pathstring, '#')) then
-          substring-before($pathstring, '#')
-        else
-          if (contains($pathstring, '?')) then
-            substring-before($pathstring, '?')
-          else
-            $pathstring"/>
-    <xsl:variable name="querystring" select="substring-after(@xlink-href, '?')"/>
-    <xsl:variable name="query" select="
-        if (contains($querystring, '#')) then
-          substring-before($querystring, '#')
-        else
-          $querystring"/>
-    <xsl:variable name="fragment" select="substring-after(@xlink:href, '#')"/>
-
-    <!--ASSERT error-->
-    <xsl:choose>
-      <xsl:when test="not($scheme) or matches($scheme, '([a-z][a-z0-9+\-.]*)')"/>
-      <xsl:otherwise>
-        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-          <xsl:text>Error:</xsl:text>
-          <xsl:text>URL scheme is not valid: </xsl:text>
-          <xsl:value-of select="@xlink:href"/>
-          <xsl:text> </xsl:text>
-          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-        </xsl:message>
-      </xsl:otherwise>
-    </xsl:choose>
-
-    <!--ASSERT error-->
-    <xsl:choose>
-      <xsl:when test="not($authority) or matches($authority, '([a-z0-9]{1})((\.[a-z0-9-])|([a-z0-9-]))*\.([a-z]{2,4})')"/>
-      <xsl:otherwise>
-        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-          <xsl:text>Error:</xsl:text>
-          <xsl:text>URL authority is not valid: </xsl:text>
-          <xsl:value-of select="@xlink:href"/>
-          <xsl:text> </xsl:text>
-          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-        </xsl:message>
-      </xsl:otherwise>
-    </xsl:choose>
-
-    <!--REPORT error-->
-    <xsl:if test="$path and (not(starts-with($path, '/')) or matches($path, '&lt;|&gt;|\{|\}|`|\^|\[|\]'))">
-      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Error:</xsl:text>
-        <xsl:text>URL path is not valid: </xsl:text>
-        <xsl:value-of select="@xlink:href"/>
-        <xsl:text> </xsl:text>
-        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-      </xsl:message>
-    </xsl:if>
-
-    <!--REPORT error-->
-    <xsl:if test="$fragment and contains($fragment, '#')">
-      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Error:</xsl:text>
-        <xsl:text>URL fragment is not valid: </xsl:text>
-        <xsl:value-of select="@xlink:href"/>
-        <xsl:text> </xsl:text>
-        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-      </xsl:message>
-    </xsl:if>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M9"/>
-  </xsl:template>
-
-  <!--RULE -->
-  <xsl:template match="email" priority="101" mode="M9">
-
-    <!--ASSERT error-->
-    <xsl:choose>
-      <xsl:when test="contains(., '@')"/>
-      <xsl:otherwise>
-        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-          <xsl:text>Error:</xsl:text>
-          <xsl:text>Emails without @ are invalid: </xsl:text>
-          <xsl:value-of select="."/>
-          <xsl:text> </xsl:text>
-          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-        </xsl:message>
-      </xsl:otherwise>
-    </xsl:choose>
-
-    <!--REPORT error-->
-    <xsl:if test="matches(., '[\W]$')">
-      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Error:</xsl:text>
-        <xsl:text>The &lt;email&gt; element contains end punctuation: </xsl:text>
-        <xsl:value-of select="."/>
-        <xsl:text> </xsl:text>
-        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-      </xsl:message>
-    </xsl:if>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M9"/>
   </xsl:template>
   <xsl:template match="text()" priority="-1" mode="M9"/>
   <xsl:template match="@* | node()" priority="-2" mode="M9">
@@ -465,20 +376,21 @@ SOFTWARE.
     </xsl:choose>
   </xsl:template>
 
-  <!--PATTERN email-warning-->
+  <!--PATTERN fn-group-error-->
 
 
   <!--RULE -->
-  <xsl:template match="text()[matches(., '(\W|^)[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}(\W|$)')]" priority="101" mode="M10">
+  <xsl:template match="back//fn-group" priority="101" mode="M10">
 
-    <!--REPORT warning-->
-    <xsl:if test="not(parent::email)">
+    <!--REPORT error-->
+    <xsl:if test="parent::sec">
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Warning:</xsl:text>
-        <xsl:text>All email addresses should be inside an &lt;email&gt; element.</xsl:text>
+        <xsl:text>Error:</xsl:text>
+        <xsl:text>Back footnotes should be directly inside the &lt;back&gt; element, not inside child &lt;sec&gt;.</xsl:text>
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
+    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M10"/>
   </xsl:template>
   <xsl:template match="text()" priority="-1" mode="M10"/>
   <xsl:template match="@* | node()" priority="-2" mode="M10">
@@ -572,8 +484,8 @@ SOFTWARE.
           <xsl:value-of select="$point/label"/>
           <xsl:text> </xsl:text>
           <xsl:value-of select="
-              if ($point/*/person-group[1]/name) then
-                $point/*/person-group[1]/name[1]/surname
+              if ($point/descendant::person-group[1]/name) then
+                $point/descendant::person-group[1]/name[1]/surname
               else
                 $point//collab"/>
           <xsl:text> , does not match the &lt;xref&gt; content: </xsl:text>
@@ -599,19 +511,17 @@ SOFTWARE.
     </xsl:choose>
   </xsl:template>
 
-  <!--PATTERN attribute-space-errors-->
+  <!--PATTERN email-warning-->
 
 
   <!--RULE -->
-  <xsl:template match="@id | @rid | @ref-type | @fn-type | @pub-id-type | @pub-type | @date-type" priority="101" mode="M12">
+  <xsl:template match="text()[matches(., '(\W|^)[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}(\W|$)')]" priority="101" mode="M12">
 
-    <!--REPORT error-->
-    <xsl:if test="matches(., '\s')">
+    <!--REPORT warning-->
+    <xsl:if test="not(parent::email)">
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Error:</xsl:text>
-        <xsl:text>@</xsl:text>
-        <xsl:value-of select="name(.)"/>
-        <xsl:text> attribute should not contain whitespace.</xsl:text>
+        <xsl:text>Warning:</xsl:text>
+        <xsl:text>All email addresses should be inside an &lt;email&gt; element</xsl:text>
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>
@@ -630,45 +540,24 @@ SOFTWARE.
     </xsl:choose>
   </xsl:template>
 
-  <!--PATTERN formula-content-errors-->
+  <!--PATTERN corresp-author-warning-->
 
 
   <!--RULE -->
-  <xsl:template match="inline-formula | disp-formula" priority="102" mode="M13">
-    <xsl:variable name="text" select="string-join(text(), ' ')"/>
+  <xsl:template match="corresp" priority="101" mode="M13">
+    <xsl:variable name="id" select="@id"/>
 
-    <!--REPORT error-->
-    <xsl:if test="mml:math and normalize-space($text)">
-      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Error:</xsl:text>
-        <xsl:text>Formula has untagged text content. Check for typos or missing math tags.</xsl:text>
-        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-      </xsl:message>
-    </xsl:if>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M13"/>
-  </xsl:template>
-
-  <!--RULE -->
-  <xsl:template match="mml:math" priority="101" mode="M13">
-    <xsl:variable name="text" select="string-join(text(), ' ')"/>
-
-    <!--REPORT error-->
-    <xsl:if test="normalize-space($text)">
-      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Error:</xsl:text>
-        <xsl:text>Math element has untagged text content. Check for typos or missing math tags.</xsl:text>
-        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-      </xsl:message>
-    </xsl:if>
-
-    <!--REPORT error-->
-    <xsl:if test="mml:mfenced">
-      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-        <xsl:text>Error:</xsl:text>
-        <xsl:text>MathMl 'mfenced' element has been deprecated. Please use &lt;mml:mrow&gt; and &lt;mo&gt; elements instead.</xsl:text>
-        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-      </xsl:message>
-    </xsl:if>
+    <!--ASSERT warning-->
+    <xsl:choose>
+      <xsl:when test="//xref[@rid = $id] or //contrib[@corresp = 'yes']"/>
+      <xsl:otherwise>
+        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+          <xsl:text>Warning:</xsl:text>
+          <xsl:text>A &lt;corresp&gt; element is present, but no author is marked as @corresp="yes"</xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+        </xsl:message>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M13"/>
   </xsl:template>
   <xsl:template match="text()" priority="-1" mode="M13"/>
@@ -685,74 +574,129 @@ SOFTWARE.
     </xsl:choose>
   </xsl:template>
 
-  <!--PATTERN position-errors-->
+  <!--PATTERN url-errors-->
 
 
   <!--RULE -->
-  <xsl:template match="floats-group/*[not(self::title)]" priority="104" mode="M14">
+  <xsl:template match="ext-link" priority="102" mode="M14">
+
+    <!--REPORT error-->
+    <xsl:if test="ends-with(@xlink:href, '.')">
+      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
+        <xsl:text>URL should not end in a dot: </xsl:text>
+        <xsl:value-of select="@xlink:href"/>
+        <xsl:text> </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+      </xsl:message>
+    </xsl:if>
+    <xsl:variable name="scheme" select="substring-before(@xlink:href, '://')"/>
+    <xsl:variable name="authstring" select="
+        if (contains(@xlink:href, '://')) then
+          substring-after(@xlink:href, '://')
+        else
+          @xlink:href"/>
+    <xsl:variable name="authority" select="
+        if (contains($authstring, '/')) then
+          substring-before($authstring, '/')
+        else
+          $authstring"/>
+    <xsl:variable name="pathstring" select="substring-after(@xlink:href, $authority)"/>
+    <xsl:variable name="path" select="
+        if (contains($pathstring, '#')) then
+          substring-before($pathstring, '#')
+        else
+          if (contains($pathstring, '?')) then
+            substring-before($pathstring, '?')
+          else
+            $pathstring"/>
+    <xsl:variable name="querystring" select="substring-after(@xlink-href, '?')"/>
+    <xsl:variable name="query" select="
+        if (contains($querystring, '#')) then
+          substring-before($querystring, '#')
+        else
+          $querystring"/>
+    <xsl:variable name="fragment" select="substring-after(@xlink:href, '#')"/>
 
     <!--ASSERT error-->
     <xsl:choose>
-      <xsl:when test="@position and @position = 'float'"/>
+      <xsl:when test="not($scheme) or matches($scheme, '([a-z][a-z0-9+\-.]*)')"/>
       <xsl:otherwise>
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Error:</xsl:text>
-          <xsl:text>Children of &lt;floats-group&gt; should have @position="float"</xsl:text>
+          <xsl:text>URL scheme is not valid: </xsl:text>
+          <xsl:value-of select="@xlink:href"/>
+          <xsl:text> </xsl:text>
           <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
+
+    <!--ASSERT error-->
+    <xsl:choose>
+      <xsl:when test="not($authority) or matches($authority, '([a-z0-9]{1})((\.[a-z0-9-])|([a-z0-9-]))*\.([a-z]{2,4})')"/>
+      <xsl:otherwise>
+        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+          <xsl:text>Error:</xsl:text>
+          <xsl:text>URL authority is not valid: </xsl:text>
+          <xsl:value-of select="@xlink:href"/>
+          <xsl:text> </xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+        </xsl:message>
+      </xsl:otherwise>
+    </xsl:choose>
+
+    <!--REPORT error-->
+    <xsl:if test="$path and (not(starts-with($path, '/')) or matches($path, '&lt;|&gt;|\{|\}|`|\^|\[|\]'))">
+      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
+        <xsl:text>URL path is not valid: </xsl:text>
+        <xsl:value-of select="@xlink:href"/>
+        <xsl:text> </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+      </xsl:message>
+    </xsl:if>
+
+    <!--REPORT error-->
+    <xsl:if test="$fragment and contains($fragment, '#')">
+      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
+        <xsl:text>URL fragment is not valid: </xsl:text>
+        <xsl:value-of select="@xlink:href"/>
+        <xsl:text> </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+      </xsl:message>
+    </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M14"/>
   </xsl:template>
 
   <!--RULE -->
-  <xsl:template match="boxed-text | fig-group | table-wrap-group" priority="103" mode="M14">
+  <xsl:template match="email" priority="101" mode="M14">
 
     <!--ASSERT error-->
     <xsl:choose>
-      <xsl:when test="parent::floats-group or @position = 'anchor'"/>
+      <xsl:when test="contains(., '@')"/>
       <xsl:otherwise>
         <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
           <xsl:text>Error:</xsl:text>
-          <xsl:text>Floatable element outside &lt;floats-group&gt; must have @position="anchor"</xsl:text>
+          <xsl:text>Emails without @ are invalid: </xsl:text>
+          <xsl:value-of select="."/>
+          <xsl:text> </xsl:text>
           <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
         </xsl:message>
       </xsl:otherwise>
     </xsl:choose>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M14"/>
-  </xsl:template>
 
-  <!--RULE -->
-  <xsl:template match="fig" priority="102" mode="M14">
-
-    <!--ASSERT error-->
-    <xsl:choose>
-      <xsl:when test="parent::fig-group or parent::floats-group or @position = 'anchor'"/>
-      <xsl:otherwise>
-        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-          <xsl:text>Error:</xsl:text>
-          <xsl:text>Fig outside &lt;floats-group&gt; must have @position="anchor"</xsl:text>
-          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-        </xsl:message>
-      </xsl:otherwise>
-    </xsl:choose>
-    <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M14"/>
-  </xsl:template>
-
-  <!--RULE -->
-  <xsl:template match="table-wrap" priority="101" mode="M14">
-
-    <!--ASSERT error-->
-    <xsl:choose>
-      <xsl:when test="parent::table-wrap-group or parent::floats-group or @position = 'anchor'"/>
-      <xsl:otherwise>
-        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
-          <xsl:text>Error:</xsl:text>
-          <xsl:text>Table outside &lt;floats-group&gt; must have @position="anchor"</xsl:text>
-          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
-        </xsl:message>
-      </xsl:otherwise>
-    </xsl:choose>
+    <!--REPORT error-->
+    <xsl:if test="matches(., '[\W]$')">
+      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
+        <xsl:text>The &lt;email&gt; element contains end punctuation: </xsl:text>
+        <xsl:value-of select="."/>
+        <xsl:text> </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+      </xsl:message>
+    </xsl:if>
     <xsl:apply-templates select="@* | * | comment() | processing-instruction()" mode="M14"/>
   </xsl:template>
   <xsl:template match="text()" priority="-1" mode="M14"/>
@@ -769,17 +713,74 @@ SOFTWARE.
     </xsl:choose>
   </xsl:template>
 
-  <!--PATTERN fn-group-error-->
+  <!--PATTERN article-type-errors-->
 
 
   <!--RULE -->
-  <xsl:template match="back//fn-group" priority="101" mode="M15">
+  <xsl:template match="article" priority="101" mode="M15">
+
+    <!--ASSERT error-->
+    <xsl:choose>
+      <xsl:when test="@article-type = 'article-commentary' or @article-type = 'correction' or @article-type = 'reply' or @article-type = 'research-article' or @article-type = 'retraction' or @article-type = 'preprint' or @article-type = 'preprint-removal' or @article-type = 'preprint-withdrawal'"/>
+      <xsl:otherwise>
+        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+          <xsl:text>Error:</xsl:text>
+          <xsl:text> The @article-type "</xsl:text>
+          <xsl:value-of select="@article-type"/>
+          <xsl:text>" is invalid. The @article-type should be "preprint" for preprints or "research-article" for author manuscripts. </xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+        </xsl:message>
+      </xsl:otherwise>
+    </xsl:choose>
+
+    <!--ASSERT error-->
+    <xsl:choose>
+      <xsl:when test="processing-instruction('origin') and processing-instruction('origin') = 'ukpmcpa'"/>
+      <xsl:otherwise>
+        <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+          <xsl:text>Error:</xsl:text>
+          <xsl:text> The &lt;?origin ukpmcpa?&gt; processing instruction should be included. </xsl:text>
+          <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+        </xsl:message>
+      </xsl:otherwise>
+    </xsl:choose>
 
     <!--REPORT error-->
-    <xsl:if test="parent::sec">
+    <xsl:if test="not(starts-with(@article-type, 'preprint')) and not(processing-instruction('properties'))">
       <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
         <xsl:text>Error:</xsl:text>
-        <xsl:text>Back footnotes should be directly inside the &lt;back&gt; element, not inside child &lt;sec&gt;.</xsl:text>
+        <xsl:text> Author manuscripts should contain the &lt;?properties manuscript?&gt; processing instruction. </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+      </xsl:message>
+    </xsl:if>
+
+    <!--REPORT error-->
+    <xsl:if test="@article-type = 'preprint' and processing-instruction('properties')">
+      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
+        <xsl:text> Preprints should not contain the &lt;?properties manuscript?&gt; processing instruction. Please delete it. </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+      </xsl:message>
+    </xsl:if>
+
+    <!--REPORT error-->
+    <xsl:if test="not(starts-with(@article-type, 'preprint')) and front/article-meta/article-id/@pub-id-type = 'archive'">
+      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
+        <xsl:text> The document has a preprint ID but the @article-type is "</xsl:text>
+        <xsl:value-of select="@article-type"/>
+        <xsl:text>". Preprints should have @article-type="preprint". </xsl:text>
+        <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
+      </xsl:message>
+    </xsl:if>
+
+    <!--REPORT error-->
+    <xsl:if test="starts-with(@article-type, 'preprint') and not(front/article-meta/article-id/@pub-id-type = 'archive')">
+      <xsl:message xmlns:iso="http://purl.oclc.org/dsdl/schematron" xmlns:osf="http://www.oxygenxml.com/sch/functions">
+        <xsl:text>Error:</xsl:text>
+        <xsl:text> The @article-type is "</xsl:text>
+        <xsl:value-of select="@article-type"/>
+        <xsl:text>", but there is no preprint ID. Author manuscripts should have @article-type="research-article". </xsl:text>
         <xsl:apply-templates select="." mode="schematron-get-full-path-2"/>
       </xsl:message>
     </xsl:if>

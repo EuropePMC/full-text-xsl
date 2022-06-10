@@ -37,8 +37,10 @@ SOFTWARE.
     <active pattern="name-errors"/>
     <active pattern="url-errors"/>
     <active pattern="attribute-space-errors"/>
-    <active pattern="formula-content-errors"/>
+    <active pattern="formula-errors"/>
+    <active pattern="math-errors"/>
     <active pattern="position-errors"/>
+    <active pattern="display-object-errors"/>
     <active pattern="fn-group-error"/>
   </phase>
   
@@ -48,21 +50,28 @@ SOFTWARE.
     <active pattern="abstract-warnings-1"/>
     <active pattern="email-warning"/>
     <active pattern="name-warnings"/>
-    <active pattern="xref-correspondence-warnings"/>
+    <active pattern="xref-warnings"/>
+    <active pattern="display-object-warnings-1"/>
+    <active pattern="display-object-warnings-2"/>
   </phase>
 
-  <include href="epmc-position-errors.sch"/>
-  <include href="epmc-formula-content-errors.sch"/>
-  <include href="epmc-attribute-space-errors.sch"/>
-  <include href="epmc-fn-group-error.sch"/>
-  <include href="epmc-xref-correspondence-warnings.sch"/>
-  <include href="epmc-email-warning.sch"/>
-  <include href="epmc-corresp-author-warning.sch"/>
-  <include href="epmc-url-errors.sch"/>
   <include href="epmc-article-type-errors.sch"/>
-  <include href="elife-name-errors.sch"/>
-  <include href="elife-name-warnings.sch"/>
   <include href="jats-abstract-errors.sch"/>
+  <include href="elife-name-errors.sch"/>
+  <include href="epmc-url-errors.sch"/>
+  <include href="epmc-attribute-space-errors.sch"/>
+  <include href="epmc-formula-errors.sch"/>
+  <include href="jats-math-errors.sch"/>
+  <include href="epmc-position-errors.sch"/>
+  <include href="jats-display-object-errors.sch"/> 
+  <include href="epmc-fn-group-error.sch"/>
+  <include href="epmc-corresp-author-warning.sch"/> 
+  <include href="jats-auths-affs-warnings.sch"/>
   <include href="jats-abstract-warnings-1.sch"/>
-  <include href="jats-auths-affs-warnings.sch"/>  
+  <include href="epmc-email-warning.sch"/>
+  <include href="elife-name-warnings.sch"/>
+  <include href="epmc-xref-warnings.sch"/>   
+  <include href="jats-display-object-warnings-1.sch"/>  
+  <include href="jats-display-object-warnings-2.sch"/>
+  
 </schema>

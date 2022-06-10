@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 -->
 
-<pattern id="xref-correspondence-warnings" xmlns="http://purl.oclc.org/dsdl/schematron">
+<pattern id="xref-warnings" xmlns="http://purl.oclc.org/dsdl/schematron">
   <rule context="xref[@ref-type='fig' or @ref-type='table']">
     <let name="ridnum" value="translate(@rid, translate(@rid, '0123456789', ''), '')"/>
     <assert test="matches(., concat('(^|\D)', $ridnum, '($|\D)'))" role="warning">The number value in the &lt;xref&gt; @rid: <value-of select="@rid"/> , does not match the text: <value-of select="."/></assert>

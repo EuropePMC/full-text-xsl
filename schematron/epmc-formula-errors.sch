@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 -->
 
-<pattern id="formula-content-errors" xmlns="http://purl.oclc.org/dsdl/schematron">
+<pattern id="formula-errors" xmlns="http://purl.oclc.org/dsdl/schematron">
   <rule context="inline-formula|disp-formula">
     <let name="text" value="string-join(text(), ' ')"/>
     <report test="mml:math and normalize-space($text)" role="error">Formula has untagged text content. Check for typos or missing math tags.</report>

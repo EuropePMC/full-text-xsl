@@ -12,9 +12,9 @@ Additionally it operates specially within the Manuscript Submission System ([xpu
 
 ### schematron
 
-A collection of schematron tests for JATS XML files submitted to the Europe PMC plus MSS (https://europepmc.org/). 
+A collection of schematron tests for JATS XML files submitted to the Europe PMC plus MSS (https://plus.europepmc.org/). 
 
-epmc.sch is the main file. Other files are taken from the following projects:
+epmc.sch is the main file. Files are taken from the following projects:
 
  * https://github.com/JATS4R/jats-schematrons
  * https://github.com/elifesciences/eLife-JATS-schematron

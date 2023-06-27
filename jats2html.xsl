@@ -2569,6 +2569,13 @@ SOFTWARE.
       </div>
     </xsl:if>
   </xsl:template>
+  
+  <xsl:template match="floats-group//fig">
+    <xsl:apply-templates></xsl:apply-templates>
+  </xsl:template>
+  <xsl:template match="floats-group//table-wrap">
+    <xsl:apply-templates></xsl:apply-templates>
+  </xsl:template>
 
   <xsl:template match="back/fn-group">
     <xsl:if test="fn[not(@fn-type = 'con' or @fn-type = 'conflict')]">
@@ -2586,7 +2593,23 @@ SOFTWARE.
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="back/fn-group/fn | author-notes/fn[@fn-type = 'con' or @fn-type = 'conflict']">
+  <xsl:template match="boxed-text/fn-group" mode="testing">
+    <xsl:if test="fn[not(@fn-type = 'con' or @fn-type = 'conflict')]">
+      <div id="notes">
+        <h2 id="notestitle">
+          <xsl:choose>
+            <xsl:when test="title">
+              <xsl:apply-templates select="title"/>
+            </xsl:when>
+            <xsl:otherwise>Notes</xsl:otherwise>
+          </xsl:choose>
+        </h2>
+        <xsl:apply-templates select="fn[not(@fn-type = 'con' or @fn-type = 'conflict')]"/>
+      </div>
+    </xsl:if>
+  </xsl:template>
+  
+  <xsl:template match="boxed-text/fn-group/fn | back/fn-group/fn | author-notes/fn[@fn-type = 'con' or @fn-type = 'conflict']">
     <xsl:apply-templates select="p" mode="testing"/>
   </xsl:template>
   
@@ -2594,7 +2617,7 @@ SOFTWARE.
     <xsl:apply-templates/>
   </xsl:template>
 
-  <xsl:template match="back/fn-group/fn/p | author-notes/fn[@fn-type = 'con' or @fn-type = 'conflict']/p" mode="testing">
+  <xsl:template match="boxed-text/fn-group/fn/p | back/fn-group/fn/p | author-notes/fn[@fn-type = 'con' or @fn-type = 'conflict']/p" mode="testing">
     <xsl:choose>
       <xsl:when test="*[position()=1][self::bold] and (not(child::text()) or not(child::text()[normalize-space(.) != '']))">
         <h3>
@@ -2611,7 +2634,7 @@ SOFTWARE.
     </xsl:choose>
   </xsl:template>
   
-  <xsl:template match="back/fn-group/fn/p | author-notes/fn[@fn-type = 'con' or @fn-type = 'conflict']/p | table-wrap-foot/fn/p">
+  <xsl:template match="boxed-text/fn-group/fn/p | back/fn-group/fn/p | author-notes/fn[@fn-type = 'con' or @fn-type = 'conflict']/p | table-wrap-foot/fn/p">
     <p>
       <xsl:if test="count(preceding-sibling::*) = 0 or preceding-sibling::*[1][self::label]">
         <xsl:attribute name="id">
@@ -3865,6 +3888,7 @@ SOFTWARE.
   <xsl:template match="@xlink:href"/>
   <xsl:template match="sec[@sec-type = 'supplementary-material'] | sec[@sec-type = 'floats-group']"/>
   <xsl:template match="back/fn-group/fn/label"/>
+  <xsl:template match="boxed-text/fn-group/fn/label"/>
   <xsl:template match="aff/label"/>
   <xsl:template match="list-item/label"/>
   <xsl:template match="disp-formula/label"/>

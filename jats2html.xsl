@@ -3358,6 +3358,15 @@ SOFTWARE.
     </span>
   </xsl:template>
   
+  <xsl:template match="(element-citation|mixed-citation)/comment">
+    <span>
+      <xsl:for-each select="@*">
+       <xsl:attribute name="{local-name()}"><xsl:value-of select="."/></xsl:attribute>
+      </xsl:for-each>
+      <xsl:apply-templates select="text()"/>
+    </span>
+  </xsl:template>
+  
   <xsl:template match="mixed-citation" mode="display">
     <xsl:variable name="title">
       <xsl:choose>

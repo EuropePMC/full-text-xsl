@@ -88,9 +88,9 @@ SOFTWARE. -->
              </span>
              <br/>
              <span class="doi">
-                 <!-- <xsl:text>doi: </xsl:text> -->
+                 <xsl:text>doi: </xsl:text>
                  <a href="{concat('https://doi.org/', $doi)}">
-                     <xsl:value-of select="concat('https://doi.org/', $doi)"/>
+                     <xsl:value-of select="$doi"/>
                  </a>
              </span>
          </p>

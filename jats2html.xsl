@@ -3381,7 +3381,7 @@ SOFTWARE.
     </span>
   </xsl:template>
   
-  <xsl:template match="(element-citation|mixed-citation)/comment">
+  <xsl:template match="element-citation/comment|mixed-citation/comment">
     <span>
       <xsl:for-each select="@*">
        <xsl:attribute name="{local-name()}"><xsl:value-of select="."/></xsl:attribute>

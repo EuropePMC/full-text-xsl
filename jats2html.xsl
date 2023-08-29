@@ -230,8 +230,9 @@ SOFTWARE.
     <xsl:variable name="doi">
       <xsl:if test="article-meta/article-id[@pub-id-type='doi']">
         <span class="doi">
+          <xsl:text>doi: </xsl:text>
           <a href="{concat('https://doi.org/', article-meta/article-id[@pub-id-type='doi'])}" target="_blank">
-            <xsl:value-of select="concat('https://doi.org/', article-meta/article-id[@pub-id-type='doi'])"/>
+            <xsl:value-of select="article-meta/article-id[@pub-id-type='doi']"/>
           </a>
         </span>
       </xsl:if>
@@ -881,8 +882,9 @@ SOFTWARE.
         <div class="citeinfo">
           <p class="identifiers">              
             <span class="doi">
+              <xsl:text>doi: </xsl:text>
               <a href="{concat('https://doi.org/', article-id[@pub-id-type='doi'])}" target="_blank">
-                <xsl:value-of select="concat('https://doi.org/', article-id[@pub-id-type='doi'])"/>
+                <xsl:value-of select="article-id[@pub-id-type='doi']"/>
               </a>
             </span>
           </p>

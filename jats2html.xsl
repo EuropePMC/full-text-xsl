@@ -2570,13 +2570,6 @@ SOFTWARE.
     </xsl:if>
   </xsl:template>
   
-  <xsl:template match="floats-group//fig">
-    <xsl:apply-templates></xsl:apply-templates>
-  </xsl:template>
-  <xsl:template match="floats-group//table-wrap">
-    <xsl:apply-templates></xsl:apply-templates>
-  </xsl:template>
-
   <xsl:template match="back/fn-group">
     <xsl:if test="fn[not(@fn-type = 'con' or @fn-type = 'conflict')]">
       <div id="notes">
@@ -2617,6 +2610,7 @@ SOFTWARE.
     <xsl:apply-templates/>
   </xsl:template>
 
+  <!-- Template for fn/p, mode = testing -->
   <xsl:template match="boxed-text/fn-group/fn/p | back/fn-group/fn/p | author-notes/fn[@fn-type = 'con' or @fn-type = 'conflict']/p" mode="testing">
     <xsl:choose>
       <xsl:when test="*[position()=1][self::bold] and (not(child::text()) or not(child::text()[normalize-space(.) != '']))">
@@ -2634,6 +2628,7 @@ SOFTWARE.
     </xsl:choose>
   </xsl:template>
   
+  <!-- Template for fn/p, default mode -->
   <xsl:template match="boxed-text/fn-group/fn/p | back/fn-group/fn/p | author-notes/fn[@fn-type = 'con' or @fn-type = 'conflict']/p | table-wrap-foot/fn/p">
     <p>
       <xsl:if test="count(preceding-sibling::*) = 0 or preceding-sibling::*[1][self::label]">
@@ -2714,6 +2709,7 @@ SOFTWARE.
     </li>
   </xsl:template>
 
+  <!-- Template for fn/p under fn-group with content-tyep = author-contribution -->
   <xsl:template match="fn-group[@content-type = 'author-contribution']/fn/p">
     <xsl:apply-templates/>
   </xsl:template>
@@ -3856,6 +3852,7 @@ SOFTWARE.
     </span>
   </xsl:template>
   
+  <!-- Override the default template, create copies for attributes and text nodes, instead of output the text values -->
   <xsl:template match="*"><xsl:apply-templates select="@* | node()"/></xsl:template>
 
   <xsl:template match="@* | text()"><xsl:copy/></xsl:template>
@@ -3875,7 +3872,17 @@ SOFTWARE.
       <xsl:apply-templates select="." mode="display"/>
     </xsl:if>
   </xsl:template>
-  
+ 
+  <!-- Nodes to skip, continue with its child nodes-->
+  <!-- Note: If nodes to skip apears in the document with attributes but the nodes 
+    are not listed here, the attributes will be copied to the parent element, 
+    which will cause problem if nodes has been generated under the parent element. 
+    We will get an XTDE0410 error. Add the nodes here will prevent the attribugtes to
+   processed. -->
+  <xsl:template match="floats-group//fig | floats-group//table-wrap | fn//table-wrap">
+    <xsl:apply-templates />
+  </xsl:template>
+
   <xsl:template match="table-wrap | boxed-text | fig | fig-group | table-wrap-group" mode="testing">
     <xsl:if test="@position='anchor'">
       <xsl:apply-templates select="." mode="display"/>

@@ -807,9 +807,9 @@ SOFTWARE.
     </xsl:choose>
   </xsl:template>
   
-  <xsl:template match="aff/text()">
+  <!-- <xsl:template match="aff/text()">
     <xsl:value-of select="normalize-space(.)"/>
-  </xsl:template>
+  </xsl:template> -->
   
   <xsl:template match="aff//xref[@ref-type = 'fn']">
     <xsl:variable name="rid" select="@rid"/>
@@ -1286,7 +1286,7 @@ SOFTWARE.
     </span>
   </xsl:template>
 
-  <xsl:template match="aff/country">
+  <xsl:template match="aff/country | aff/institution-wrap/country">
     <span class="country">
       <xsl:apply-templates/>
     </span>
@@ -3921,5 +3921,6 @@ SOFTWARE.
   <xsl:template match="funding-group//institution-wrap/institution-id"/>
   <xsl:template match="table-wrap/graphic"/>
   <xsl:template match="table-wrap-foot//fn/label"/>
+  <xsl:template match="aff/institution-wrap/institution-id"/>
 
 </xsl:stylesheet>

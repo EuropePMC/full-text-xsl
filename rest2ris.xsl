@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2019 EMBL-EBI/Europe PMC (https://europepmc.org/)
+<!-- Copyright (c) 2024 EMBL-EBI/Europe PMC (https://europepmc.org/)
   
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,8 @@ SOFTWARE. -->
 	
 	<!-- 
 		Script: rest2ris.xsl
-		Version: 1.0
+		Version: 1.1
+		Changes since 1.0: Handle preprint servers as journal titles
 		Status: Ready for production
 		Summary: Transforms Europe PMC RESTful search responses (resulttype=core) to RIS format (compatible with Reference Manager and EndNote)
 		Usage Notes: Set the includeHeader parameter to 'N' after the first page, when transforming multiple pages of RESTful responses, to be concatenated into a single file
@@ -107,6 +108,10 @@ SOFTWARE. -->
 						</xsl:when>
 						<xsl:when test="pubTypeList/pubType[text()='Report']">
 							<xsl:text>RPRT</xsl:text>
+						</xsl:when>
+						<!-- NOTE: RIS does not yet specifically support preprint as a TY reference type, so use JOUR -->
+						<xsl:when test="pubTypeList/pubType[text()='Preprint']">
+							<xsl:text>JOUR</xsl:text>
 						</xsl:when>
 						<xsl:otherwise>
 							<xsl:text>GEN</xsl:text>
@@ -230,6 +235,10 @@ SOFTWARE. -->
 			</xsl:when>
 			<xsl:when test="text()='CIT'">
 				<xsl:text>DB  - CiteSeer</xsl:text>
+				<xsl:value-of select="$newline"/>
+			</xsl:when>
+			<xsl:when test="text()='PPR'">
+				<xsl:text>DB  - Europe PMC Preprints</xsl:text>
 				<xsl:value-of select="$newline"/>
 			</xsl:when>
 		</xsl:choose>
@@ -418,9 +427,19 @@ SOFTWARE. -->
 	
 	<xsl:template match="bookOrReportDetails/publisher">
 		<xsl:param name="risType"/>
-		<xsl:text>PB  - </xsl:text>
-		<xsl:apply-templates/>
-		<xsl:value-of select="$newline"/>
+		<xsl:choose>
+			<xsl:when test="$risType = 'JOUR'">
+				<!-- Use T2 instead of PB for the preprint server name, T2 avoids interpretation as an abbreviation, see JIRA ticket: CIT-8546 -->
+				<xsl:text>T2  - </xsl:text>
+				<xsl:apply-templates/>
+				<xsl:value-of select="$newline"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:text>PB  - </xsl:text>
+				<xsl:apply-templates/>
+				<xsl:value-of select="$newline"/>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 	
 	<xsl:template match="bookOrReportDetails/yearOfPublication">

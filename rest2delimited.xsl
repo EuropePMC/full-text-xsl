@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2019 EMBL-EBI/Europe PMC (https://europepmc.org/)
+<!-- Copyright (c) 2024 EMBL-EBI/Europe PMC (https://europepmc.org/)
   
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,8 @@ SOFTWARE. -->
 	
 	<!-- 
 		Script: rest2delimited.xsl
-		Version: 1.1
+		Version: 1.2
+		Changes since 1.1: journalMode = 1
 		Changes since 1.0: Now uses author first names, if available
 		Status: Ready for production
 		Summary: Transforms Europe PMC RESTful "search" responses (resulttype=core) to a one-line per record containing key fields delimited
@@ -36,7 +37,7 @@ SOFTWARE. -->
 	<xsl:param name="delimiter" select="'&#x9;'"/>
 	<xsl:param name="includeHeader" select="'Y'"/>
 	<xsl:param name="maxAuthors"/>
-	<xsl:param name="journalMode" select="2"/>	<!-- 1 = Full title, 2 = Abbreviated title, 3 = ISSN -->
+	<xsl:param name="journalMode" select="1"/>	<!-- 1 = Full title, 2 = Abbreviated title, 3 = ISSN -->
 	<xsl:param name="authorMode" select="2"/>	<!-- 1 = Surname, Initials, 2 = Surname, Firstnames (where available, if not initials) -->
 	
 	<xsl:variable name="newline" select="'&#13;&#10;'"/>

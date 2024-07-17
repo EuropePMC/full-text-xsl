@@ -66,7 +66,7 @@ SOFTWARE. -->
 							<xsl:text>)</xsl:text>
 						</xsl:if>
 					</xsl:if>
-					<xsl:text> </xsl:text>
+					<xsl:text>:</xsl:text>
 					<xsl:apply-templates select="pageInfo"/>
 					<xsl:text>.</xsl:text>
 					<!-- TODO: Add languages here? -->

@@ -108,7 +108,7 @@ SOFTWARE. -->
 				</xsl:otherwise>
 			</xsl:choose>	
 			<xsl:if test="doi">
-				<xsl:text> doi:</xsl:text>
+				<xsl:text> doi: </xsl:text>
 				<xsl:apply-templates select="doi[1]"/>
 				<xsl:text>.</xsl:text>
 			</xsl:if>

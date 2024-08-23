@@ -72,10 +72,15 @@ SOFTWARE. -->
 					<!-- TODO: Add languages here? -->
 				</xsl:when>
 				<xsl:when test="bookOrReportDetails">
-					<xsl:if test="not(substring(title/text(), string-length(title/text()), 1) = '.')">
-						<xsl:text>. </xsl:text>
-					</xsl:if>
-					<xsl:if test="bookOrReportDetails/comprisingTitle and not(pubTypeList/pubType[text()='Book'])">
+					<xsl:choose>
+						<xsl:when test="not(substring(title/text(), string-length(title/text()), 1) = '.')">
+							<xsl:text>. </xsl:text>
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:text> </xsl:text>
+						</xsl:otherwise>
+					</xsl:choose>
+					<xsl:if test="bookOrReportDetails/comprisingTitle and not(pubTypeList/pubType[text()='Book']) and not(pubTypeList/pubType[text()='Preprint'])">
 						<xsl:text>In: </xsl:text>
 						<!-- TODO: List editors here, if/when they are made available in the core web service response, see JIRA ticket CIT-1166 -->
 						<xsl:apply-templates select="bookOrReportDetails/comprisingTitle"/>
@@ -97,8 +102,10 @@ SOFTWARE. -->
 							<xsl:apply-templates select="fullTextUrlList/fullTextUrl[site/text()='NCBI_Bookshelf']/url"/>
 						</xsl:if>
 					</xsl:if>
-					<xsl:if test="bookOrReportDetails/publisher and (pubTypeList/pubType[text()='Preprint'])">
+					<xsl:if test="pubTypeList/pubType[text()='Preprint']">
 						<xsl:apply-templates select="bookOrReportDetails/publisher"/>
+						<xsl:text>; </xsl:text>
+						<xsl:apply-templates select="bookOrReportDetails/yearOfPublication"/>
 						<xsl:text>.</xsl:text>
 					</xsl:if>
 				</xsl:when>

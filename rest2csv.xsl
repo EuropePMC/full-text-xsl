@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2019 EMBL-EBI/Europe PMC (https://europepmc.org/)
+<!-- Copyright (c) 2024 EMBL-EBI/Europe PMC (https://europepmc.org/)
   
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,8 @@ SOFTWARE.-->
 	
 	<!-- 
 		Script: rest2csv.xsl
-		Version: 1.2
+		Version: 1.3
+		Changes since 1.2: Handle preprint servers as journal titles, journalMode = 1
 		Changes since 1.0: Now uses author first names, if available
 		Status: Ready for production
 		Summary: Transforms Europe PMC RESTful "search" responses (resulttype=core) to a one-line per record containing key fields delimited
@@ -36,7 +37,7 @@ SOFTWARE.-->
 	
 	<xsl:param name="includeHeader" select="'Y'"/>
 	<xsl:param name="maxAuthors"/>
-	<xsl:param name="journalMode" select="2"/>	<!-- 1 = Full title, 2 = Abbreviated title, 3 = ISSN -->
+	<xsl:param name="journalMode" select="1"/>	<!-- 1 = Full title, 2 = Abbreviated title, 3 = ISSN -->
 	<xsl:param name="authorMode" select="2"/>	<!-- 1 = Surname, Initials, 2 = Surname, Firstnames (where available, if not initials) -->
 	<xsl:param name="formatMode" select="2"/>	<!-- 1 = TSV, 2 = CSV -->
 		
@@ -247,6 +248,18 @@ SOFTWARE.-->
 						</xsl:otherwise>
 					</xsl:choose>
 				</xsl:when>
+				<xsl:when test="source/text()='PPR' and not(journalInfo/journal)">
+					<xsl:choose>
+						<xsl:when test="$formatMode=1">
+							<xsl:apply-templates select="bookOrReportDetails/publisher"/>
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:call-template name="doublequotes">
+								<xsl:with-param name="text" select="bookOrReportDetails/publisher" />
+							</xsl:call-template>					
+						</xsl:otherwise>
+					</xsl:choose>
+				</xsl:when>
 				<xsl:otherwise>					
 					<xsl:choose>
 						<xsl:when test="$formatMode=1">
@@ -295,7 +308,13 @@ SOFTWARE.-->
 			<xsl:text>&quot;</xsl:text>
 			
 			<xsl:call-template name="outputdelimiter"/>
-			<xsl:apply-templates select="bookOrReportDetails/publisher"/>
+			
+			<xsl:choose>
+				<xsl:when test="not(source/text()='PPR')">
+					<xsl:apply-templates select="bookOrReportDetails/publisher"/>
+				</xsl:when>
+			</xsl:choose>
+			
 			<xsl:call-template name="outputdelimiter"/>
 			<xsl:apply-templates select="citedByCount"/>
 			<xsl:call-template name="outputdelimiter"/>

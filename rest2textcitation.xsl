@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2019 EMBL-EBI/Europe PMC (https://europepmc.org/)
+<!-- Copyright (c) 2024 EMBL-EBI/Europe PMC (https://europepmc.org/)
   
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,8 @@ SOFTWARE. -->
 	
 	<!-- 
 		Script: rest2textcitation.xsl
-		Version: 1.0
+		Version: 1.1
+		Changes since 1.0: Handle preprint servers as journal titles; include notice for retractions, errata and published preprints
 		Status: Ready for production
 		Summary: Transforms Europe PMC RESTful "search" responses (resulttype=core) to a one-line per record text citation format that is as close as possible to the format=text format that PubMed provides
 		Issues: Cannot do book editors (as this field is not in REST core.) Languages not included as that would require a mapping table of ISO 639-2 codes be included in this stylesheet
@@ -65,16 +66,21 @@ SOFTWARE. -->
 							<xsl:text>)</xsl:text>
 						</xsl:if>
 					</xsl:if>
-					<xsl:text> </xsl:text>
+					<xsl:text>:</xsl:text>
 					<xsl:apply-templates select="pageInfo"/>
 					<xsl:text>.</xsl:text>
 					<!-- TODO: Add languages here? -->
 				</xsl:when>
 				<xsl:when test="bookOrReportDetails">
-					<xsl:if test="not(substring(title/text(), string-length(title/text()), 1) = '.')">
-						<xsl:text>. </xsl:text>
-					</xsl:if>
-					<xsl:if test="bookOrReportDetails/comprisingTitle and not(pubTypeList/pubType[text()='Book'])">
+					<xsl:choose>
+						<xsl:when test="not(substring(title/text(), string-length(title/text()), 1) = '.')">
+							<xsl:text>. </xsl:text>
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:text> </xsl:text>
+						</xsl:otherwise>
+					</xsl:choose>
+					<xsl:if test="bookOrReportDetails/comprisingTitle and not(pubTypeList/pubType[text()='Book']) and not(pubTypeList/pubType[text()='Preprint'])">
 						<xsl:text>In: </xsl:text>
 						<!-- TODO: List editors here, if/when they are made available in the core web service response, see JIRA ticket CIT-1166 -->
 						<xsl:apply-templates select="bookOrReportDetails/comprisingTitle"/>
@@ -96,6 +102,12 @@ SOFTWARE. -->
 							<xsl:apply-templates select="fullTextUrlList/fullTextUrl[site/text()='NCBI_Bookshelf']/url"/>
 						</xsl:if>
 					</xsl:if>
+					<xsl:if test="pubTypeList/pubType[text()='Preprint']">
+						<xsl:apply-templates select="bookOrReportDetails/publisher"/>
+						<xsl:text>; </xsl:text>
+						<xsl:apply-templates select="bookOrReportDetails/yearOfPublication"/>
+						<xsl:text>.</xsl:text>
+					</xsl:if>
 				</xsl:when>
 				<xsl:otherwise>
 					<xsl:text>. </xsl:text>
@@ -103,10 +115,21 @@ SOFTWARE. -->
 				</xsl:otherwise>
 			</xsl:choose>	
 			<xsl:if test="doi">
-				<xsl:text> doi:</xsl:text>
+				<xsl:text> doi: </xsl:text>
 				<xsl:apply-templates select="doi[1]"/>
 				<xsl:text>.</xsl:text>
 			</xsl:if>
+			<xsl:for-each select="commentCorrectionList/commentCorrection">
+				<xsl:choose>
+					<xsl:when test="type/text()='Retraction in' or type/text()='Erratum in' or type/text()='Preprint of'">
+						<xsl:text> </xsl:text>
+						<xsl:apply-templates select="type"/>
+						<xsl:text>: </xsl:text>
+						<xsl:apply-templates select="reference"/>
+						<xsl:text>.</xsl:text>
+					</xsl:when>
+				</xsl:choose>
+			</xsl:for-each>
 			<xsl:choose>
 				<xsl:when test="pmid">
 					<xsl:text> PMID: </xsl:text>

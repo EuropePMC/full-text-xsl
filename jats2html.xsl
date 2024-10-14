@@ -310,7 +310,7 @@ SOFTWARE.
                 </xsl:otherwise>
               </xsl:choose>
               <xsl:text> </xsl:text>
-              <xsl:value-of select="article-meta/pub-date[1]/year"/>
+              <xsl:value-of select="article-meta/pub-date[@pub-type = 'ppub']/year | article-meta/pub-date[@pub-type = 'epub']/year"/>
               <xsl:for-each select="article-meta[1]">
                 <xsl:if test="volume or issue or fpage or elocation-id">
                   <xsl:if test="volume or issue">

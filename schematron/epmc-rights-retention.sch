@@ -21,10 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 -->
 
-<schema xmlns="http://purl.oclc.org/dsdl/schematron" queryBinding="xslt2">
-    <pattern id="aaas-warning" xmlns="http://purl.oclc.org/dsdl/schematron">
-        <rule context="text()">
-            <report test="contains(lower-case(normalize-space(.)), 'written permission of aaas')" role="warning">An AAAS Copyright Retention statement is present</report>     
-        </rule>
-    </pattern>
-</schema>
+<pattern id="aaas-warning" xmlns="http://purl.oclc.org/dsdl/schematron">
+    <rule context="text()">
+        <report test="contains(lower-case(normalize-space(.)), 'written permission of aaas')" role="warning">An AAAS Copyright Retention statement is present</report>
+    </rule>
+</pattern>

@@ -74,6 +74,6 @@ SOFTWARE.
   <include href="epmc-xref-warnings.sch"/>   
   <include href="jats-display-object-warnings-1.sch"/>  
   <include href="jats-display-object-warnings-2.sch"/>
-  <include href="empc-rights-retention.sch"/>
+  <include href="epmc-rights-retention.sch"/>
   
 </schema>

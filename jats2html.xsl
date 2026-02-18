@@ -3898,7 +3898,7 @@ SOFTWARE.
     which will cause problem if nodes has been generated under the parent element. 
     We will get an XTDE0410 error. Add the nodes here will prevent the attribugtes to
    processed. -->
-  <xsl:template match="floats-group//fig | floats-group//table-wrap | fn//table-wrap | back/sec//table-wrap">
+  <xsl:template match="floats-group//fig | disp-quote//fig | floats-group//table-wrap | fn//table-wrap | back/sec//table-wrap">
     <xsl:apply-templates />
   </xsl:template>
 

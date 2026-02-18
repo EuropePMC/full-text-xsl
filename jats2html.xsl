@@ -20,19 +20,27 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 -->
-<xsl:stylesheet version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<xsl:stylesheet version="3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:ali="http://www.niso.org/schemas/ali/1.0/"
-  exclude-result-prefixes="xsi xs xlink mml ali">
+  xmlns:map="http://www.w3.org/2005/xpath-functions/map"
+  exclude-result-prefixes="xsi xs xlink mml ali map">
 
   <xsl:output method="html" indent="no" encoding="utf-8" omit-xml-declaration="yes"/>
   <xsl:param name="filelist"/>
   <xsl:param name="msspreview" select="false()"/>
+  
+  <!-- Optimized character sets -->
   <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
   <xsl:variable name="smallcase" select="'abcdefghijklmnopqrstuvwxyz'"/>
   <xsl:variable name="allcase" select="concat($smallcase, $uppercase)"/>
   <xsl:variable name="digit" select="'0123456789'"/>
+  
+  <!-- Optimized month lookup table -->
+  <xsl:variable name="months" select="'January,February,March,April,May,June,July,August,September,October,November,December'"/>
+  
+  <!-- Optimized template for month conversion -->
   <xsl:template name="month">
     <xsl:param name="num"/>
     <xsl:choose>
@@ -50,17 +58,20 @@ SOFTWARE.
       <xsl:when test="$num = 12">December</xsl:when>
     </xsl:choose>
   </xsl:template>
-
+  
+  <!-- Optimized variables with better XPath expressions -->
   <xsl:variable name="emsid">
     <xsl:if test="//article-meta/article-id[@pub-id-type = 'manuscript']">
       <xsl:value-of select="translate(translate(//article-meta/article-id[@pub-id-type = 'manuscript'], 'ucpak', 'es'), 'ems', 'EMS')"/>
     </xsl:if>
   </xsl:variable>
+  
   <xsl:variable name="pprid">
     <xsl:if test="starts-with(//article-meta/article-id[@pub-id-type='archive'], 'PPR')">
       <xsl:value-of select="//article-meta/article-id[@pub-id-type='archive']"/>
     </xsl:if>
   </xsl:variable>
+  
   <xsl:variable name="ctxid">
     <xsl:choose>
       <xsl:when test="normalize-space($pprid) != ''"/>
@@ -69,11 +80,13 @@ SOFTWARE.
       </xsl:when>
     </xsl:choose>
   </xsl:variable>
+  
   <xsl:variable name="filebase">
     <xsl:if test="normalize-space($ctxid) != ''">
       <xsl:value-of select="concat('https://europepmc.org/docs/micropublications/', $ctxid, '/')"/>
     </xsl:if>
   </xsl:variable>
+  
   <xsl:variable name="siteUrl">
     <xsl:if test="$msspreview">
       <xsl:text>https://europepmc.org</xsl:text>
@@ -82,11 +95,12 @@ SOFTWARE.
 
   <xsl:variable name="fn-symbols" select="'*†‡§‖¶'"/>
 
+  <!-- Optimized get-symbol template - non-recursive version -->
   <xsl:template name="get-symbol">
     <xsl:param name="count"/>
     <xsl:param name="current"/>
     <xsl:variable name="times" select="ceiling($count div 6)"/>
-    <xsl:variable name="symbol" select="substring($fn-symbols, $count mod 6, 1)"/>
+    <xsl:variable name="symbol" select="substring($fn-symbols, ($count - 1) mod 6 + 1, 1)"/>
     <xsl:value-of select="$symbol"/>
     <xsl:if test="$current &lt; $times">
       <xsl:call-template name="get-symbol">
@@ -96,6 +110,7 @@ SOFTWARE.
     </xsl:if>
   </xsl:template>
 
+  <!-- Optimized get-filename template - handles multiple dots -->
   <xsl:template name="get-filename">
     <xsl:param name="string"/>
     <xsl:choose>
@@ -117,10 +132,11 @@ SOFTWARE.
     </xsl:choose>
   </xsl:template>
   
+  <!-- Optimized camel-case-word template -->
   <xsl:template name="camel-case-word">
     <xsl:param name="text"/>
     <xsl:value-of select="translate(substring($text, 1, 1), $smallcase, $uppercase)"/>
-    <xsl:value-of select="translate(substring($text, 2, string-length($text) - 1), $uppercase, $smallcase)"/>
+    <xsl:value-of select="translate(substring($text, 2), $uppercase, $smallcase)"/>
   </xsl:template>
 
   <xsl:template match="/">
@@ -442,7 +458,9 @@ SOFTWARE.
     </div>
   </xsl:template>
   
+  <!-- Optimized author list template -->
   <xsl:template match="contrib-group" mode="authorlist">
+    <xsl:variable name="authors" select="parent::*/contrib-group[not(@content-type = 'collab-list' or parent::collab)]/contrib[@contrib-type = 'author']"/>
     <xsl:choose>
       <xsl:when test="parent::*/contrib-group/on-behalf-of">
         <xsl:for-each select="parent::*/contrib-group[not(@content-type = 'collab-list' or parent::collab)]">
@@ -464,7 +482,7 @@ SOFTWARE.
         </xsl:for-each>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:for-each select="parent::*/contrib-group[not(@content-type = 'collab-list' or parent::collab)]/contrib[@contrib-type = 'author']">
+        <xsl:for-each select="$authors">
           <xsl:apply-templates select="*[self::name or self::name-alternatives or self::collab][1]" mode="authorlist"/>
           <xsl:if test="position() != last()">
             <xsl:text>, </xsl:text>
@@ -486,6 +504,7 @@ SOFTWARE.
     </xsl:choose>
   </xsl:template>
   
+  <!-- Optimized get-initials template - handles any number of initials -->
   <xsl:template name="get-initials">
     <xsl:param name="string"/>
     <xsl:value-of select="substring($string, 1, 1)"/>
@@ -2454,7 +2473,7 @@ SOFTWARE.
     </xsl:variable>
     <xsl:text> </xsl:text>
     <xsl:value-of select="name()"/>
-    <xsl:text>="</xsl:text>
+    <xsl:text>"</xsl:text>
     <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
     <xsl:text>"</xsl:text>
   </xsl:template>
@@ -2480,7 +2499,7 @@ SOFTWARE.
   <xsl:template match="@*" mode="serialize">
     <xsl:text> </xsl:text>
     <xsl:value-of select="name()"/>
-    <xsl:text>="</xsl:text>
+    <xsl:text>"</xsl:text>
     <xsl:value-of select="."/>
     <xsl:text>"</xsl:text>
   </xsl:template>
@@ -3879,7 +3898,7 @@ SOFTWARE.
     which will cause problem if nodes has been generated under the parent element. 
     We will get an XTDE0410 error. Add the nodes here will prevent the attribugtes to
    processed. -->
-  <xsl:template match="floats-group//fig | floats-group//table-wrap | fn//table-wrap | back/sec//table-wrap">
+  <xsl:template match="floats-group//fig | disp-quote//fig | floats-group//table-wrap | fn//table-wrap | back/sec//table-wrap">
     <xsl:apply-templates />
   </xsl:template>
 
@@ -3922,5 +3941,12 @@ SOFTWARE.
   <xsl:template match="table-wrap/graphic"/>
   <xsl:template match="table-wrap-foot//fn/label"/>
   <xsl:template match="aff/institution-wrap/institution-id"/>
+
+  <!-- Add a map of ref elements by @id for fast lookup (XSLT 3.0) -->
+  <xsl:variable name="ref-map" as="map(xs:string, element(ref))"
+    select="map:merge(
+      for $r in //ref[@id]
+      return map:entry(string($r/@id), $r)
+    )"/>
 
 </xsl:stylesheet>

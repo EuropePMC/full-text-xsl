@@ -1316,6 +1316,17 @@ SOFTWARE.
       <xsl:apply-templates/>
     </span>
   </xsl:template>
+
+  <xsl:template match="aff/city">
+    <xsl:apply-templates/>
+  </xsl:template>
+
+  <xsl:template match="aff/postal-code">
+    <xsl:if test="preceding-sibling::node()[1][self::city]">
+      <xsl:text> </xsl:text>
+    </xsl:if>
+    <xsl:apply-templates/>
+  </xsl:template>
   
   <!-- ==== Data set start ==== -->
   <xsl:template match="sec[@sec-type = 'datasets']">

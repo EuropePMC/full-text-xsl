@@ -9,6 +9,8 @@
   exclude-result-prefixes="xsi xs xlink mml ali">
 
   <xsl:output method="html" indent="no" encoding="utf-8" omit-xml-declaration="yes"/>
+	<xsl:param name="elementId" select="''"/>
+	<xsl:param name="elementType" select="''"/>
   <xsl:template name="pmc_month">
     <xsl:param name="num"/>
     <xsl:choose>
@@ -225,7 +227,7 @@
   </xsl:template>
 
   <xsl:template match="permissions" name="permissions">
-    <xsl:param name="top"/>
+		<xsl:param name="top" as="xs:integer" select="0"/>
     <xsl:variable name="head">
       <xsl:choose>
         <xsl:when test="parent::article-meta or $top">h2</xsl:when>

@@ -2555,7 +2555,7 @@ SOFTWARE.
           </xsl:choose>
         </xsl:variable>
         <a href="{$graphics}" target="_blank" class="figure-expand" title="{$caption} - Click to open full size">
-          <img data-img="[graphic-{$filename}-medium]" src="{$graphics}" alt="{alt}"/>
+          <img data-img="[graphic-{$filename}-medium]" src="{$graphics}" alt="{$alt}"/>
         </a>
       </xsl:if>
       <xsl:apply-templates select="label" mode="captionLabel"/>
@@ -2752,7 +2752,7 @@ SOFTWARE.
     </span>
   </xsl:template>
 
-  <xsl:template match="fig-group//caption/title | fig//caption/title | supplementary-material/caption/title | table-wrap/caption | table-wrap-group/caption/title">
+  <xsl:template match="fig-group//caption/title | fig//caption/title | supplementary-material/caption/title | table-wrap/caption/p | table-wrap-group/caption/p">
     <span class="caption-title">
       <xsl:apply-templates/>
     </span>

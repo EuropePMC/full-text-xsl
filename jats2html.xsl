@@ -3874,7 +3874,7 @@ SOFTWARE.
   <!-- Override the default template, create copies for attributes and text nodes, instead of output the text values -->
   <xsl:template match="*"><xsl:apply-templates select="@* | node()"/></xsl:template>
 
-  <!-- <xsl:template match="@* | text()"><xsl:copy/></xsl:template> -->
+  <xsl:template match="@* | text()"><xsl:copy/></xsl:template>
   
   <!-- END - general format -->
   

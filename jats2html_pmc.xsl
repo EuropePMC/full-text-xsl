@@ -24,9 +24,9 @@ SOFTWARE.
   xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:ali="http://www.niso.org/schemas/ali/1.0/"
-  exclude-result-prefixes="xsi xs xlink mml ali"> 
+  exclude-result-prefixes="xsi xs xlink mml ali">
   <xsl:output method="html" indent="no" encoding="utf-8" omit-xml-declaration="yes"/>
-  <xsl:include href="/xsl/lang_map.xsl" />
+  <xsl:include href="lang_map.xsl" />
   <xsl:param name="filelist"/>
   <xsl:param name="msspreview" select="false()"/>
   <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
@@ -149,7 +149,7 @@ SOFTWARE.
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xsl:template name="camel-case-word">
     <xsl:param name="text"/>
     <xsl:value-of select="translate(substring($text, 1, 1), $smallcase, $uppercase)"/>
@@ -174,7 +174,7 @@ SOFTWARE.
         </div>
       </xsl:when>
       <xsl:otherwise>
-        <div id="epmc-fulltext-container">        
+        <div id="epmc-fulltext-container">
         <xsl:if test="$is-retracted">
           <xsl:attribute name="class">
             <xsl:text>retraction-wm</xsl:text>
@@ -198,7 +198,7 @@ SOFTWARE.
     <!-- <xsl:apply-templates select="front" mode="article-info-history"/> -->
     <!-- </xsl:if> -->
   </xsl:template>
-  
+
   <!-- *** FRONT MATTER START *** -->
 
   <xsl:template match="front">
@@ -249,11 +249,11 @@ SOFTWARE.
       <xsl:if test="article-meta/abstract and normalize-space($ctxid) = ''">
         <xsl:apply-templates select="article-meta/abstract"/>
         <xsl:apply-templates select="article-meta/trans-abstract"/>
-      </xsl:if>               
+      </xsl:if>
       <!-- </xsl:otherwise> -->
     <!-- </xsl:choose> -->
   </xsl:template>
-  
+
   <xsl:template match="sub-article">
     <div class="sub-article-divider"/>
     <div class="sub-article" id="{@id}">
@@ -288,9 +288,9 @@ SOFTWARE.
       <xsl:if test="$hasPubInfo">
         <div class="pmc-citeinfo">
           <div class="pmc-identifiers float-right">
-              <xsl:apply-templates select="article-meta/article-id"/> 
+              <xsl:apply-templates select="article-meta/article-id"/>
               <xsl:if test="normalize-space($emsid) != ''">
-                <xsl:text>EMSID: </xsl:text>     
+                <xsl:text>EMSID: </xsl:text>
                 <!-- <xsl:when test="$pmid"> -->
                   <a href="https://europepmc.org/article/MED/{$pmid}" target="_blank">
                     <xsl:value-of select="$emsid"/>
@@ -331,14 +331,14 @@ SOFTWARE.
               <xsl:value-of select="article-meta/pub-date[1]/year"/>
               <xsl:if test="article-meta/pub-date[1]/season">
                 <xsl:text> </xsl:text>
-                <xsl:value-of select="article-meta/pub-date[1]/season"/>                 
+                <xsl:value-of select="article-meta/pub-date[1]/season"/>
               </xsl:if>
               <!-- <xsl:if test="normalize-space($pmcid) != ''"> -->
                 <xsl:if test="article-meta/pub-date[1]/month">
                   <xsl:text> </xsl:text>
                   <xsl:call-template name="pmc_month">
                     <xsl:with-param name="num" select="article-meta/pub-date[1]/month"/>
-                  </xsl:call-template>          
+                  </xsl:call-template>
                 </xsl:if>
                 <xsl:if test="$isSub">
                   <xsl:text> </xsl:text>
@@ -420,7 +420,7 @@ SOFTWARE.
             </xsl:choose> -->
             <br/>
           </xsl:if>
-          
+
             <xsl:if test="article-meta/pub-history/event[@event-type='original-publication']">
               <xsl:text>Originally Published </xsl:text>
               <xsl:call-template name="format-version-date">
@@ -450,7 +450,7 @@ SOFTWARE.
   <xsl:template match="article-meta">
     <!-- <xsl:apply-templates select="contrib-group/contrib[@content-type='reviewer'][1]" mode="article-info-reviewing-editor"/>
     <xsl:apply-templates select="contrib-group/contrib[@content-type='editor'][1]" mode="article-info-reviewing-editor"/> -->
-    
+
     <!-- section contributor information-->
     <xsl:apply-templates select="ancestor::*[self::article or self::sub-article][1]
             /body//sec[@sec-type='contrib-info']" mode="contrib-info"/>
@@ -468,11 +468,11 @@ SOFTWARE.
               </xsl:attribute>
             </xsl:if>
             <xsl:text>Author and contributor roles</xsl:text>
-          </xsl:element>           
+          </xsl:element>
           <xsl:apply-templates select=".//contrib[role]" mode="display-roles"/>
         </div>
       </xsl:if>
-    <!-- article notes-->  
+    <!-- article notes-->
   <xsl:apply-templates select="../notes[@notes-type='article-notes']"/>
   <!--permissions-->
   <xsl:choose>
@@ -531,7 +531,7 @@ SOFTWARE.
               </xsl:attribute>
             </xsl:if>
             <xsl:text>Supplementary Materials</xsl:text>
-          </xsl:element>  
+          </xsl:element>
           <xsl:apply-templates select="sec[@sec-type='supplementary-materials']" mode="associated-data"/>
       </div>
     </xsl:if>
@@ -580,7 +580,7 @@ SOFTWARE.
               <xsl:value-of select="concat('https://europepmc.org/api/fulltextRepo?pmcId=', $pmcid, '&amp;type=FILE&amp;fileName=', @xlink:href, '&amp;version=', $current-version, '&amp;mimeType=application/vnd.openxmlformats-officedocument.wordprocessingml.document', '&amp;pmc_pageType=supp')"/>
             </xsl:when>
             <xsl:otherwise>
-              <xsl:value-of select="concat('https://europepmc.org/api/fulltextRepo?pmcId=', $pmcid, '&amp;type=FILE&amp;fileName=', $href, '&amp;mimeType=application/pdf', '&amp;pmc_pageType=supp')"/>
+              <xsl:value-of select="concat('https://europepmc.org/api/fulltextRepo?pmcId=', $pmcid, '&amp;type=FILE&amp;fileName=', @xlink:href, '&amp;mimeType=application/pdf', '&amp;pmc_pageType=supp')"/>
             </xsl:otherwise>
           </xsl:choose>
         </xsl:attribute>
@@ -603,7 +603,7 @@ SOFTWARE.
             </xsl:attribute>
           </xsl:if>
           <xsl:text>Contributor information</xsl:text>
-        </xsl:element>  
+        </xsl:element>
       <div class="section-contrib">
         <xsl:apply-templates select="p"/>
       </div>
@@ -636,7 +636,7 @@ SOFTWARE.
           </xsl:attribute>
         </xsl:if>
         <xsl:text>Article notes</xsl:text>
-      </xsl:element>  
+      </xsl:element>
         <div class="article-notes-content">
           <xsl:apply-templates select="sec" mode="article-notes"/>
         </div>
@@ -685,8 +685,8 @@ SOFTWARE.
             </xsl:attribute>
           </xsl:if>
           <xsl:text>Other versions</xsl:text>
-        </xsl:element>  
-        <div class="version-history-content">    
+        </xsl:element>
+        <div class="version-history-content">
           <ul class="version-history-list">
             <xsl:for-each select="$versions">
               <xsl:sort select="date/year" data-type="number"/>
@@ -733,7 +733,7 @@ SOFTWARE.
   <xsl:template match="article-meta" mode="authors">
     <div class="fulltext--author-information whole_rhythm">
       <xsl:choose>
-        <xsl:when test="normalize-space($ctxid) != ''"/> 
+        <xsl:when test="normalize-space($ctxid) != ''"/>
         <xsl:otherwise>
           <div>
             <xsl:apply-templates select=".//contrib-group[not(@content-type = 'collab-list' or parent::collab)][1]" mode="authorlist"/>
@@ -763,17 +763,17 @@ SOFTWARE.
                 <xsl:text>Author affiliations &amp; information</xsl:text>
               </h2>
               <div class="author-content">
-                <ol class="pmc-affiliations">            
-                  <xsl:apply-templates select=".//aff[not(parent::contrib-group[@content-type='collab-list'] or ancestor::collab)][not(. = preceding::aff)]" mode="afflist"/>              
+                <ol class="pmc-affiliations">
+                  <xsl:apply-templates select=".//aff[not(parent::contrib-group[@content-type='collab-list'] or ancestor::collab)][not(. = preceding::aff)]" mode="afflist"/>
                 </ol>
                 <!-- List only labeled notes -->
-                <ol class="author-notes">        
+                <ol class="author-notes">
                   <xsl:for-each select=".//author-notes/fn">
                     <li id="{@id}">
                       <xsl:if test="label">
                         <sup>
                           <xsl:value-of select="label"/>
-                          <xsl:text> </xsl:text>     
+                          <xsl:text> </xsl:text>
                         </sup>
                       </xsl:if>
                       <xsl:apply-templates select="p/node()"/>
@@ -793,11 +793,11 @@ SOFTWARE.
       </xsl:choose>
     </div>
   </xsl:template>
-  
+
   <xsl:template match="contrib-group[@content-type='editor']">
     <div class="fulltext--editor-information" style="margin: 8px" />
     <xsl:choose>
-      <xsl:when test="normalize-space($ctxid) != ''"/> 
+      <xsl:when test="normalize-space($ctxid) != ''"/>
       <xsl:otherwise>
         <xsl:for-each select="parent::*/contrib-group[@content-type = 'editor' and not(@content-type = 'collab-list' or parent::collab)]/contrib">
           <span class="fulltext--editor-name">
@@ -884,7 +884,7 @@ SOFTWARE.
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xsl:template match="node()" mode="make-url">
     <xsl:choose>
       <xsl:when test="self::contrib-group or preceding-sibling::contrib-group or parent::contrib-group"/>
@@ -893,7 +893,7 @@ SOFTWARE.
       </xsl:when>
     </xsl:choose>
   </xsl:template>
-  
+
   <xsl:template name="get-initials">
     <xsl:param name="string"/>
     <xsl:value-of select="substring($string, 1, 1)"/>
@@ -905,7 +905,7 @@ SOFTWARE.
       </xsl:call-template>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template match="name-alternatives" mode="authorlist">
     <xsl:apply-templates select="name[1]" mode="authorlist"/>
     <xsl:for-each select="name[position() > 1]|string-name">
@@ -934,7 +934,7 @@ SOFTWARE.
           </xsl:variable>
           <xsl:value-of select="concat($siteUrl,'/search?query=AUTH:%22', $collab-url, '%22')"/>
         </xsl:when>
-      </xsl:choose> 
+      </xsl:choose>
       </xsl:attribute>
       <xsl:apply-templates select="prefix"/>
       <span class="fulltext--author-name">
@@ -948,7 +948,7 @@ SOFTWARE.
           </xsl:when>
         </xsl:choose>
       </span>
-      <xsl:apply-templates select="following-sibling::degrees"/>  
+      <xsl:apply-templates select="following-sibling::degrees"/>
     </a><!-- used for author list at beginning-->
    <!-- following-sibling::xref[@ref-type='aff'] - used for author list at beginning-->
     <!--exclude this for sub-article - peer-review-info if needed-->
@@ -976,8 +976,8 @@ SOFTWARE.
                   <xsl:with-param name="position" select="$position"/>
                 </xsl:apply-templates>
               </xsl:otherwise>
-            </xsl:choose>          
-          </xsl:when> 
+            </xsl:choose>
+          </xsl:when>
           <!-- used for author list at beginning -->
           <xsl:when test="self::xref">
             <xsl:variable name="rid" select="@rid"/>
@@ -995,7 +995,7 @@ SOFTWARE.
                   <xsl:with-param name="position" select="$position"/>
                 </xsl:apply-templates>
               </xsl:otherwise>
-            </xsl:choose>    
+            </xsl:choose>
           </xsl:when>
         </xsl:choose>
       </xsl:for-each>
@@ -1125,17 +1125,17 @@ SOFTWARE.
     </xsl:choose>
     <xsl:apply-templates select="following-sibling::on-behalf-of"/>
   </xsl:template>
-  
+
   <xsl:template match="name/prefix">
     <xsl:value-of select="."/>
     <xsl:text> </xsl:text>
   </xsl:template>
-  
+
   <xsl:template match="contrib/degrees | name/suffix">
     <xsl:text>, </xsl:text>
     <xsl:value-of select="."/>
   </xsl:template>
-  
+
   <xsl:template match="on-behalf-of">
     <xsl:if test="preceding-sibling::contrib">
       <xsl:text>,</xsl:text>
@@ -1143,17 +1143,17 @@ SOFTWARE.
     <xsl:text> </xsl:text>
     <xsl:apply-templates/>
   </xsl:template>
-  
+
   <xsl:template match="aff" mode="list-xrefs">
     <xsl:param name="current"/>
     <xsl:param name="position"/>
     <xsl:if test=". = $current">
       <xsl:text> </xsl:text>
       <a>
-        <xsl:attribute name="href">   
+        <xsl:attribute name="href">
           <xsl:if test="@id">
             <xsl:value-of select="concat('#',@id)"/>
-          </xsl:if>          
+          </xsl:if>
         </xsl:attribute>
         <!-- <xsl:if test="not($msspreview) and normalize-space($pprid) != ''"> -->
         <xsl:if test="not($msspreview)">
@@ -1161,7 +1161,7 @@ SOFTWARE.
             <xsl:text>document.getElementById('</xsl:text>
               <xsl:if test="@id">
                 <xsl:value-of select="@id"/>
-              </xsl:if>            
+              </xsl:if>
             <xsl:text>').closest('.author-content').previousElementSibling.classList.add('open')</xsl:text>
           </xsl:attribute>
         </xsl:if>
@@ -1177,9 +1177,9 @@ SOFTWARE.
       <xsl:if test="$position!='last'">
         <xsl:text> </xsl:text>
       </xsl:if>
-    </xsl:if>      
+    </xsl:if>
   </xsl:template>
-  
+
   <xsl:template match="aff" mode="afflist">
     <li class="fulltext--author-affiliation-item">
         <xsl:attribute name="id">
@@ -1188,21 +1188,21 @@ SOFTWARE.
            </xsl:if>
         </xsl:attribute>
           <div class="p">
-            <sup>             
+            <sup>
               <xsl:if test="label">
                 <xsl:value-of select="label"/>
-                <xsl:text> </xsl:text> 
-              </xsl:if>                  
+                <xsl:text> </xsl:text>
+              </xsl:if>
             </sup>
             <xsl:apply-templates select="*[not(self::label)]|text()"/>
           </div>
         </li>
   </xsl:template>
-  
+
   <xsl:template match="aff/text()">
     <xsl:value-of select="normalize-space(.)"/>
   </xsl:template>
-  
+
   <xsl:template match="aff//xref[@ref-type = 'fn']">
     <xsl:variable name="rid" select="@rid"/>
     <xsl:choose>
@@ -1220,20 +1220,20 @@ SOFTWARE.
               <xsl:call-template name="get-symbol">
                 <xsl:with-param name="count" select="$count"/>
                 <xsl:with-param name="current" select="1"/>
-              </xsl:call-template>              
+              </xsl:call-template>
             </a>
           </xsl:if>
         </xsl:for-each>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xsl:template match="p" mode="review-map">
     <xsl:variable name="afterRec" select="normalize-space(substring-after(., 'Recommendation:'))"/>
     <xsl:variable name="str" select="translate($afterRec, '-', ' ')"/>
     <xsl:value-of select="concat(translate(substring($str, 1, 1), $smallcase, $uppercase), substring($str, 2))"/>
   </xsl:template>
-  
+
   <xsl:template name="peer-review-summary">
     <div class="peer-review-summary" id="prs">
       <h2 id="prstitle" class="head">Peer Review Summary</h2>
@@ -1271,7 +1271,7 @@ SOFTWARE.
       </table>
     </div>
   </xsl:template>
-  
+
   <xsl:template match="article-meta/title-group">
     <div id="title-group">
       <xsl:apply-templates select="article-title | subtitle"/>
@@ -1443,7 +1443,7 @@ SOFTWARE.
       <xsl:value-of select="surname"/>
     </span>
   </xsl:template>
-  
+
   <xsl:template match="string-name | collab">
     <xsl:value-of select="."/>
   </xsl:template>
@@ -1473,7 +1473,7 @@ SOFTWARE.
           </xsl:apply-templates>
         </xsl:for-each>
       </ul>
-    </div>    
+    </div>
   </xsl:template>
 
   <xsl:template match="date | pub-date" mode="publication-history-item">
@@ -1506,7 +1506,7 @@ SOFTWARE.
     <xsl:apply-templates/>
   </xsl:template>
   <xsl:template match="fn-group[@content-type = 'ethics-information']/title"/>
-  
+
   <xsl:template match="contrib" mode="article-info-reviewing-editor">
     <xsl:variable name="level">
       <xsl:choose>
@@ -1541,7 +1541,7 @@ SOFTWARE.
       </xsl:element>
     </xsl:element>
   </xsl:template>
-  
+
   <xsl:template match="contrib" mode="edlist">
     <xsl:apply-templates select="descendant::name[1]|string-name|collab"/>
   </xsl:template>
@@ -1561,7 +1561,7 @@ SOFTWARE.
 
   <!-- permissions -->
   <xsl:template match="permissions" name="permissions">
-    <xsl:param name="top"/>
+    <xsl:param name="top" as="xs:integer" select="0"/>
     <xsl:variable name="head">
       <xsl:choose>
         <xsl:when test="parent::article-meta or $top">h2</xsl:when>
@@ -1632,11 +1632,11 @@ SOFTWARE.
   </xsl:template>
 
   <xsl:template match="permissions/copyright-statement">
-    <p class="copyright"><xsl:apply-templates/></p>  
+    <p class="copyright"><xsl:apply-templates/></p>
   </xsl:template>
 
   <xsl:template match="license">
-    <xsl:apply-templates/>    
+    <xsl:apply-templates/>
   </xsl:template>
 
   <xsl:template match="license-p">
@@ -1699,7 +1699,7 @@ SOFTWARE.
       <xsl:apply-templates/>
     </span>
   </xsl:template>
-  
+
   <!-- ==== Data set start ==== -->
   <xsl:template match="sec[@sec-type = 'datasets']">
     <div id="datasets">
@@ -1763,7 +1763,7 @@ SOFTWARE.
       <xsl:apply-templates/>
     </span>
   </xsl:template>
-  
+
   <!-- funding-group -->
   <xsl:template match="funding-group">
     <div id="author-info-funding">
@@ -1800,7 +1800,7 @@ SOFTWARE.
       <xsl:apply-templates/>
     </h5>
   </xsl:template>
-  
+
   <xsl:template match="principal-award-recipient">
     <ul class="principal-award-recipient">
       <xsl:apply-templates/>
@@ -1814,7 +1814,7 @@ SOFTWARE.
     </li>
     <xsl:value-of select="name"/>
   </xsl:template>
-  
+
   <xsl:template match="funding-statement" name="funding-statement">
     <p class="funding-statement">
       <xsl:apply-templates/>
@@ -1822,7 +1822,7 @@ SOFTWARE.
   </xsl:template>
 
   <!-- ==== FRONT MATTER END ==== -->
-  
+
   <!-- ==== ABSTRACT ==== -->
 
   <xsl:template match="abstract | trans-abstract">
@@ -1844,7 +1844,7 @@ SOFTWARE.
             <xsl:attribute name="lang">
               <xsl:value-of select="$lang"/>
             </xsl:attribute>
-          </xsl:if> 
+          </xsl:if>
           <xsl:attribute name="class">
             <xsl:text>abstract trans</xsl:text>
           </xsl:attribute>
@@ -1860,7 +1860,7 @@ SOFTWARE.
       <h2 id="{concat($id,'title')}" class="head">
         <xsl:apply-templates select="label"/>
         <xsl:apply-templates select="title/node()"/>
-      </h2>  
+      </h2>
       <xsl:apply-templates select="node()[not(self::label or self:: title)]" mode="testing"/>
     </div>
   </xsl:template>
@@ -1886,7 +1886,7 @@ SOFTWARE.
       </xsl:for-each>
     </p>
   </xsl:template> -->
-  
+
   <!-- ==== BODY ==== -->
   <xsl:template match="body">
     <xsl:if test="child::*[position()=1][self::p]">
@@ -1905,7 +1905,7 @@ SOFTWARE.
       </div>
     </div>
   </xsl:template>
-  
+
   <!--no longer needed as its handled separately with associated-data-->
   <!-- <xsl:template match="body" mode="supplementary-materials"> -->
   <!--This will never be applied as there is no direct <supplementary-materials> tag in the ssnexlite xml, so changed to supplementary-material check-->
@@ -2046,7 +2046,7 @@ SOFTWARE.
       <xsl:apply-templates select="." mode="add-floats"/>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template match="boxed-text" mode="label-title">
     <xsl:param name="heading-el"/>
     <xsl:variable name="level">
@@ -2107,7 +2107,7 @@ SOFTWARE.
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xsl:template match="
     sec[not(@sec-type = 'additional-information')][not(@sec-type = 'datasets')][not(@sec-type = 'supplementary-materials')]
     [not(@sec-type = 'floats-group')][not(@sec-type = 'scanned-pages')][not(@sec-type = 'ref-list')]" mode="testing">
@@ -2147,9 +2147,9 @@ SOFTWARE.
   </xsl:template>
 
   <!-- END transforming sections to heading levels -->
-  
+
   <!-- body content -->
-  
+
   <xsl:template match="p">
     <xsl:if test="not(supplementary-material)">
       <p>
@@ -2184,7 +2184,7 @@ SOFTWARE.
       <xsl:apply-templates select="." mode="add-floats"/>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template match="ext-link">
     <xsl:variable name="type" select="@ext-link-type"/>
     <xsl:variable name="href" select="@xlink:href"/>
@@ -2236,7 +2236,7 @@ SOFTWARE.
     <xsl:apply-templates/>
   </a>
   </xsl:template>
-  
+
   <xsl:template match="named-content">
     <span>
       <xsl:attribute name="class">
@@ -2248,9 +2248,9 @@ SOFTWARE.
       <xsl:apply-templates/>
     </span>
   </xsl:template>
-  
+
   <!-- list elements start-->
-  
+
   <xsl:template name="get-list-start">
     <xsl:param name="rid"/>
     <xsl:param name="count" select="1"/>
@@ -2268,7 +2268,7 @@ SOFTWARE.
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xsl:template match="list">
     <xsl:choose>
       <xsl:when test="@list-type = 'simple' or @list-type = 'bullet'">
@@ -2327,7 +2327,7 @@ SOFTWARE.
       <xsl:apply-templates select="." mode="add-floats"/>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template match="list-item">
     <li>
       <xsl:if test="@id">
@@ -2349,10 +2349,10 @@ SOFTWARE.
       </xsl:choose>
     </li>
   </xsl:template>
-  
+
   <xsl:template match="p" mode="list-single-p">
     <xsl:if test="preceding-sibling::*[1][self::label]">
-      <xsl:apply-templates select="preceding-sibling::*[1][self::label]" mode="list-label"/>      
+      <xsl:apply-templates select="preceding-sibling::*[1][self::label]" mode="list-label"/>
     </xsl:if>
     <span class="p-content">
       <xsl:if test="@id">
@@ -2363,7 +2363,7 @@ SOFTWARE.
       <xsl:apply-templates mode="testing"/>
     </span>
   </xsl:template>
-  
+
   <xsl:template match="label" mode="list-label">
     <span class="list_label">
       <xsl:apply-templates/>
@@ -2375,9 +2375,9 @@ SOFTWARE.
       </xsl:if>
     </span>
   </xsl:template>
-  
+
   <!-- START handling citation objects -->
-  
+
   <xsl:template match="*" mode="add-floats">
     <xsl:if test="//floats-group or //sec[@sec-type = 'floats-group'] or //*[@position = 'float']">
       <xsl:for-each select="descendant::xref[@ref-type = 'table' or @ref-type = 'fig' or @ref-type = 'boxed-text']">
@@ -2389,12 +2389,12 @@ SOFTWARE.
         </xsl:if>
       </xsl:for-each>
     </xsl:if>
-  </xsl:template>  
-  
+  </xsl:template>
+
   <xsl:template match="xref">
     <xsl:apply-templates select="." mode="testing"/>
   </xsl:template>
-  
+
   <xsl:template match="xref" mode="testing">
     <xsl:choose>
       <xsl:when test="ancestor::fn and ancestor::table">
@@ -2451,7 +2451,7 @@ SOFTWARE.
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xsl:template match="
     text()[string-length(.) = 1]
     [preceding-sibling::*[1][self::xref][number(.) = number(.)]]
@@ -2489,9 +2489,9 @@ SOFTWARE.
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <!-- END handling citation objects -->
-  
+
   <!-- box text -->
   <xsl:template match="boxed-text" mode="display">
     <xsl:param name="heading-el"/>
@@ -2519,7 +2519,7 @@ SOFTWARE.
       <xsl:apply-templates select="node()[not(self::label or self::caption)]" mode="display"/>
     </div>
   </xsl:template>
-  
+
   <xsl:template match="table-wrap" mode="display">
     <div class="table-expansion table-overflow whole_rhythm">
       <xsl:if test="@id">
@@ -2555,7 +2555,7 @@ SOFTWARE.
           </xsl:choose>
         </xsl:variable>
         <a href="{$graphics}" target="_blank" class="figure-expand" title="{$caption} - Click to open full size">
-          <img data-img="[graphic-{$filename}-medium]" src="{$graphics}" alt="{alt}"/>
+          <img data-img="[graphic-{$filename}-medium]" src="{$graphics}" alt="{$alt}"/>
         </a>
       </xsl:if>
       <xsl:apply-templates select="label" mode="captionLabel"/>
@@ -2565,7 +2565,7 @@ SOFTWARE.
 
   <xsl:template match="table-wrap/label|table-wrap-group/label" mode="captionLabel">
     <span class="table-label">
-      <xsl:apply-templates/>    
+      <xsl:apply-templates/>
     </span>
     <xsl:text> </xsl:text>
   </xsl:template>
@@ -2576,7 +2576,7 @@ SOFTWARE.
       <div class="table-caption">
         <xsl:apply-templates select="child::*[not(self::p)]"/>
       </div>
-    </xsl:if>    
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="table-wrap/table">
@@ -2644,13 +2644,13 @@ SOFTWARE.
       <xsl:apply-templates/>
     </xsl:element>
   </xsl:template>
-  
+
   <xsl:template match="table-wrap-foot">
     <div class="table-foot">
       <xsl:apply-templates/>
     </div>
   </xsl:template>
-  
+
   <xsl:template match="@rules | @frame | @style">
     <xsl:attribute name="{name()}">
         <xsl:value-of select="."/>
@@ -2727,7 +2727,7 @@ SOFTWARE.
             <a class="figpopup">
               <xsl:attribute name="href">
                 <xsl:value-of select="concat('/article/view/', $pmcid, '/figure/', $id, '/version/', $current-version)"/>
-              </xsl:attribute>           
+              </xsl:attribute>
               <xsl:value-of select="label/text()"/>
             </a>
           </span>
@@ -2752,16 +2752,16 @@ SOFTWARE.
     </span>
   </xsl:template>
 
-  <xsl:template match="fig-group//caption/title | fig//caption/title | supplementary-material/caption/title | table-wrap/caption | table-wrap-group/caption/title">
+  <xsl:template match="fig-group//caption/title | fig//caption/title | supplementary-material/caption/title | table-wrap/caption/p | table-wrap-group/caption/p">
     <span class="caption-title">
       <xsl:apply-templates/>
     </span>
   </xsl:template>
-  
+
   <xsl:template match="caption">
     <xsl:apply-templates/>
   </xsl:template>
-  
+
   <xsl:template match="fig-group" mode="display">
     <div class="elife-fig-image-caption-wrapper" id="{@id}">
       <div class="fig-caption fig-group">
@@ -2844,7 +2844,7 @@ SOFTWARE.
       </div>
     </div>
   </xsl:template>
-  
+
   <xsl:template match="inline-graphic | graphic[not(ancestor::fig)][not(ancestor::sec[@sec-type='scanned-pages'])]">
     <xsl:variable name="filename">
       <xsl:call-template name="get-filename">
@@ -2873,11 +2873,11 @@ SOFTWARE.
       <img data-img="[graphic-{$filename}-medium]" src="{$graphics}" alt="{$alt}"/>
     </a>
   </xsl:template>
-  
+
   <!-- END Figure Handling -->
-  
+
   <!-- START Math Handling -->
-  
+
   <xsl:template match="inline-formula">
     <span class="inline-formula">
       <xsl:attribute name="id">
@@ -2921,7 +2921,7 @@ SOFTWARE.
       </xsl:if>
       <xsl:copy-of select="." />
     </span>
-  </xsl:template> 
+  </xsl:template>
   <xsl:template match="mml:mglyph/@src">
     <xsl:variable name="filename">
       <xsl:call-template name="get-filename">
@@ -2939,7 +2939,7 @@ SOFTWARE.
         <xsl:attribute name="id">
           <xsl:value-of select="@id"/>
         </xsl:attribute>
-      </xsl:if>   
+      </xsl:if>
       <xsl:choose>
         <xsl:when test="$msspreview">
           <xsl:text>&lt;math xmlns="http://www.w3.org/1998/Math/MathML"&gt;</xsl:text>
@@ -2952,7 +2952,7 @@ SOFTWARE.
               <xsl:attribute name="{name()}">
                 <xsl:value-of select="."/>
               </xsl:attribute>
-            </xsl:for-each>        
+            </xsl:for-each>
             <xsl:apply-templates/>
           </math>
           </xsl:otherwise>
@@ -2971,9 +2971,9 @@ SOFTWARE.
     <xsl:copy-of select="."/>
   </xsl:template>
 
-  <xsl:template match="text()">
-    <xsl:copy-of select="."/>
-  </xsl:template>
+<!--  <xsl:template match="text()">-->
+<!--    <xsl:copy-of select="."/>-->
+<!--  </xsl:template>-->
 
   <xsl:template match="mml:mglyph/@src">
     <xsl:variable name="filename">
@@ -2985,7 +2985,7 @@ SOFTWARE.
       <xsl:value-of select="concat($filebase,'image/',$filename,'.jpg')"/>
     </xsl:attribute>
   </xsl:template>
-  
+
   <xsl:template match="mml:mglyph/@src" mode="serialize">
     <xsl:variable name="filename">
       <xsl:call-template name="get-filename">
@@ -2998,7 +2998,7 @@ SOFTWARE.
     <xsl:value-of select="substring-before(substring-after($filelist, concat($filename,':')), ';')"/>
     <xsl:text>"</xsl:text>
   </xsl:template>
-  
+
   <xsl:template match="*" mode="serialize">
     <xsl:text>&lt;</xsl:text>
     <xsl:value-of select="local-name(.)"/>
@@ -3016,7 +3016,7 @@ SOFTWARE.
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xsl:template match="@*" mode="serialize">
     <xsl:text> </xsl:text>
     <xsl:value-of select="name()"/>
@@ -3024,27 +3024,27 @@ SOFTWARE.
     <xsl:value-of select="."/>
     <xsl:text>"</xsl:text>
   </xsl:template>
-  
+
   <xsl:template match="text()" mode="serialize">
     <xsl:value-of select="."/>
   </xsl:template>
-  
+
   <!-- END Math Handling -->
-  
+
   <!-- ==== BACK ==== -->
-  
+
   <xsl:template match="back">
     <xsl:apply-templates select="ack"/>
     <xsl:apply-templates select="preceding-sibling::*//author-notes"/>
     <xsl:if test="not(preceding-sibling::*//author-notes) and (fn-group/fn[@fn-type = 'con'] | preceding-sibling::*//contrib[@equal-contrib = 'yes'] | preceding-sibling::*//contrib/email | bio | fn-group/fn[@fn-type = 'conflict'] | preceding-sibling::*//contrib-group[@content-type='collab-list'] | preceding-sibling::*//contrib-group/parent::collab)">
       <h2 id="author-notes" class="head">Author Information</h2>
       <xsl:if test="preceding-sibling::*//contrib/email">
-        <xsl:apply-templates select="preceding-sibling::*" mode="list-emails"/>        
+        <xsl:apply-templates select="preceding-sibling::*" mode="list-emails"/>
       </xsl:if>
       <xsl:apply-templates select="bio"/>
       <xsl:if test="fn-group/fn[@fn-type = 'con'] | preceding-sibling::*//contrib[@equal-contrib = 'yes']">
         <div id="author-info-equal-contrib">
-          <xsl:apply-templates select="fn-group/fn[@fn-type = 'con']"/> 
+          <xsl:apply-templates select="fn-group/fn[@fn-type = 'con']"/>
           <xsl:if test="not(fn-group/fn[@fn-type = 'con'])">
             <h3>Author Contributions</h3>
           </xsl:if>
@@ -3057,7 +3057,7 @@ SOFTWARE.
     </xsl:if>
     <xsl:apply-templates select="*[not(self::ack) and not(self::bio)]"/>
   </xsl:template>
-  
+
   <!-- Acknowledgement -->
 
   <xsl:template match="back/ack">
@@ -3074,7 +3074,7 @@ SOFTWARE.
       <xsl:apply-templates select="*[not(self::label or self::title)]"/>
     </div>
   </xsl:template>
-  
+
   <!-- Back footnotes -->
 
   <!-- author-notes -->
@@ -3087,7 +3087,7 @@ SOFTWARE.
     </xsl:if>
     <xsl:if test="ancestor::*[starts-with(name(), 'front')]/following-sibling::back/fn-group/fn[@fn-type = 'con'] | fn[@fn-type = 'con'] | fn[@fn-type = 'equal'] | parent::*//contrib[@equal-contrib = 'yes']">
       <div id="author-info-equal-contrib">
-        <xsl:apply-templates select="ancestor::*[starts-with(name(), 'front')]/following-sibling::back/fn-group/fn[@fn-type = 'con']"/> 
+        <xsl:apply-templates select="ancestor::*[starts-with(name(), 'front')]/following-sibling::back/fn-group/fn[@fn-type = 'con']"/>
         <xsl:apply-templates select="fn[@fn-type = 'con']"/>
         <xsl:if test="not(fn[@fn-type = 'con'] or ancestor::*[starts-with(name(), 'front')]/following-sibling::back/fn-group/fn[@fn-type = 'con'])">
           <h3>Author Contributions</h3>
@@ -3109,7 +3109,7 @@ SOFTWARE.
       </div>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template match="back/fn-group">
     <xsl:if test="fn[not(@fn-type = 'con' or @fn-type = 'conflict')]">
       <div id="notes">
@@ -3141,11 +3141,11 @@ SOFTWARE.
       </div>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template match="boxed-text/fn-group/fn | back/fn-group/fn | author-notes/fn[@fn-type = 'con' or @fn-type = 'conflict']">
     <xsl:apply-templates select="p" mode="testing"/>
   </xsl:template>
-  
+
   <xsl:template match="table-wrap-foot/fn">
     <xsl:apply-templates/>
   </xsl:template>
@@ -3167,7 +3167,7 @@ SOFTWARE.
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <!-- Template for fn/p, default mode -->
   <xsl:template match="boxed-text/fn-group/fn/p | back/fn-group/fn/p | author-notes/fn[@fn-type = 'con' or @fn-type = 'conflict']/p | table-wrap-foot/fn/p">
     <p>
@@ -3206,7 +3206,7 @@ SOFTWARE.
 
   <xsl:template match="fn[@fn-type = 'equal']">
     <xsl:variable name="contributeid" select="@id"/>
-    <div class="equal-contrib" id="{@id}">    
+    <div class="equal-contrib" id="{@id}">
       <xsl:apply-templates/>
       <ul class="equal-contrib-list">
         <xsl:for-each select="../../contrib-group/contrib[xref[@rid = $contributeid]]">
@@ -3266,7 +3266,7 @@ SOFTWARE.
       <xsl:if test="//xref[@rid = $id]">
         <xsl:if test="not(preceding-sibling::p)">
           <xsl:variable name="count" select="count(parent::fn/preceding-sibling::fn[not(@fn-type)] |
-            parent::fn/preceding-sibling::fn[(@fn-type != 'con' and @fn-type != 'present-address')]) + 1"/>    
+            parent::fn/preceding-sibling::fn[(@fn-type != 'con' and @fn-type != 'present-address')]) + 1"/>
           <xsl:call-template name="get-symbol">
             <xsl:with-param name="count" select="$count"/>
             <xsl:with-param name="current" select="1"/>
@@ -3378,7 +3378,7 @@ SOFTWARE.
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xsl:template match="contrib-group[@content-type='collab-list']">
     <xsl:for-each select="contrib">
       <xsl:choose>
@@ -3416,7 +3416,7 @@ SOFTWARE.
       </div>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template match="contrib-group" mode="make-collab-list">
     <xsl:param name="rid"/>
     <div class="fulltext--collab-author-information" id="{$rid}">
@@ -3436,7 +3436,7 @@ SOFTWARE.
       </div>
     </div>
   </xsl:template>
-  
+
   <xsl:template match="collab" mode="collab-list-container">
     <div class="fulltext--collab-author-information" id="{concat('collab', count(preceding::collab[contrib-group])+1)}">
       <h3>
@@ -3551,7 +3551,7 @@ SOFTWARE.
             <xsl:text>References</xsl:text>
           </xsl:otherwise>
         </xsl:choose>
-      </xsl:element> 
+      </xsl:element>
       <xsl:apply-templates select="p" mode="pmc-reference"/>
       <ol>
         <xsl:attribute name="id">
@@ -3579,11 +3579,11 @@ SOFTWARE.
       </xsl:if>
       <xsl:if test="count(ancestor::ref-list//mixed-citation) > 1">
         <xsl:apply-templates select="label"/>
-      </xsl:if>     
+      </xsl:if>
       <xsl:apply-templates select="mixed-citation" mode="pmc-reference"/>
     </li>
   </xsl:template>
-  
+
   <xsl:template match="mixed-citation" mode="pmc-reference">
     <span class="reflink-main">
       <xsl:apply-templates select="named-content" mode="pmc-reference"/>
@@ -3600,21 +3600,21 @@ SOFTWARE.
               <xsl:with-param name="label" select="'[DOI]'"/>
             </xsl:call-template>
           </xsl:when>
-        
+
           <xsl:when test="self::ext-link[@ext-link-type='pmcid']">
             <xsl:call-template name="ext-link-pmcid">
               <xsl:with-param name="href"  select="@xlink:href"/>
               <xsl:with-param name="label" select="'[Europe PMC free article]'"/>
             </xsl:call-template>
           </xsl:when>
-      
+
           <xsl:when test="self::ext-link[@ext-link-type='pmid']">
             <xsl:call-template name="ext-link-pmid">
               <xsl:with-param name="href"  select="@xlink:href"/>
               <xsl:with-param name="label" select="'[Abstract]'"/>
             </xsl:call-template>
           </xsl:when>
-        
+
           <xsl:when test="self::ext-link[@ext-link-type='google-scholar']">
             <xsl:call-template name="ext-link-google-scholar">
               <xsl:with-param name="href"  select="@xlink:href"/>
@@ -3820,20 +3820,20 @@ SOFTWARE.
         <xsl:otherwise>
           <xsl:apply-templates/>
         </xsl:otherwise>
-      </xsl:choose>      
+      </xsl:choose>
     </li>
   </xsl:template>
-  
+
   <xsl:template match="ref/label">
     <xsl:apply-templates select="." mode="list-label"/>
   </xsl:template>
-  
+
   <xsl:template match="ref/note">
     <span class="reflink-note">
       <xsl:apply-templates select="p"/>
     </span>
   </xsl:template>
-  
+
   <xsl:template match="ref/note/p">
     <xsl:apply-templates mode="testing"/>
     <xsl:if test="not(ancestor::list-item or ancestor::fig or ancestor::table or ancestor::boxed-text)">
@@ -3903,7 +3903,7 @@ SOFTWARE.
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xsl:template match="element-citation" mode="display">
     <xsl:variable name="title">
       <xsl:choose>
@@ -3928,7 +3928,7 @@ SOFTWARE.
         </xsl:when>
       </xsl:choose>
     </xsl:variable>
-    <xsl:apply-templates select="label" mode="list-label"/>    
+    <xsl:apply-templates select="label" mode="list-label"/>
     <span class="reflink-main">
       <!-- call authors template -->
       <xsl:if test="person-group[@person-group-type = 'author'] | collab">
@@ -4007,7 +4007,7 @@ SOFTWARE.
           <xsl:value-of select="'elocation|'"/>
         </xsl:if>
       </xsl:variable>
-      <xsl:if test="contains($includes, 'edlist|') and @publication-type != 'journal'">        
+      <xsl:if test="contains($includes, 'edlist|') and @publication-type != 'journal'">
         <xsl:if test="contains($includes, 'source|')">
           <xsl:text>In: </xsl:text>
         </xsl:if>
@@ -4037,7 +4037,7 @@ SOFTWARE.
           </xsl:if>
           <xsl:text> </xsl:text>
         </span>
-      </xsl:if>            
+      </xsl:if>
       <xsl:if test="contains($includes, 'conference|')">
         <span class="reflink-details-conference">
           <xsl:apply-templates select="child::conf-name/node()"/>
@@ -4045,7 +4045,7 @@ SOFTWARE.
             <xsl:if test="not('.' = substring(conf-name, string-length(conf-name) - string-length('.') + 1))">
               <xsl:text>; </xsl:text>
             </xsl:if>
-          </xsl:if>          
+          </xsl:if>
           <xsl:apply-templates select="child::conf-date/node()"/>
           <xsl:if test="(child::conf-name or child::conf-date) and child::conf-loc">
             <xsl:text>; </xsl:text>
@@ -4178,10 +4178,10 @@ SOFTWARE.
       <xsl:apply-templates select="comment|annotation|ext-link"/>
       <xsl:apply-templates select="date-in-citation"/>
       <xsl:apply-templates select="pub-id[@pub-id-type = 'doi']" mode="idlinks"/>
-      <xsl:apply-templates select="pub-id[not(@pub-id-type = 'doi')]" mode="idlinks"/>     
+      <xsl:apply-templates select="pub-id[not(@pub-id-type = 'doi')]" mode="idlinks"/>
     </span>
   </xsl:template>
-  
+
   <xsl:template match="element-citation/comment|mixed-citation/comment">
     <span>
       <xsl:for-each select="@*">
@@ -4190,7 +4190,7 @@ SOFTWARE.
       <xsl:apply-templates select="text()"/>
     </span>
   </xsl:template>
-  
+
   <xsl:template match="mixed-citation" mode="display">
     <xsl:variable name="title">
       <xsl:choose>
@@ -4215,18 +4215,18 @@ SOFTWARE.
         </xsl:when>
       </xsl:choose>
     </xsl:variable>
-    <xsl:apply-templates select="label" mode="list-label"/>    
+    <xsl:apply-templates select="label" mode="list-label"/>
     <span class="reflink-main">
       <xsl:apply-templates/>
     </span>
   </xsl:template>
-  
+
   <xsl:template match="mixed-citation/person-group[@person-group-type = 'author'] | mixed-citation/collab">
     <span class="authors">
       <xsl:apply-templates/>
     </span>
   </xsl:template>
-  
+
   <xsl:template match="mixed-citation//name">
     <span class="reflink-author">
       <xsl:value-of select="concat(surname, ' ', given-names)"/>
@@ -4236,15 +4236,15 @@ SOFTWARE.
       </xsl:if>
     </span>
   </xsl:template>
-  
+
   <xsl:template match="mixed-citation//string-name">
     <span class="reflink-author"><xsl:apply-templates/></span>
   </xsl:template>
-  
+
   <xsl:template match="mixed-citation//etal">
     <xsl:text>et al</xsl:text>
   </xsl:template>
-  
+
   <xsl:template match="mixed-citation//article-title | mixed-citation//chapter-title">
     <span class="elife-reflink-title">
       <span class="nlm-article-title">
@@ -4252,7 +4252,7 @@ SOFTWARE.
       </span>
     </span>
   </xsl:template>
-  
+
   <xsl:template match="mixed-citation//source">
     <xsl:choose>
       <xsl:when test="not(ancestor::mixed-citation/article-title or ancestor::mixed-citation/chapter-title)">
@@ -4267,13 +4267,13 @@ SOFTWARE.
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xsl:template match="mixed-citation//pub-id">
     <xsl:apply-templates select="." mode="idlinks"/>
   </xsl:template>
-  
+
   <xsl:template match="mixed-citation//*/@*"/>
-  
+
   <xsl:template match="element-citation//publisher-loc" mode="publisher-pair">
   <xsl:param name="includes"/>
     <span class="reflink-details-pub-loc">
@@ -4283,7 +4283,7 @@ SOFTWARE.
       <xsl:if test="contains($includes, 'publisher-name|')">
         <xsl:text>: </xsl:text>
       </xsl:if>
-    </span>    
+    </span>
     <xsl:if test="contains($includes, 'publisher-name|')">
       <span class="reflink-details-pub-name">
         <span class="nlm-publisher-name">
@@ -4302,7 +4302,7 @@ SOFTWARE.
       </span>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template match="element-citation//date-in-citation">
     <xsl:text> </xsl:text>
     <xsl:text>[</xsl:text>
@@ -4379,11 +4379,11 @@ SOFTWARE.
       </xsl:when>
     </xsl:choose>
   </xsl:template>
-  
+
   <!-- END reference handling -->
 
   <!-- START video handling -->
-  
+
   <xsl:template match="media" mode="testing">
     <xsl:variable name="filename">
       <xsl:choose>
@@ -4458,7 +4458,7 @@ SOFTWARE.
   </xsl:template>
 
   <!-- END video handling -->
-  
+
   <!-- Appendices -->
 
   <xsl:template name="appendices-main-text">
@@ -4482,15 +4482,15 @@ SOFTWARE.
       <xsl:apply-templates mode="testing"/>
     </div>
   </xsl:template>
-  
+
   <xsl:template match="fn-group[@content-type = 'competing-interest']/fn/p |
     //history//*[@publication-type = 'journal']/article-title">
     <xsl:apply-templates/>
   </xsl:template>
-  
+
 
   <!-- START - general format -->
-  
+
   <xsl:template match="hr">
     <hr/>
   </xsl:template>
@@ -4506,7 +4506,7 @@ SOFTWARE.
       <xsl:apply-templates/>
     </em>
   </xsl:template>
-  
+
   <xsl:template match="sc">
     <span style="font-variant:small-caps">
       <xsl:apply-templates/>
@@ -4580,7 +4580,7 @@ SOFTWARE.
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xsl:template match="glossary">
     <sec id="glossary">
       <xsl:if test="not(title)">
@@ -4589,32 +4589,32 @@ SOFTWARE.
       <xsl:apply-templates/>
     </sec>
   </xsl:template>
-  
+
   <xsl:template match="glossary/title">
     <h2 id="glossarytitle" class="head">
       <xsl:apply-templates/>
     </h2>
   </xsl:template>
-  
+
   <xsl:template match="def-list/label">
     <xsl:apply-templates/>
     <xsl:text>. </xsl:text>
   </xsl:template>
-  
+
   <xsl:template match="def-list/title">
     <h3>
       <xsl:apply-templates select="preceding-sibling::label"/>
       <xsl:apply-templates/>
     </h3>
   </xsl:template>
-  
+
   <xsl:template match="def-list">
     <xsl:apply-templates select="title"/>
     <dl>
       <xsl:apply-templates select="term-head|def-head|def-item|def-list"/>
     </dl>
   </xsl:template>
-  
+
   <xsl:template match="term-head">
     <dt><h4>
       <xsl:apply-templates/>
@@ -4626,31 +4626,31 @@ SOFTWARE.
       <xsl:apply-templates/>
     </h4></dd>
   </xsl:template>
-  
+
   <xsl:template match="def-item">
     <xsl:apply-templates/>
   </xsl:template>
-  
+
   <xsl:template match="def-item/term">
     <dt>
       <xsl:apply-templates/>
     </dt>
   </xsl:template>
-  
+
   <xsl:template match="def">
     <dd>
       <xsl:apply-templates select="p/* | p/text()"/>
     </dd>
   </xsl:template>
-  
+
   <xsl:template match="bio">
     <xsl:apply-templates/>
   </xsl:template>
-  
+
   <xsl:template match="bio/title">
     <h3 id="{parent::bio/@id}"><xsl:apply-templates/></h3>
   </xsl:template>
-  
+
   <xsl:template match="verse-line">
     <span style="display: block; text-indent: -1em; margin-left: 1em; ">
       <xsl:apply-templates/>
@@ -4693,22 +4693,22 @@ SOFTWARE.
     </li>
   </xsl:template>
 
-  
+
   <!-- Override the default template, create copies for attributes and text nodes, instead of output the text values -->
   <!-- <xsl:template match="*"><xsl:apply-templates select="@* | node()"/></xsl:template>
   <xsl:template match="@* | text()"><xsl:copy/></xsl:template> -->
 
   <xsl:template match="*">
     <xsl:copy>
-      <xsl:apply-templates select="@*"/> 
+      <xsl:apply-templates select="@*"/>
       <xsl:apply-templates select="node()"/>
     </xsl:copy>
   </xsl:template>
   <xsl:template match="@*"><xsl:copy/></xsl:template>
   <xsl:template match="text()"><xsl:copy/></xsl:template>
-  
+
   <!-- END - general format -->
-  
+
   <!-- send through testing -->
   <xsl:template match="
       caption | table-wrap/table | table-wrap-foot | fn | bold | italic | underline | preformat | monospace | styled-content |
@@ -4716,17 +4716,17 @@ SOFTWARE.
       inline-formula | list | list-item | hr | disp-quote | code | verse-group | def-list | inline-graphic | p" mode="testing">
     <xsl:apply-templates select="."/>
   </xsl:template>
-  
+
   <xsl:template match="element-citation|mixed-citation">
     <xsl:if test="not(ancestor::ref)">
       <xsl:apply-templates select="." mode="display"/>
     </xsl:if>
   </xsl:template>
- 
+
   <!-- Nodes to skip, continue with its child nodes-->
-  <!-- Note: If nodes to skip apears in the document with attributes but the nodes 
-    are not listed here, the attributes will be copied to the parent element, 
-    which will cause problem if nodes has been generated under the parent element. 
+  <!-- Note: If nodes to skip apears in the document with attributes but the nodes
+    are not listed here, the attributes will be copied to the parent element,
+    which will cause problem if nodes has been generated under the parent element.
     We will get an XTDE0410 error. Add the nodes here will prevent the attribugtes to
    processed. -->
   <xsl:template match="floats-group//fig | floats-group//table-wrap | fn//table-wrap">
@@ -4761,9 +4761,9 @@ SOFTWARE.
   <xsl:template match="fig-group"/>
   <xsl:template match="ack/title"/>
   <xsl:template match="ref-list/title"/>
-  <xsl:template match="element-citation//year | element-citation//article-title | element-citation//fpage | element-citation//volume 
-    | element-citation//issue | element-citation//source | element-citation//pub-id | element-citation//fpage 
-    | element-citation//supplement | element-citation//person-group[@person-group-type = 'editor'] | element-citation//collab 
+  <xsl:template match="element-citation//year | element-citation//article-title | element-citation//fpage | element-citation//volume
+    | element-citation//issue | element-citation//source | element-citation//pub-id | element-citation//fpage
+    | element-citation//supplement | element-citation//person-group[@person-group-type = 'editor'] | element-citation//collab
     | element-citation//edition | element-citation//publisher-loc |  element-citation//publisher-name | element-citation//elocation-id
     | element-citation//issn | element-citation//month | element-citation//day | element-citation//season"/>
   <xsl:template match="media/label"/>

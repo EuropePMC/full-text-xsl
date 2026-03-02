@@ -9,6 +9,8 @@
   exclude-result-prefixes="xsi xs xlink mml ali">
 
   <xsl:output method="html" indent="no" encoding="utf-8" omit-xml-declaration="yes"/>
+	<xsl:param name="elementId" select="''"/>
+	<xsl:param name="elementType" select="''"/>
   <xsl:template name="pmc_month">
     <xsl:param name="num"/>
     <xsl:choose>
@@ -35,18 +37,18 @@
   <xsl:variable name="pmcid">
     <xsl:value-of select="//article-meta/article-id[@pub-id-type='pmcid']"/>
   </xsl:variable>
-  <xsl:variable name="pageStart">
+  <xsl:variable name="pageStart" as="xs:integer?">
     <xsl:choose>
       <xsl:when test="$elementType = 'scanned'">
-        <xsl:value-of select="substring-before(//article-meta/page-range, '–')"/>
+        <xsl:value-of select="xs:integer(substring-before(//article-meta/page-range, '–'))"/>
       </xsl:when>
       <xsl:otherwise/>
     </xsl:choose>
   </xsl:variable>
-  <xsl:variable name="pageEnd">
+  <xsl:variable name="pageEnd" as="xs:integer?">
     <xsl:choose>
       <xsl:when test="$elementType = 'scanned'">
-        <xsl:value-of select="substring-after(//article-meta/page-range, '–')"/>
+        <xsl:value-of select="xs:integer(substring-after(//article-meta/page-range, '–'))"/>
       </xsl:when>
       <xsl:otherwise/>
     </xsl:choose>
@@ -225,7 +227,7 @@
   </xsl:template>
 
   <xsl:template match="permissions" name="permissions">
-    <xsl:param name="top"/>
+		<xsl:param name="top" as="xs:integer" select="0"/>
     <xsl:variable name="head">
       <xsl:choose>
         <xsl:when test="parent::article-meta or $top">h2</xsl:when>
@@ -412,13 +414,12 @@
         <xsl:value-of select="label"/>
       </h1>
       <div class="table-caption">
-        <strong>
-          <xsl:value-of select="caption/title"/>
-        </strong>
         <xsl:if test="caption/p">
+        <strong>
           <p>
             <xsl:value-of select="caption/p"/>
           </p>
+        </strong>
         </xsl:if>
       </div>
       <div class="table-container">
@@ -503,10 +504,12 @@
     <div class="scanned-container">
       <div class="scanned-header">
         <h2>Scanned pages</h2>
-        <a href="/{$pdf-file-name}" class="download-link">
-          <i class="fas fa-download"></i>
-          <span>Download PDF</span>
-        </a>
+				<xsl:if test="$pdf-file-name != ''">
+					<a href="/{$pdf-file-name}" class="download-link">
+						<i class="fas fa-download"></i>
+						<span>Download PDF</span>
+					</a>
+				</xsl:if>
       </div>
       <xsl:call-template name="scanned-navigation"/>
       <xsl:apply-templates select="graphic[label=$elementId]"/>
@@ -517,8 +520,8 @@
   <xsl:template name="scanned-navigation">
     <div class="scanned-pagination">
       <xsl:choose>
-        <xsl:when test="$elementId &gt; $pageStart">
-          <a class="nav-link prev" href="{concat('/article/view/', $pmcid, '/scanned/', $elementId - 1 , '/version/', $current-version)}">
+        <xsl:when test="xs:integer($elementId) gt $pageStart">
+          <a class="nav-link prev" href="{concat('/article/view/', $pmcid, '/scanned/', xs:integer($elementId) - 1 , '/version/', $current-version)}">
           <!-- &lt; Previous -->
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M15 18L9 12L15 6"/>
@@ -536,15 +539,17 @@
           </span>
         </xsl:otherwise>
       </xsl:choose>
-      <ul class="page-tabs">
-        <xsl:call-template name="page-loop">
-          <xsl:with-param name="i" select="$pageStart"/>
-          <xsl:with-param name="end" select="$pageEnd"/>
-        </xsl:call-template>
-      </ul>
+			<xsl:if test="$pageStart and $pageEnd">
+				<ul class="page-tabs">
+					<xsl:call-template name="page-loop">
+						<xsl:with-param name="i" select="$pageStart" as="xs:integer"/>
+						<xsl:with-param name="end" select="$pageEnd" as="xs:integer"/>
+					</xsl:call-template>
+				</ul>
+			</xsl:if>
       <xsl:choose>
-        <xsl:when test="$elementId &lt; $pageEnd">
-          <a class="nav-link next" href="{concat('/article/view/', $pmcid, '/scanned/', $elementId + 1, '/version/', $current-version)}">
+        <xsl:when test="xs:integer($elementId) lt $pageEnd">
+          <a class="nav-link next" href="{concat('/article/view/', $pmcid, '/scanned/', xs:integer($elementId) + 1, '/version/', $current-version)}">
           <!-- Next &gt; -->
           Next
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -571,7 +576,7 @@
     <xsl:if test="$i &lt;= $end">
       <li>
         <xsl:choose>
-          <xsl:when test="$i = $elementId">
+          <xsl:when test="$i eq xs:integer($elementId)">
             <span class="page-link current"><xsl:value-of select="$i"/></span>
           </xsl:when>
           <xsl:otherwise>
@@ -582,8 +587,8 @@
         </xsl:choose>
       </li>
       <xsl:call-template name="page-loop">
-        <xsl:with-param name="i" select="$i + 1"/>
-        <xsl:with-param name="end" select="$end"/>
+        <xsl:with-param name="i" select="$i + 1" as="xs:integer"/>
+        <xsl:with-param name="end" select="$end" as="xs:integer"/>
       </xsl:call-template>
     </xsl:if>
   </xsl:template>

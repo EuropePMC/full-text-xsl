@@ -3903,21 +3903,29 @@ SOFTWARE.
     </xsl:if>
   </xsl:template>
  
+  <xsl:template match="table-wrap | boxed-text | fig | fig-group | table-wrap-group" mode="testing">
+    <xsl:if test="@position='anchor'">
+      <xsl:apply-templates select="." mode="display"/>
+    </xsl:if>
+  </xsl:template>
+  
   <!-- Nodes to skip, continue with its child nodes-->
   <!-- Note: If nodes to skip apears in the document with attributes but the nodes 
     are not listed here, the attributes will be copied to the parent element, 
     which will cause problem if nodes has been generated under the parent element. 
     We will get an XTDE0410 error. Add the nodes here will prevent the attribugtes to
    processed. -->
-  <xsl:template match="floats-group//fig | disp-quote//fig | floats-group//table-wrap | fn//table-wrap | back/sec//table-wrap">
+  <xsl:template match="
+    floats-group//fig
+    | disp-quote//fig
+    | floats-group//table-wrap
+    | fn//table-wrap
+    | back//table-wrap
+    | back//app-group
+    | institution-wrap//institution-id">
     <xsl:apply-templates />
   </xsl:template>
 
-  <xsl:template match="table-wrap | boxed-text | fig | fig-group | table-wrap-group" mode="testing">
-    <xsl:if test="@position='anchor'">
-      <xsl:apply-templates select="." mode="display"/>
-    </xsl:if>
-  </xsl:template>
 
   <!-- nodes to remove -->
   <xsl:template match="ali:license_ref | ali:free_to_read"/>
@@ -3948,10 +3956,8 @@ SOFTWARE.
     | element-citation//issn | element-citation//month | element-citation//day | element-citation//season"/>
   <xsl:template match="media/label"/>
   <xsl:template match="object-id | table-wrap/label | table-wrap-group/label"/>
-  <xsl:template match="funding-group//institution-wrap/institution-id"/>
   <xsl:template match="table-wrap/graphic"/>
   <xsl:template match="table-wrap-foot//fn/label"/>
-  <xsl:template match="aff/institution-wrap/institution-id"/>
 
   <!-- Add a map of ref elements by @id for fast lookup (XSLT 3.0) -->
   <xsl:variable name="ref-map" as="map(xs:string, element(ref))"
